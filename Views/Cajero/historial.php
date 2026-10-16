@@ -106,7 +106,7 @@
                                 <th>CLIENTE / DNI</th>
                                 <th>FORMA DE PAGO</th>
                                 <th class="amount">TOTAL</th>
-                                <th style="text-align:center; width:110px;">ACCIÓN</th>
+                                <th style="width: 48px; text-align: center;"></th>
                             </tr>
                         </thead>
                         <tbody id="tbodyHistorial">
@@ -150,31 +150,21 @@
                                     <td class="amount">
                                         <strong>S/ <?= number_format($totalNum, 2) ?></strong>
                                     </td>
-                                    <td>
-                                        <div class="action-buttons-wrap">
-                                            <!-- Botón Azul: Previsualizar (Ojo) -->
-                                            <button type="button" 
-                                                    class="btn-action-history btn-preview" 
-                                                    onclick="previsualizarTicket(<?= $index ?>)" 
-                                                    title="Previsualizar comprobante"
-                                                    aria-label="Previsualizar comprobante">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                                    <circle cx="12" cy="12" r="3"></circle>
-                                                </svg>
+                                    <td style="text-align: right; white-space: nowrap;">
+                                        <div class="table-kebab-container">
+                                            <button type="button" class="table-kebab-btn" aria-label="Acciones de comprobante" title="Opciones">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
                                             </button>
-                                            <!-- Botón Verde: Imprimir (Impresora) -->
-                                            <button type="button" 
-                                                    class="btn-action-history btn-print" 
-                                                    onclick="imprimirTicketDirecto(<?= $index ?>)" 
-                                                    title="Imprimir ticket térmico"
-                                                    aria-label="Imprimir ticket térmico">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                                                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                                                    <rect x="6" y="14" width="12" height="8"></rect>
-                                                </svg>
-                                            </button>
+                                            <div class="table-kebab-menu">
+                                                <button type="button" class="table-kebab-item" onclick="previsualizarTicket(<?= $index ?>)">
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                                    Ver comprobante
+                                                </button>
+                                                <button type="button" class="table-kebab-item" onclick="imprimirTicketDirecto(<?= $index ?>)">
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                                                    Imprimir ticket
+                                                </button>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>

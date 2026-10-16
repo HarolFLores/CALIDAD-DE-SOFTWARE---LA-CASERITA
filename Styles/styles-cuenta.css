@@ -451,31 +451,35 @@ textarea {
     color: rgba(255, 255, 255, 0.8);
 }
 
-/* Botón de Salir / Cerrar Sesión en Sidebar (Rojo Vino #C62828) */
+/* Cerrar sesión conserva el estilo neutro de las opciones no activas. */
 .cuenta-logout-sidebar-btn {
-    background: #c62828 !important;
+    background: transparent !important;
     border: none !important;
-    color: #ffffff !important;
-    box-shadow: 0 4px 12px rgba(198, 40, 40, 0.2);
-    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease !important;
+    color: #475569 !important;
+    box-shadow: none;
 }
 
 .cuenta-logout-sidebar-btn:hover {
-    background: #a81e1e !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 6px 18px rgba(198, 40, 40, 0.35) !important;
+    background: #c62828 !important;
+    color: #ffffff !important;
+    transform: translateX(3px) !important;
+    box-shadow: 0 6px 18px rgba(198, 40, 40, 0.28) !important;
+}
+
+.cuenta-logout-sidebar-btn:hover small {
+    color: rgba(255, 255, 255, 0.85) !important;
 }
 
 .cuenta-logout-sidebar-btn svg {
-    stroke: #ffffff !important;
+    stroke: currentColor !important;
 }
 
 .cuenta-logout-sidebar-btn strong {
-    color: #ffffff !important;
+    color: inherit !important;
 }
 
 .cuenta-logout-sidebar-btn small {
-    color: rgba(255, 255, 255, 0.85) !important;
+    color: #94a3b8 !important;
 }
 
 .cuenta-content {
@@ -549,16 +553,6 @@ textarea {
 }
 
 .cuenta-count-badge {
-    min-height: 36px;
-    padding: 0 13px;
-
-    display: inline-flex;
-    align-items: center;
-
-    border-radius: 999px;
-
-    background: #ecfeff;
-    color: var(--cuenta-primary);
 
     font-size: 0.78rem;
     font-weight: 850;
@@ -621,42 +615,90 @@ textarea {
 }
 
 .pedido-estado {
-    min-height: 30px;
-    padding: 0 11px;
-
+    min-height: auto;
+    padding: 0;
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-
-    border-radius: 999px;
-
-    font-size: 0.74rem;
-    font-weight: 850;
+    gap: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    font-size: 0.88rem;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
+.pedido-estado::before {
+    display: none;
+}
+
+/* Colores idénticos a los del panel Admin (delivery_admin.css) */
 .pedido-estado-pendiente {
-    background: #fef3c7;
-    color: #b45309;
+    color: #d97706;
 }
 
+.pedido-estado-pendiente::before {
+    background: #f59e0b;
+}
+
+.pedido-estado-en_preparacion,
 .pedido-estado-confirmado {
-    background: #dbeafe;
-    color: #1d4ed8;
+    color: #4f46e5;
 }
 
-.pedido-estado-camino {
-    background: #ede9fe;
-    color: #6d28d9;
+.pedido-estado-en_preparacion::before,
+.pedido-estado-confirmado::before {
+    background: #6366f1;
+}
+
+.pedido-estado-listo_para_recojo,
+.pedido-estado-listo_recojo {
+    color: #0891b2;
+}
+
+.pedido-estado-listo_para_recojo::before,
+.pedido-estado-listo_recojo::before {
+    background: #06b6d4;
+}
+
+.pedido-estado-asignado {
+    color: #0284c7;
+}
+
+.pedido-estado-asignado::before {
+    background: #0ea5e9;
+}
+
+.pedido-estado-camino,
+.pedido-estado-en_camino,
+.pedido-estado-en_ruta,
+.pedido-estado-despachado {
+    color: #0284c7 !important; /* Celeste vivo / Cyan vibrante, claramente diferente de En Preparación */
+    font-weight: 700;
+}
+
+.pedido-estado-camino::before,
+.pedido-estado-en_camino::before,
+.pedido-estado-en_ruta::before {
+    background: #3b82f6;
 }
 
 .pedido-estado-entregado {
-    background: #d1fae5;
-    color: #047857;
+    color: #16a34a;
 }
 
-.pedido-estado-cancelado {
-    background: #fee2e2;
-    color: #b91c1c;
+.pedido-estado-entregado::before {
+    background: #16a34a;
+}
+
+.pedido-estado-cancelado,
+.pedido-estado-fallido {
+    color: #dc2626;
+}
+
+.pedido-estado-cancelado::before,
+.pedido-estado-fallido::before {
+    background: #dc2626;
 }
 
 .pedido-view-button {
@@ -1077,8 +1119,15 @@ textarea {
 }
 
 @keyframes cuenta-checklist-in {
-    from { opacity: 0; transform: translateY(-4px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .auth-pass-checklist-title {
@@ -1224,8 +1273,15 @@ textarea {
 }
 
 @keyframes eye-transition-in {
-    from { opacity: 0; transform: scale(0.75); }
-    to { opacity: 1; transform: scale(1); }
+    from {
+        opacity: 0;
+        transform: scale(0.75);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .cuenta-modal-close {
@@ -1843,13 +1899,6 @@ body.cuenta-modal-open {
         text-overflow: ellipsis;
     }
 
-    .cuenta-status-badge {
-        min-height: 24px;
-        font-size: 0.72rem;
-        padding: 2px 10px;
-        display: inline-flex;
-        flex-shrink: 0;
-    }
 
     .cuenta-profile-meta {
         flex-direction: row;
@@ -2060,11 +2109,11 @@ body.cuenta-modal-open {
     }
 
     .badge-tipo-entrega {
-        font-size: 0.75rem;
-        padding: 2px 8px;
-        border-radius: 20px;
-        background: #f1f5f9;
-        color: #334155;
+        font-size: 0.85rem;
+        padding: 0;
+        border-radius: 0;
+        background: transparent !important;
+        color: #1e293b;
         font-weight: 600;
     }
 
@@ -2341,11 +2390,11 @@ body.cuenta-modal-open {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
     margin-bottom: 20px;
     flex-wrap: wrap;
     background: #ffffff;
-    padding: 15px 20px;
+    padding: 14px 18px;
     border-radius: 14px;
     border: 1px solid #e2e8f0;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
@@ -2354,52 +2403,110 @@ body.cuenta-modal-open {
 .pedidos-search-box {
     position: relative;
     flex: 1;
-    min-width: 250px;
-}
-
-.pedidos-search-box i {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #94a3b8;
+    min-width: 260px;
 }
 
 .pedidos-search-box input {
     width: 100%;
-    padding: 10px 15px 10px 40px;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
+    padding: 10px 14px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
     font-size: 0.9rem;
-    color: #334155;
+    color: #1e293b;
+    background: #ffffff;
     transition: all 0.2s;
     outline: none;
+    box-sizing: border-box;
 }
 
 .pedidos-search-box input:focus {
-    border-color: #0d9488;
-    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+    border-color: #15803d;
+    box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.12);
+}
+
+.pedidos-filters-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.pedidos-filter-box input[type="date"] {
+    padding: 9px 12px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    color: #334155;
+    background: #ffffff;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.pedidos-filter-box input[type="date"]:focus {
+    border-color: #15803d;
+    box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.12);
 }
 
 .pedidos-filter-box select {
-    padding: 10px 35px 10px 15px;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    font-size: 0.9rem;
+    padding: 9px 34px 9px 14px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 0.88rem;
     color: #334155;
     background-color: #ffffff;
     cursor: pointer;
     outline: none;
     transition: all 0.2s;
     appearance: none;
-    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2364748b%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E");
     background-repeat: no-repeat;
-    background-position: right 12px top 50%;
-    background-size: 10px auto;
+    background-position: right 12px center;
 }
 
 .pedidos-filter-box select:focus {
-    border-color: #0d9488;
+    border-color: #15803d;
+    box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.12);
+}
+
+.btn-limpiar-filtros {
+    padding: 9px 16px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-limpiar-filtros:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+    border-color: #cbd5e1;
+}
+
+.badge-tipo-entrega,
+.badge-metodo-pago {
+    display: inline !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    font-size: 0.88rem !important;
+    line-height: inherit !important;
+}
+
+.badge-tipo-entrega {
+    color: #1e293b !important;
+    font-weight: 600 !important;
+}
+
+.badge-metodo-pago {
+    color: #475569 !important;
+    font-weight: 400 !important;
 }
 
 .table-responsive {
@@ -2456,14 +2563,7 @@ body.cuenta-modal-open {
     font-size: 0.9rem;
 }
 
-.badge-tipo-entrega {
-    background-color: #f1f5f9;
-    color: #334155;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-}
+/* badge-tipo-entrega plain text handled above */
 
 .pedidos-filters-container {
     display: flex;
@@ -2488,30 +2588,30 @@ body.cuenta-modal-open {
 }
 
 .pedido-total {
-    color: #15803D;
-    font-weight: 800;
+    color: #0f172a;
+    font-weight: 700;
     font-size: 1.05rem;
 }
 
 .pedido-btn-detalle-texto {
     display: inline-block;
-    background-color: #334155;
+    background-color: #15803d;
     color: #ffffff;
     border: none;
     cursor: pointer;
-    padding: 8px 16px;
+    padding: 8px 18px;
     border-radius: 6px;
-    font-size: 0.85rem;
-    font-weight: 600;
+    font-size: 0.88rem;
+    font-weight: 700;
     transition: all 0.2s ease;
     white-space: nowrap;
     text-decoration: none;
 }
 
 .pedido-btn-detalle-texto:hover {
-    background-color: #0f172a;
+    background-color: #166534;
     transform: translateY(-1px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 10px rgba(21, 128, 61, 0.3);
 }
 
 .text-center {

@@ -38,7 +38,7 @@ class AuthMiddleware {
 
             $rolActual = $_SESSION['usuario_rol'];
             if ($rolActual === 'admin') {
-                header('Location: index.php?action=home_admin');
+                header('Location: index.php?action=dashboard_ganancias');
             } elseif ($rolActual === 'cajero') {
                 header('Location: index.php?action=pos');
             } else {

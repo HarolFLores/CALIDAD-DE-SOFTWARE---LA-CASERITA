@@ -69,6 +69,13 @@ $(document).ready(function () {
             const valSpan = row.querySelector('.card-qty-val');
             if (!valSpan) return;
             let val = parseInt(valSpan.textContent, 10) || 1;
+            const maxStock = card && card.dataset.stock !== undefined && card.dataset.stock !== '' ? parseInt(card.dataset.stock, 10) : null;
+            if (delta > 0 && maxStock !== null && !isNaN(maxStock) && maxStock > 0 && (val + delta) > maxStock) {
+                if (typeof window.mostrarToast === 'function') {
+                    window.mostrarToast(`Límite alcanzado. Solo quedan ${maxStock} unidades disponibles.`, 'warning');
+                }
+                return;
+            }
             val = Math.max(1, val + delta);
             valSpan.textContent = val;
         }
@@ -134,11 +141,19 @@ $(document).ready(function () {
                 }
 
                 cards.sort((a, b) => {
-                    if (orden === 'menor_precio') {
+                    if (orden === 'precio_menor_mayor' || orden === 'menor_precio') {
                         return parseFloat(a.dataset.precio || 0) - parseFloat(b.dataset.precio || 0);
-                    } else if (orden === 'mayor_descuento') {
+                    } else if (orden === 'precio_mayor_menor') {
+                        return parseFloat(b.dataset.precio || 0) - parseFloat(a.dataset.precio || 0);
+                    } else if (orden === 'mejor_descuento' || orden === 'mayor_descuento') {
                         return parseFloat(b.dataset.descuento || 0) - parseFloat(a.dataset.descuento || 0);
-                    } else if (orden === 'mas_vendidos') {
+                    } else if (orden === 'mas_nuevos') {
+                        return parseInt(b.dataset.id || 0) - parseInt(a.dataset.id || 0);
+                    } else if (orden === 'a_z') {
+                        return (a.dataset.titulo || '').localeCompare(b.dataset.titulo || '');
+                    } else if (orden === 'z_a') {
+                        return (b.dataset.titulo || '').localeCompare(a.dataset.titulo || '');
+                    } else if (orden === 'recomendados' || orden === 'mas_vendidos') {
                         return parseInt(b.dataset.sugerencia || 0) - parseInt(a.dataset.sugerencia || 0);
                     }
                     return 0;

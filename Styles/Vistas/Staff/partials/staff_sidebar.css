@@ -44,12 +44,13 @@ body.repartidor-panel {
   box-sizing: border-box;
 }
 
-/* Header Móvil (Imagen 5) */
+/* Header Móvil */
 .staff-sidebar .sidebar-header-mobile {
   display: none;
   min-height: 72px;
   padding: 16px 20px;
   background: #15803d;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   align-items: center;
   justify-content: space-between;
   box-sizing: border-box;
@@ -94,12 +95,12 @@ body.repartidor-panel {
   transform: scale(1.05);
 }
 
-/* Brand Desktop (Imagen 2) */
+/* Brand Desktop */
 .staff-sidebar .sidebar-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 15px 20px;
+  gap: 12px;
+  padding: 16px 20px;
   border-bottom: 1px solid #e2e8f0;
   text-decoration: none;
   background: #ffffff;
@@ -130,7 +131,8 @@ body.repartidor-panel {
   flex: 1 1 auto;
   overflow-y: auto;
   min-height: 0;
-  padding: 10px 0 20px 0;
+  padding: 12px 0 20px 0;
+  background: #ffffff;
 }
 
 .staff-sidebar .sidebar-nav::-webkit-scrollbar {
@@ -143,11 +145,11 @@ body.repartidor-panel {
 }
 
 .staff-sidebar .sidebar-nav-title {
-  padding: 14px 18px 6px;
+  padding: 16px 20px 6px;
   font-size: 0.68rem;
   font-weight: 700;
   color: #15803d;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -157,7 +159,7 @@ body.repartidor-panel {
 
 .staff-sidebar .sidebar-menu {
   list-style: none;
-  padding: 0 18px;
+  padding: 0 14px;
   margin: 0;
 }
 
@@ -170,13 +172,13 @@ body.repartidor-panel {
 .staff-sidebar .sidebar-link {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 14px;
+  gap: 12px;
+  padding: 9px 14px;
   text-decoration: none;
   color: #475569;
   border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.85rem;
+  font-weight: 500;
+  font-size: 0.86rem;
   transition: all 0.2s ease;
   margin-bottom: 2px;
 }
@@ -190,6 +192,7 @@ body.repartidor-panel {
   background: #dcfce7;
   color: #15803d;
   font-weight: 700;
+  box-shadow: none;
 }
 
 .staff-sidebar .sidebar-link svg {
@@ -217,42 +220,108 @@ body.repartidor-panel {
   color: #ffffff;
 }
 
-/* Footer Sidebar (Imagen 2 y 5) */
-.staff-sidebar .sidebar-footer {
-  padding: 15px;
-  border-top: 1px solid #f1f5f9;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+/* Footer Sidebar (Estilo Referencia: Avatar, Nombre, Rol, Salir) */
+.staff-sidebar .sidebar-footer-user {
+  padding: 13px 16px;
   background: #ffffff;
-  margin-top: auto;
-}
-
-.staff-sidebar .sidebar-footer a {
-  text-decoration: none;
-}
-
-.staff-sidebar .sidebar-logout-btn {
-  background: #fee2e2;
-  color: #dc2626;
-  border-radius: 10px;
-  font-weight: 700;
-  padding: 10px 14px;
-  text-decoration: none;
+  border-top: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 0.85rem;
-  transition: background 0.2s ease;
-  border: none;
-  cursor: pointer;
-  width: 100%;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
   box-sizing: border-box;
+  width: 100%;
 }
 
-.staff-sidebar .sidebar-logout-btn:hover {
-  background: #fecaca;
+.staff-sidebar .sidebar-user-info {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  text-decoration: none;
+  min-width: 0;
+  flex: 1;
+  transition: opacity 0.15s ease;
+}
+
+.staff-sidebar .sidebar-user-info:hover {
+  opacity: 0.85;
+}
+
+.staff-sidebar .sidebar-user-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #dcfce7;
+  color: #15803d;
+  border: 1.5px solid #bbf7d0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 800;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.staff-sidebar .sidebar-user-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.staff-sidebar .sidebar-user-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.staff-sidebar .sidebar-user-role {
+  font-size: 11.5px;
+  color: #64748b;
+  line-height: 1.25;
+  text-transform: lowercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+
+.staff-sidebar .sidebar-user-exit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #64748b;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.staff-sidebar .sidebar-user-exit:hover {
   color: #dc2626;
+  background: #fef2f2;
+  border-color: #fee2e2;
+}
+
+.staff-sidebar .sidebar-user-exit svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  flex-shrink: 0;
 }
 
 /* Layout Principal y Topbar */
@@ -265,19 +334,7 @@ body.repartidor-panel {
 }
 
 .staff-topbar {
-  height: 66px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 0 24px;
-  background: #15803d;
-  color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  box-sizing: border-box;
+  display: none;
 }
 
 .staff-topbar-left {

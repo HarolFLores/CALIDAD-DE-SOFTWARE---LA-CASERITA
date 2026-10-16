@@ -51,14 +51,18 @@ document.addEventListener('DOMContentLoaded', () => {
         searchInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                mostrarResultadosCompletos(currentTerm);
+                const term = searchInput.value.trim();
+                if (term.length > 0) {
+                    window.location.href = 'index.php?action=ver_categoria&buscar=' + encodeURIComponent(term);
+                } else {
+                    window.location.href = 'index.php?action=ver_categoria&ofertas=1&nombre=Ofertas';
+                }
             }
         });
     }
 
-    
     document.addEventListener('click', (e) => {
-        if (!e.target.closest('.search-container')) {
+        if (!e.target.closest('.search-container') && !e.target.closest('.header-search-wrap')) {
             if (searchDropdown) {
                 searchDropdown.classList.remove('active');
                 searchDropdown.style.display = 'none';
@@ -67,8 +71,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (searchViewAllBtn) {
-        searchViewAllBtn.addEventListener('click', () => {
-            mostrarResultadosCompletos(currentTerm);
+        searchViewAllBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const term = (searchInput ? searchInput.value : currentTerm || '').trim();
+            if (term.length > 0) {
+                window.location.href = 'index.php?action=ver_categoria&buscar=' + encodeURIComponent(term);
+            } else {
+                window.location.href = 'index.php?action=ver_categoria&ofertas=1&nombre=Ofertas';
+            }
         });
     }
 
@@ -113,25 +123,55 @@ document.addEventListener('DOMContentLoaded', () => {
         if (searchQuickProducts) {
             searchQuickProducts.innerHTML = '';
             
-            // Requerimiento: Solo debe mostrar el título del producto, no la tarjeta con imagen.
-            resultados.slice(0, 5).forEach(p => {
-                const titleItem = document.createElement('div');
-                titleItem.style.padding = '10px 15px';
-                titleItem.style.cursor = 'pointer';
-                titleItem.style.borderBottom = '1px solid #eee';
-                titleItem.style.fontSize = '14px';
-                titleItem.innerHTML = p.titulo.replace(new RegExp(term, 'gi'), match => `<strong>${match}</strong>`);
+            // Mostrar imagen, título resaltado y precio del producto
+            resultados.slice(0, 6).forEach(p => {
+                const itemRow = document.createElement('div');
+                itemRow.className = 'search-quick-item';
+                itemRow.style.display = 'flex';
+                itemRow.style.alignItems = 'center';
+                itemRow.style.gap = '12px';
+                itemRow.style.padding = '8px 12px';
+                itemRow.style.cursor = 'pointer';
+                itemRow.style.borderBottom = '1px solid #f1f5f9';
+                itemRow.style.borderRadius = '8px';
+                itemRow.style.transition = 'background 0.15s ease';
+
+                itemRow.addEventListener('mouseenter', () => itemRow.style.background = '#f8fafc');
+                itemRow.addEventListener('mouseleave', () => itemRow.style.background = 'transparent');
+
+                let imgSrc = p.imagen || p.imagen_url || 'Images/logo.png';
+                if (!imgSrc || imgSrc.trim() === '') {
+                    imgSrc = 'Images/logo.png';
+                }
+                const highlightedTitle = p.titulo.replace(new RegExp(term, 'gi'), match => `<strong>${match}</strong>`);
+                const precio = parseFloat(p.precio || 0).toFixed(2);
+                const und = p.unidad_medida ? ` / ${p.unidad_medida.toLowerCase()}` : '';
+
+                itemRow.innerHTML = `
+                    <img src="${imgSrc}" alt="${p.titulo}" onerror="this.onerror=null; this.src='Images/logo.png';" style="width: 44px; height: 44px; object-fit: contain; border-radius: 8px; border: 1px solid #e2e8f0; flex-shrink: 0; background: #fff; padding: 2px;">
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-size: 0.88rem; color: #1e293b; line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            ${highlightedTitle}
+                        </div>
+                        <div style="font-size: 0.80rem; font-weight: 700; color: #15803d; margin-top: 2px;">
+                            S/ ${precio}<span style="font-size: 0.72rem; color: #64748b; font-weight: 500;">${und}</span>
+                        </div>
+                    </div>
+                `;
                 
-                titleItem.addEventListener('click', () => { 
+                itemRow.addEventListener('click', () => { 
                     window.location.href = `index.php?action=detalle_producto&id=${p.id_producto}`; 
                 });
                 
-                searchQuickProducts.appendChild(titleItem);
+                searchQuickProducts.appendChild(itemRow);
             });
 
             if (resultados.length === 0) {
-                searchQuickProducts.innerHTML = '<p style="padding:15px; color:#666;">No hay productos que coincidan.</p>';
-                if (searchViewAllBtn) searchViewAllBtn.style.display = 'none';
+                searchQuickProducts.innerHTML = '<p style="padding:15px; color:#666; font-size:13px;">No hay productos que coincidan.</p>';
+                if (searchViewAllBtn) {
+                    searchViewAllBtn.style.display = 'block';
+                    searchViewAllBtn.textContent = 'VER PRODUCTOS CON DESCUENTO';
+                }
             } else if (searchViewAllBtn) {
                 searchViewAllBtn.style.display = 'block';
                 searchViewAllBtn.textContent = `VER LOS ${resultados.length} PRODUCTOS`;
@@ -140,14 +180,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.mostrarResultadosCompletos = function(term) {
-        if (!window.productosBD || !term) return;
+        const cleanTerm = (term || '').trim();
+        if (cleanTerm === '') {
+            window.location.href = 'index.php?action=ver_categoria&ofertas=1&nombre=Ofertas';
+            return;
+        }
+
+        if (!searchResultsSection || !mainContent) {
+            window.location.href = 'index.php?action=ver_categoria&buscar=' + encodeURIComponent(cleanTerm);
+            return;
+        }
 
         if (searchDropdown) {
             searchDropdown.classList.remove('active');
             searchDropdown.style.display = 'none';
         }
 
-        const resultados = window.productosBD.filter(p => p.titulo.toLowerCase().includes(term));
+        const resultados = window.productosBD ? window.productosBD.filter(p => p.titulo.toLowerCase().includes(cleanTerm.toLowerCase())) : [];
 
         if (searchResultsTerm) searchResultsTerm.textContent = term;
         if (searchResultsCount) searchResultsCount.textContent = resultados.length;
@@ -276,6 +325,9 @@ document.addEventListener('DOMContentLoaded', () => {
             dropdown.classList.remove('active');
             if (overlay) overlay.classList.remove('active');
         } else {
+            const userMenuWrapper = document.getElementById('userMenuWrapper');
+            if (userMenuWrapper) userMenuWrapper.classList.remove('active');
+
             const cartSidebar = document.getElementById('cartSidebar');
             if (cartSidebar && cartSidebar.classList.contains('active')) {
                 cartSidebar.classList.remove('active');
@@ -303,7 +355,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function cargarNotificaciones() {
         if (!notifItems) return;
-        notifItems.innerHTML = '<div style="padding:40px 20px;text-align:center;color:#64748b;"><div style="font-size:1.8rem;margin-bottom:8px;">⏳</div>Cargando notificaciones...</div>';
+        // Si el drawer ya tiene items renderizados por PHP, conservarlos para carga instantánea
+        if (notifItems.querySelector('.notif-item-row')) {
+            return;
+        }
+
+        notifItems.innerHTML = `
+            <div style="padding:40px 20px;text-align:center;color:#64748b;">
+                <div style="display:inline-flex;margin-bottom:10px;animation:spin 1s linear infinite;color:#15803d;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                </div>
+                <div style="font-size:0.9rem;font-weight:600;">Cargando notificaciones...</div>
+            </div>
+        `;
         if (notifEmpty) notifEmpty.style.display = 'none';
 
         fetch('index.php?action=listar_pedidos_usuario', {
@@ -316,41 +380,31 @@ document.addEventListener('DOMContentLoaded', () => {
             return res.json();
         })
         .then(response => {
-            if (response.success && response.data && response.data.pedidos && response.data.pedidos.length > 0) {
-                renderNotificaciones(response.data.pedidos);
+            if (response.success && response.data && Array.isArray(response.data.pedidos)) {
+                const pendientes = response.data.pedidos.filter(pedido =>
+                    parseInt(pedido.leido_cliente !== undefined ? pedido.leido_cliente : 0, 10) === 0
+                );
+                renderNotificaciones(pendientes);
             } else {
-                renderNotificacionesDemo();
+                renderNotificacionesVacias();
             }
         })
         .catch(() => {
-            renderNotificacionesDemo();
+            renderNotificacionesVacias('No se pudieron cargar las notificaciones.');
         });
     }
 
-    function renderNotificacionesDemo() {
+    function renderNotificacionesVacias(mensaje = 'Los cambios de estado de tus pedidos aparecerán aquí.') {
         if (!notifItems) return;
         notifItems.innerHTML = `
-            <div style="padding: 16px 20px; border-bottom: 1px solid #f1f5f9; display: flex; gap: 14px; align-items: flex-start;">
-                <span style="font-size: 1.4rem; background: #e0f2fe; padding: 10px; border-radius: 14px; color: #0284c7; flex-shrink:0;">🛒</span>
-                <div>
-                    <strong style="font-size: 0.95rem; color: #0f172a; display: block;">¡Tu pedido ha sido recibido!</strong>
-                    <span style="font-size: 0.83rem; color: #64748b; display: block; margin: 3px 0 4px;">Estamos procesando tu orden correctamente.</span>
-                    <small style="font-size: 0.74rem; color: #94a3b8;">Reciente</small>
+            <div style="padding:50px 20px;text-align:center;color:#64748b;">
+                <div style="margin-bottom:12px;display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:50%;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
                 </div>
-            </div>
-            <div style="padding: 16px 20px; border-bottom: 1px solid #f1f5f9; display: flex; gap: 14px; align-items: flex-start;">
-                <span style="font-size: 1.4rem; background: #fef3c7; padding: 10px; border-radius: 14px; color: #d97706; flex-shrink:0;">🎉</span>
-                <div>
-                    <strong style="font-size: 0.95rem; color: #0f172a; display: block;">Nuevas ofertas disponibles</strong>
-                    <span style="font-size: 0.83rem; color: #64748b; display: block; margin: 3px 0 4px;">Descuentos especiales en Frutas y Verduras hoy.</span>
-                    <small style="font-size: 0.74rem; color: #94a3b8;">Hoy</small>
-                </div>
+                <strong style="font-size:1rem;color:#0f172a;display:block;">No tienes notificaciones nuevas</strong>
+                <p style="font-size:0.85rem;margin-top:4px;">${mensaje}</p>
             </div>
         `;
-        if (notifBadge) {
-            notifBadge.textContent = '2';
-            notifBadge.style.display = 'flex';
-        }
     }
 
     function renderNotificaciones(pedidos) {
@@ -358,23 +412,40 @@ document.addEventListener('DOMContentLoaded', () => {
         notifItems.innerHTML = '';
         
         if (pedidos.length === 0) {
-            renderNotificacionesDemo();
+            renderNotificacionesVacias();
             return;
         }
-        
-        let activeCount = 0;
 
         pedidos.forEach(pedido => {
-            const estado = pedido.estado ? pedido.estado.toLowerCase() : '';
-            if (estado !== 'entregado' && estado !== 'cancelado') {
-                activeCount++;
+            const rawEst = pedido.estado ? pedido.estado.trim().toLowerCase() : 'pendiente';
+            const isUnread = parseInt(pedido.leido_cliente !== undefined ? pedido.leido_cliente : 0, 10) === 0;
+            
+            let colorEstado = '#64748b';
+            let badgeText = pedido.estado || 'Pendiente';
+            switch (rawEst) {
+                case 'en camino':
+                    colorEstado = '#0284c7';
+                    badgeText = 'En camino';
+                    break;
+                case 'en preparacion':
+                case 'en preparación':
+                    colorEstado = '#4f46e5';
+                    badgeText = 'En preparación';
+                    break;
+                case 'pendiente':
+                    colorEstado = '#d97706';
+                    badgeText = 'Pendiente';
+                    break;
+                case 'entregado':
+                    colorEstado = '#15803d';
+                    badgeText = 'Entregado';
+                    break;
+                case 'cancelado':
+                case 'rechazado':
+                    colorEstado = '#dc2626';
+                    badgeText = 'Cancelado';
+                    break;
             }
-
-            let statusClass = 'status-pendiente';
-            if (estado === 'aceptado') statusClass = 'status-aceptado';
-            else if (estado === 'en camino') statusClass = 'status-en_camino';
-            else if (estado === 'entregado') statusClass = 'status-entregado';
-            else if (estado === 'cancelado') statusClass = 'status-cancelado';
 
             const fechaFormat = new Date(pedido.fecha).toLocaleString('es-PE', {
                 year: 'numeric', month: 'short', day: 'numeric',
@@ -382,33 +453,58 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const div = document.createElement('div');
-            div.style.cssText = 'padding: 16px 20px; border-bottom: 1px solid #f1f5f9; display: flex; gap: 14px; align-items: flex-start;';
+            div.className = `stock-dropdown-item notif-item-row ${isUnread ? 'notif-unread' : 'notif-read'}`;
+            div.id = `notifItemRow_${pedido.id_pedido}`;
+            div.setAttribute('data-leido', isUnread ? '0' : '1');
+            div.style.cssText = `cursor:pointer; padding: 16px 20px; border-bottom: 1px solid #f1f5f9; display: flex; gap: 14px; align-items: flex-start; transition: all 0.2s ease; background-color: ${isUnread ? '#f0fdf4' : '#ffffff'}; border-left: ${isUnread ? '3.5px solid #15803d' : '3.5px solid transparent'};`;
             
-            const iconSvg = `<div style="width: 42px; height: 42px; background: #e0f2fe; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #0284c7; flex-shrink: 0; font-size: 1.3rem;">
-                🛍️
-            </div>`;
+            div.addEventListener('mouseenter', () => div.style.backgroundColor = '#f1f5f9');
+            div.addEventListener('mouseleave', () => {
+                div.style.backgroundColor = (div.getAttribute('data-leido') === '0' ? '#f0fdf4' : '#ffffff');
+            });
+            div.addEventListener('click', () => {
+                if (typeof window.leerNotificacionPedido === 'function') {
+                    window.leerNotificacionPedido(pedido.id_pedido, `index.php?action=detalle_pedido_usuario&id=${pedido.id_pedido}`);
+                } else {
+                    window.location.href = `index.php?action=detalle_pedido_usuario&id=${pedido.id_pedido}`;
+                }
+            });
+
+            const iconBoxBg = isUnread ? '#dcfce7' : '#f8fafc';
+            const iconBoxBorder = isUnread ? '#86efac' : '#e2e8f0';
+            const iconBoxColor = isUnread ? '#15803d' : '#94a3b8';
+
+            const iconSvg = `
+                <div class="notif-icon-box" style="width: 42px; height: 42px; background: ${iconBoxBg}; border: 1px solid ${iconBoxBorder}; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: ${iconBoxColor}; flex-shrink: 0; transition: all 0.2s ease;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                </div>
+            `;
+
+            const pillNuevo = isUnread ? `<span class="notif-pill-nuevo" style="background:#dcfce7;color:#15803d;font-size:0.68rem;font-weight:700;padding:2px 7px;border-radius:10px;border:1px solid #86efac;letter-spacing:0.3px;">Nuevo</span>` : '';
 
             div.innerHTML = `
                 ${iconSvg}
-                <div style="flex: 1;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <strong style="font-size: 0.95rem; color: #0f172a;">Pedido #${pedido.id_pedido}</strong>
-                        <small style="font-size: 0.75rem; color: #94a3b8;">${fechaFormat}</small>
+                <div style="flex: 1; min-width: 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <strong class="notif-pedido-titulo" style="font-size: 0.95rem; color: ${isUnread ? '#0f172a' : '#334155'}; font-weight: ${isUnread ? '700' : '600'};">Pedido #${String(pedido.id_pedido).padStart(5, '0')}</strong>
+                            ${pillNuevo}
+                        </div>
+                        <small style="font-size: 0.74rem; color: #94a3b8; flex-shrink:0;">${fechaFormat}</small>
                     </div>
-                    <p style="margin: 4px 0; color: #15803D; font-size: 0.85rem; font-weight: 600;">Total: S/ ${parseFloat(pedido.total).toFixed(2)} - ${pedido.tipo_entrega}</p>
+                    <p style="margin: 4px 0; color: #334155; font-size: 0.85rem; font-weight: 600;">Total: S/ ${parseFloat(pedido.total || 0).toFixed(2)} - ${pedido.tipo_entrega || 'Delivery'}</p>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
-                        <span class="notif-status ${statusClass}" style="padding: 3px 8px; border-radius: 10px; font-size: 0.72rem; font-weight: 800;">${pedido.estado}</span>
-                        <a href="index.php?action=detalle_pedido_usuario&id=${pedido.id_pedido}" style="font-size: 0.8rem; color: #10b981; font-weight: bold; text-decoration: none;">Ver detalle →</a>
+                        <span class="notif-estado-texto" style="color:${colorEstado};font-size:0.8rem;font-weight:700;letter-spacing:0.2px;">${badgeText}</span>
+                        <span style="font-size: 0.82rem; color: #15803d; font-weight: 700;">Ver detalle →</span>
                     </div>
                 </div>
             `;
             notifItems.appendChild(div);
         });
-
-        if (notifBadge) {
-            notifBadge.textContent = activeCount > 0 ? activeCount : '0';
-            notifBadge.style.display = activeCount > 0 ? 'flex' : 'none';
-        }
     }
 
     fetch('index.php?action=listar_pedidos_usuario', {
@@ -423,14 +519,17 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(response => {
         if (response.success && response.data && response.data.pedidos) {
             const pedidos = response.data.pedidos;
-            let activeCount = 0;
+            let unreadCount = 0;
             pedidos.forEach(p => {
                 const est = p.estado ? p.estado.toLowerCase() : '';
-                if (est !== 'entregado' && est !== 'cancelado') activeCount++;
+                const leido = parseInt(p.leido_cliente !== undefined ? p.leido_cliente : 0, 10);
+                if (leido === 0) {
+                    unreadCount++;
+                }
             });
-            if (notifBadge && activeCount > 0) {
-                notifBadge.textContent = activeCount;
-                notifBadge.style.display = 'flex';
+            if (notifBadge) {
+                notifBadge.textContent = unreadCount > 0 ? unreadCount : '0';
+                notifBadge.style.display = unreadCount > 0 ? 'flex' : 'none';
             }
         }
     }).catch(() => { /* Sin sesión activa, no mostrar badge */ });

@@ -13,24 +13,51 @@ class VerificacionPagoModel {
     }
 
     public function listarVerificaciones($filtro = null) {
-        $sql = "SELECT pv.*, p.codigo_pedido, p.total as pedido_total, p.estado as pedido_estado,
-                       u.nombre as cliente_nombre, u.apellido as cliente_apellido, u.correo as cliente_correo,
-                       mp.nombre as metodo_nombre,
-                       v.nombre as verificador_nombre, v.apellido as verificador_apellido
-                FROM pago_verificacion pv
-                JOIN pedido p ON pv.id_pedido = p.id_pedido
+        $sql = "SELECT 
+                    COALESCE(pv.id_verificacion, p.id_pedido) as id_verificacion,
+                    p.id_pedido,
+                    p.codigo_pedido,
+                    p.total as pedido_total,
+                    p.estado as pedido_estado,
+                    u.nombre as cliente_nombre,
+                    u.apellido as cliente_apellido,
+                    u.correo as cliente_correo,
+                    COALESCE(u.telefono, pv.celular_remitente, '—') as cliente_telefono,
+                    mp.nombre as metodo_nombre,
+                    COALESCE(pv.codigo_operacion, CASE WHEN LOWER(mp.nombre) LIKE '%yape%' OR LOWER(mp.nombre) LIKE '%plin%' THEN 'OTP-DIGITAL' ELSE 'AUT-PASARELA' END) as codigo_operacion,
+                    COALESCE(pv.celular_remitente, u.telefono, '—') as celular_remitente,
+                    COALESCE(pv.titular_origen, CONCAT(u.nombre, ' ', u.apellido)) as titular_origen,
+                    COALESCE(pv.monto_reportado, p.total) as monto_reportado,
+                    COALESCE(pv.captura_voucher, 'VERIFICACION_SISTEMA') as captura_voucher,
+                    COALESCE(pv.estado_verificacion, CASE WHEN p.estado = 'Cancelado' THEN 'Rechazado' WHEN p.estado IN ('En Preparacion', 'En Camino', 'Entregado') THEN 'Aprobado' ELSE 'Pendiente' END) as estado_verificacion,
+                    COALESCE(pv.fecha_envio, p.fecha_pedido) as fecha_envio,
+                    pv.fecha_verificacion,
+                    COALESCE(CONCAT(v.nombre, ' ', v.apellido), 'Sistema Automatizado') as verificador_nombre,
+                    pv.motivo_rechazo,
+                    CASE 
+                        WHEN LOWER(mp.nombre) LIKE '%tarjeta%' THEN 'Pasarela Tarjeta (Aprobación Instantánea)'
+                        WHEN LOWER(mp.nombre) LIKE '%yape%' THEN 'Pasarela Yape Directo (Validación OTP)'
+                        WHEN LOWER(mp.nombre) LIKE '%plin%' THEN 'Pasarela Plin Directo (Validación OTP)'
+                        ELSE 'Procesamiento Digital'
+                    END as canal_pasarela
+                FROM pedido p
+                JOIN metodo_pago mp ON p.id_metodo = mp.id_metodo
                 JOIN usuario u ON p.id_usuario = u.id_usuario
-                JOIN metodo_pago mp ON pv.id_metodo = mp.id_metodo
-                LEFT JOIN usuario v ON pv.id_usuario_verificador = v.id_usuario";
-        $params = [];
-        if ($filtro) {
-            $sql .= " WHERE pv.estado_verificacion = :est";
-            $params[':est'] = $filtro;
-        }
-        $sql .= " ORDER BY pv.id_verificacion DESC";
+                LEFT JOIN pago_verificacion pv ON pv.id_pedido = p.id_pedido
+                LEFT JOIN usuario v ON pv.id_usuario_verificador = v.id_usuario
+                WHERE LOWER(mp.nombre) NOT LIKE '%efectivo%'";
 
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute($params);
+        if ($filtro && in_array($filtro, ['Pendiente', 'Aprobado', 'Rechazado'], true)) {
+            $sql .= " HAVING estado_verificacion = :est";
+            $sql .= " ORDER BY fecha_envio DESC";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute([':est' => $filtro]);
+        } else {
+            $sql .= " ORDER BY fecha_envio DESC";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute();
+        }
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -76,7 +103,7 @@ class VerificacionPagoModel {
 
             // 2. Actualizar estado del pedido a 'En Preparacion'
             $idPedido = $verif['id_pedido'];
-            $sqlUpdP = "UPDATE pedido SET estado = 'En Preparacion' WHERE id_pedido = :ped";
+            $sqlUpdP = "UPDATE pedido SET estado = 'En Preparacion', leido_cliente = 0 WHERE id_pedido = :ped";
             $stmtUpdP = $this->conn->prepare($sqlUpdP);
             $stmtUpdP->bindParam(':ped', $idPedido, PDO::PARAM_INT);
             $stmtUpdP->execute();
@@ -154,7 +181,7 @@ class VerificacionPagoModel {
             $stmtUpdV->execute();
 
             // 2. Marcar pedido como cancelado
-            $sqlUpdP = "UPDATE pedido SET estado = 'Cancelado', observacion = CONCAT(COALESCE(observacion,''), ' [Rechazo comprobante: ', :motivo, ']') WHERE id_pedido = :ped";
+            $sqlUpdP = "UPDATE pedido SET estado = 'Cancelado', leido_cliente = 0, observacion = CONCAT(COALESCE(observacion,''), ' [Rechazo comprobante: ', :motivo, ']') WHERE id_pedido = :ped";
             $stmtUpdP = $this->conn->prepare($sqlUpdP);
             $stmtUpdP->bindParam(':motivo', $motivo);
             $stmtUpdP->bindParam(':ped', $verif['id_pedido'], PDO::PARAM_INT);

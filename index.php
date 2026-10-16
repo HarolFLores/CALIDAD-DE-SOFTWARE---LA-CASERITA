@@ -185,8 +185,11 @@ $rutasAutenticado = [
     'eliminar_direccion',
     'listar_pedidos_usuario',
     'detalle_pedido_usuario',
+    'marcar_pedido_leido',
+    'marcar_todos_pedidos_leidos',
     'crear_pedido',
     'pedido_confirmado',
+    'mercadopago_retorno',
     'checkout',
     'logout',
 ];
@@ -486,8 +489,17 @@ switch($action) {
     case 'detalle_pedido_usuario':
         $pedidoController->detallePedidoUsuario();
         break;
+    case 'marcar_pedido_leido':
+        $pedidoController->marcarPedidoLeido();
+        break;
+    case 'marcar_todos_pedidos_leidos':
+        $pedidoController->marcarTodosPedidosLeidos();
+        break;
     case 'crear_pedido':
         $pedidoController->crearPedido();
+        break;
+    case 'mercadopago_retorno':
+        $pedidoController->mercadopagoRetorno();
         break;
     case 'pedido_confirmado':
         $pedidoController->pedidoConfirmado();

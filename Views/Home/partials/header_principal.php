@@ -14,7 +14,9 @@ $esPersonal = in_array($rol, ['admin', 'cajero', 'repartidor'], true);
 $rutaInicio = 'index.php?action=home_usuario';
 $rutaPerfil = $esAdmin ? 'index.php?action=dashboard_ganancias' : (($rol === 'cajero') ? 'index.php?action=panel_cajero' : (($rol === 'repartidor') ? 'index.php?action=panel_repartidor' : 'index.php?action=mi_cuenta'));
 $textoPerfil = $esAdmin ? 'Panel ERP' : (($rol === 'cajero') ? 'Panel de caja' : (($rol === 'repartidor') ? 'Mis entregas' : 'Ir a Mi Cuenta'));
-$nombre = $estaAutenticado ? htmlspecialchars($_SESSION['usuario_nombre'] ?? 'Usuario') : 'Invitado';
+$nombreCompleto = $_SESSION['usuario_nombre'] ?? 'Usuario';
+$partesNombre = explode(' ', trim($nombreCompleto));
+$nombre = $estaAutenticado ? htmlspecialchars($partesNombre[0]) : 'Invitado';
 
 if (!isset($cantPedidosActivos)) {
     $cantPedidosActivos = 0;
@@ -22,10 +24,13 @@ if (!isset($cantPedidosActivos)) {
         try {
             require_once __DIR__ . '/../../../Models/pedidoModel.php';
             $pModel = new PedidoModel();
-            $pedidosAct = $pModel->obtenerPedidosActivosPorUsuario($_SESSION['usuario_id']);
-            $cantPedidosActivos = count($pedidosAct);
+            $cantPedidosActivos = $pModel->obtenerCantidadPedidosNoLeidos((int)$_SESSION['usuario_id']);
+            if (!isset($pedidosUsuario)) {
+                $pedidosUsuario = $pModel->getPedidosByUsuario((int)$_SESSION['usuario_id']);
+            }
         } catch (\Throwable $th) {
             $cantPedidosActivos = 0;
+            $pedidosUsuario = [];
         }
     }
 }
@@ -39,19 +44,21 @@ foreach ($carritoSesionHeader as $itemCart) {
 }
 
 if (!isset($productosParaBuscadorGlobal)) {
-    try {
-        require_once __DIR__ . '/../../../Models/productModel.php';
-        $__pModelGlobal = new ProductModel();
-        $productosParaBuscadorGlobal = $__pModelGlobal->getTodosProductos(true);
-    } catch (\Throwable $th) {
-        $productosParaBuscadorGlobal = [];
+    if (isset($product_bd) && !empty($product_bd)) {
+        $productosParaBuscadorGlobal = $product_bd;
+    } else {
+        try {
+            require_once __DIR__ . '/../../../Models/productModel.php';
+            $__pModelGlobal = new ProductoModel();
+            $productosParaBuscadorGlobal = $__pModelGlobal->getProductofull();
+        } catch (\Throwable $th) {
+            $productosParaBuscadorGlobal = [];
+        }
     }
 }
 ?>
     <script>
-        if (!window.productosBD) {
-            window.productosBD = <?= json_encode($productosParaBuscadorGlobal ?? []); ?>;
-        }
+        window.productosBD = <?= json_encode($productosParaBuscadorGlobal ?? []); ?>;
     </script>
     <script src="Scripts/app.js?v=<?= time(); ?>"></script>
 
@@ -84,7 +91,8 @@ if (!isset($productosParaBuscadorGlobal)) {
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
                 </span>
-                <input type="text" name="busqueda" id="busqueda" placeholder="Busca arroz, leche, bebidas, frutas y más..."
+                <?php $valBusquedaHeader = isset($_GET['buscar']) ? trim($_GET['buscar']) : (isset($_GET['q']) ? trim($_GET['q']) : ''); ?>
+                <input type="text" name="busqueda" id="busqueda" value="<?= htmlspecialchars($valBusquedaHeader); ?>" placeholder="Busca arroz, leche, bebidas, frutas y más..."
                     class="header-search-input-pill" autocomplete="off">
                 <button type="button" class="search-clear" id="searchClear" style="display: none;">×</button>
 
@@ -100,23 +108,63 @@ if (!isset($productosParaBuscadorGlobal)) {
                                 <strong id="searchQuickTerm"></strong>
                             </div>
                             <div class="search-quick-products" id="searchQuickProducts"></div>
-                            <button type="button" class="search-view-all-btn" id="searchViewAllBtn">VER TODOS LOS PRODUCTOS</button>
+                            <button type="button" class="search-view-all-btn" id="searchViewAllBtn">VER PRODUCTOS CON DESCUENTO</button>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="header-controls-group header-actions">
-                <!-- Botón Usuario (Píldora) -->
+                <!-- Botón Usuario (Píldora con Menú Desplegable al pasar el cursor) -->
                 <?php if ($estaAutenticado): ?>
-                    <a href="<?= htmlspecialchars($rutaPerfil) ?>" class="btn-user-pill-img1 btn-user" title="<?= htmlspecialchars($textoPerfil) ?>">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
-                        <span class="btn-user-label"><?= $esPersonal ? htmlspecialchars($textoPerfil) . ' (' . $nombre . ')' : $nombre; ?></span>
-                    </a>
+                    <div class="user-menu-wrapper" id="userMenuWrapper">
+                        <button type="button" class="btn-user-pill-img1 btn-user" title="<?= htmlspecialchars($textoPerfil) ?>" id="btnUserPill" onclick="toggleUserDropdownMenu(event)" aria-haspopup="true" aria-expanded="false">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            <span class="btn-user-label"><?= $esPersonal ? htmlspecialchars($textoPerfil) . ' (' . $nombre . ')' : $nombre; ?></span>
+                            <?php if (!$esPersonal): ?>
+                                <span class="user-notif-badge-img1 notif-badge" id="notifBadge" title="<?= $cantPedidosActivos; ?> notificaciones de pedidos sin leer" style="display: <?= $cantPedidosActivos > 0 ? 'flex' : 'none'; ?>; cursor: default;">
+                                    <?= $cantPedidosActivos; ?>
+                                </span>
+                            <?php endif; ?>
+                        </button>
+
+                        <!-- Dropdown flotante al hacer hover sobre el usuario -->
+                        <div class="user-dropdown-menu" id="userDropdownMenu" role="menu">
+                            <div class="user-dropdown-header">
+                                <div class="user-dropdown-avatar">
+                                    <?= strtoupper(substr($nombre, 0, 1)); ?>
+                                </div>
+                                <div class="user-dropdown-info">
+                                    <strong class="user-dropdown-name"><?= htmlspecialchars($nombreCompleto); ?></strong>
+                                    <span class="user-dropdown-email"><?= htmlspecialchars($_SESSION['usuario_correo'] ?? ''); ?></span>
+                                </div>
+                            </div>
+                            <div class="user-dropdown-divider"></div>
+
+                            <a href="<?= htmlspecialchars($rutaPerfil); ?>" class="user-dropdown-item" role="menuitem">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                <span>Ver mi perfil</span>
+                            </a>
+
+                            <?php if (!$esPersonal): ?>
+                            <a href="javascript:void(0);" onclick="toggleNotificaciones(event)" class="user-dropdown-item" role="menuitem">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                                <span>Notificaciones</span>
+                            </a>
+                            <?php endif; ?>
+
+                            <div class="user-dropdown-divider"></div>
+
+                            <a href="index.php?action=logout" class="user-dropdown-item user-dropdown-logout" role="menuitem">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                                <span>Salir</span>
+                            </a>
+                        </div>
+                    </div>
                 <?php else: ?>
                     <button type="button" class="btn-user-pill-img1 btn-user" onclick="if(typeof abrirModalAuth==='function') abrirModalAuth('login'); else window.location.href='index.php?action=login';" title="Entrar">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -125,18 +173,6 @@ if (!isset($productosParaBuscadorGlobal)) {
                             <circle cx="12" cy="7" r="4"></circle>
                         </svg>
                         <span class="btn-user-label">Entrar</span>
-                    </button>
-                <?php endif; ?>
-
-                <!-- Notificaciones (Cuando está logueado) -->
-                <?php if ($estaAutenticado && !$esPersonal): ?>
-                    <button class="btn-icon" id="btnNotificaciones" type="button" onclick="if(typeof toggleNotificaciones==='function') toggleNotificaciones(event);" title="Notificaciones" style="width:40px; height:40px; border-radius:50%; border:1px solid #e2e8f0; background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            stroke="#334155" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                        </svg>
-                        <span class="badge notif-badge" id="notifBadge" style="display: <?= $cantPedidosActivos > 0 ? 'flex' : 'none'; ?>;"><?= $cantPedidosActivos; ?></span>
                     </button>
                 <?php endif; ?>
 
@@ -160,4 +196,27 @@ if (!isset($productosParaBuscadorGlobal)) {
 
     <!-- Modal de Autenticación Global (Login / Registro) -->
     <?php include_once __DIR__ . '/../../Login/auth_modal.php'; ?>
+
+    <!-- Drawer Lateral de Notificaciones ("Mis Pedidos") Unificado -->
+    <?php include_once __DIR__ . '/notificaciones_drawer.php'; ?>
+
+    <script>
+        function toggleUserDropdownMenu(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            const wrapper = document.getElementById('userMenuWrapper');
+            if (!wrapper) return;
+            wrapper.classList.toggle('active');
+        }
+
+        document.addEventListener('click', function(e) {
+            const wrapper = document.getElementById('userMenuWrapper');
+            if (wrapper && !wrapper.contains(e.target)) {
+                wrapper.classList.remove('active');
+            }
+        });
+        window.toggleUserDropdownMenu = toggleUserDropdownMenu;
+    </script>
 

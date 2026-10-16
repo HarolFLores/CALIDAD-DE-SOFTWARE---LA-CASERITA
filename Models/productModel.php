@@ -26,7 +26,9 @@ class ProductoModel{
     }
 
     public function getProduct(){
-        $query = "SELECT * FROM producto";
+        $query = "SELECT p.*, COALESCE(inv.stock_minimo, 5) AS stock_minimo, COALESCE(inv.stock_actual, p.stock) AS stock_actual
+                  FROM producto p
+                  LEFT JOIN inventario inv ON p.id_producto = inv.id_producto";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -94,11 +96,14 @@ class ProductoModel{
 
     public function getProductofull(){
         $query = "SELECT p.*, c.nombre AS categoria_nombre, gm.nombre AS grupo_nombre, gm.color AS grupo_color, gm.imagen AS grupo_imagen,
-                mc.nombre AS momento_nombre, mc.id_momento
+                mc.nombre AS momento_nombre, mc.id_momento,
+                COALESCE(inv.stock_minimo, 5) AS stock_minimo,
+                COALESCE(inv.stock_actual, p.stock) AS stock_actual
                 FROM producto p
                 LEFT JOIN categoria c ON p.id_categoria = c.id_categoria
                 LEFT JOIN grupo_momento gm ON p.id_grupo = gm.id_grupo
                 LEFT JOIN momento_consumo mc ON gm.id_momento = mc.id_momento
+                LEFT JOIN inventario inv ON p.id_producto = inv.id_producto
                 WHERE p.activo = 1
                 ORDER BY p.fecha_creacion DESC";
 
@@ -277,11 +282,14 @@ class ProductoModel{
 
     public function getProductoById($idProducto){
         $query = "SELECT p.*, c.nombre AS categoria_nombre, c.nombre AS nombre_categoria, gm.nombre AS grupo_nombre,
-                         gm.id_momento, mc.nombre AS momento_nombre
+                         gm.id_momento, mc.nombre AS momento_nombre,
+                         COALESCE(inv.stock_minimo, 5) AS stock_minimo,
+                         COALESCE(inv.stock_actual, p.stock) AS stock_actual
                   FROM producto p 
                   LEFT JOIN categoria c ON p.id_categoria = c.id_categoria 
                   LEFT JOIN grupo_momento gm ON p.id_grupo = gm.id_grupo 
                   LEFT JOIN momento_consumo mc ON gm.id_momento = mc.id_momento
+                  LEFT JOIN inventario inv ON p.id_producto = inv.id_producto
                   WHERE p.id_producto = :id_producto LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindValue(':id_producto', $idProducto, PDO::PARAM_INT);

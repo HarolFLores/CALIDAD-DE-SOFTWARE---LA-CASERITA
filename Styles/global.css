@@ -546,41 +546,6 @@ img {
     transform: scale(0.98);
 }
 
-/* Universal Close Button (Cart Style) */
-.btn-close-universal {
-    width: 48px;
-    height: 48px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    border: 1px solid transparent;
-    border-radius: 50%;
-    background: transparent;
-    color: #64748b;
-    font-size: 1.6rem;
-    font-weight: 400;
-    cursor: pointer;
-    box-shadow: none;
-    transition: color 0.24s ease, border-color 0.24s ease, background-color 0.24s ease;
-    line-height: 1;
-    text-decoration: none;
-    padding: 0;
-    padding-bottom: 2px;
-}
-
-.btn-close-universal:hover {
-    background: #f0fdf4;
-    color: #15803d;
-    border-color: #15803d;
-    transform: none;
-}
-
-.modal-close-glyph {
-    display: inline-block;
-    transform-origin: center;
-}
-
 .va-modal-overlay:not(.active) {
     visibility: hidden;
 }
@@ -589,61 +554,355 @@ img {
     visibility: visible;
 }
 
-:is(.auth-modal-close-btn, .sidebar-close, .sidebar-close-btn, .staff-sidebar-close, .btn-close-cart, .modal-close, .co-modal-close, .cuenta-modal-close, .prov-modal-close, .cat-modal-close-btn, .va-modal-close-icon, .modal-close-caja, .comp-modal-close, .btn-close-universal, .product-detail-close, .btn-close-mobile-filtros, .ticket-modal-close) {
-    width: 48px !important;
-    height: 48px !important;
-    min-width: 48px !important;
-    min-height: 48px !important;
+:is(.auth-modal-close-btn, .sidebar-close, .sidebar-close-btn, .staff-sidebar-close, .modal-close, .co-modal-close, .cuenta-modal-close, .prov-modal-close, .cat-modal-close-btn, .va-modal-close-icon, .modal-close-caja, .comp-modal-close, .btn-close-universal, .product-detail-close, .btn-close-mobile-filtros, .ticket-modal-close, .btn-close-notif, .btn-close-cart) {
+    width: clamp(30px, 4vw, 34px);
+    height: clamp(30px, 4vw, 34px);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0 !important;
-    border: 1px solid transparent !important;
-    border-radius: 50% !important;
-    background: transparent !important;
-    color: #64748b !important;
-    font-size: 1.5rem !important;
-    line-height: 1 !important;
-    box-shadow: none !important;
-    transition: color 0.24s ease, border-color 0.24s ease, background-color 0.24s ease;
+    flex-shrink: 0;
+    padding: 0;
+    border: 1.5px solid transparent;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: clamp(1.3rem, 3vw, 1.5rem);
+    font-weight: 200;
+    line-height: 1;
+    box-shadow: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-:is(.auth-modal-close-btn, .sidebar-close, .sidebar-close-btn, .staff-sidebar-close, .btn-close-cart, .modal-close, .co-modal-close, .cuenta-modal-close, .prov-modal-close, .cat-modal-close-btn, .va-modal-close-icon, .modal-close-caja, .comp-modal-close, .btn-close-universal, .product-detail-close, .btn-close-mobile-filtros, .ticket-modal-close):hover {
-    background: #f0fdf4 !important;
-    color: #15803d !important;
-    border-color: #15803d !important;
-    transform: none !important;
-    box-shadow: none !important;
-}
-
-:is(.auth-modal-close-btn, .sidebar-close, .sidebar-close-btn, .staff-sidebar-close, .btn-close-cart, .modal-close, .co-modal-close, .cuenta-modal-close, .prov-modal-close, .cat-modal-close-btn, .va-modal-close-icon, .modal-close-caja, .comp-modal-close, .btn-close-universal, .product-detail-close, .btn-close-mobile-filtros, .ticket-modal-close):hover > svg,
-:is(.auth-modal-close-btn, .sidebar-close, .sidebar-close-btn, .staff-sidebar-close, .btn-close-cart, .modal-close, .co-modal-close, .cuenta-modal-close, .prov-modal-close, .cat-modal-close-btn, .va-modal-close-icon, .modal-close-caja, .comp-modal-close, .btn-close-universal, .product-detail-close, .btn-close-mobile-filtros, .ticket-modal-close):hover > .modal-close-glyph,
-:is(.auth-modal-close-btn, .sidebar-close, .sidebar-close-btn, .staff-sidebar-close, .btn-close-cart, .modal-close, .co-modal-close, .cuenta-modal-close, .prov-modal-close, .cat-modal-close-btn, .va-modal-close-icon, .modal-close-caja, .comp-modal-close, .btn-close-universal, .product-detail-close, .btn-close-mobile-filtros, .ticket-modal-close):hover > i {
+:is(.auth-modal-close-btn, .sidebar-close, .sidebar-close-btn, .staff-sidebar-close, .modal-close, .co-modal-close, .cuenta-modal-close, .prov-modal-close, .cat-modal-close-btn, .va-modal-close-icon, .modal-close-caja, .comp-modal-close, .btn-close-universal, .product-detail-close, .btn-close-mobile-filtros, .ticket-modal-close, .btn-close-notif, .btn-close-cart):hover {
+    background: #f0fdf4;
+    color: #15803d;
+    border-color: #15803d;
     transform: rotate(90deg);
 }
 
-.btn-close-universal:hover > svg,
-.btn-close-universal:hover > .modal-close-glyph,
-.btn-close-universal:hover > i {
-    transform: rotate(90deg) !important;
-}
-
 .comp-modal-header .btn-close-universal {
-    color: #ffffff !important;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .comp-modal-header .btn-close-universal:hover {
-    color: #ffffff !important;
-    border-color: #ffffff !important;
-    background: rgba(255, 255, 255, 0.16) !important;
+    color: #ffffff;
+    border-color: #ffffff;
+    background: rgba(255, 255, 255, 0.22);
 }
 
-:is(.auth-modal-close-btn, .sidebar-close, .sidebar-close-btn, .staff-sidebar-close, .btn-close-cart, .modal-close, .co-modal-close, .cuenta-modal-close, .prov-modal-close, .cat-modal-close-btn, .va-modal-close-icon, .modal-close-caja, .comp-modal-close, .btn-close-universal, .product-detail-close, .btn-close-mobile-filtros, .ticket-modal-close) > svg,
-:is(.auth-modal-close-btn, .sidebar-close, .sidebar-close-btn, .staff-sidebar-close, .btn-close-cart, .modal-close, .co-modal-close, .cuenta-modal-close, .prov-modal-close, .cat-modal-close-btn, .va-modal-close-icon, .modal-close-caja, .comp-modal-close, .btn-close-universal, .product-detail-close, .btn-close-mobile-filtros, .ticket-modal-close) > .modal-close-glyph,
-:is(.auth-modal-close-btn, .sidebar-close, .sidebar-close-btn, .staff-sidebar-close, .btn-close-cart, .modal-close, .co-modal-close, .cuenta-modal-close, .prov-modal-close, .cat-modal-close-btn, .va-modal-close-icon, .modal-close-caja, .comp-modal-close, .btn-close-universal, .product-detail-close, .btn-close-mobile-filtros, .ticket-modal-close) > i {
-    transition: transform 0.24s ease;
+:is(.auth-modal-close-btn, .sidebar-close, .sidebar-close-btn, .staff-sidebar-close, .modal-close, .co-modal-close, .cuenta-modal-close, .prov-modal-close, .cat-modal-close-btn, .va-modal-close-icon, .modal-close-caja, .comp-modal-close, .btn-close-universal, .product-detail-close, .btn-close-mobile-filtros, .ticket-modal-close, .btn-close-notif) svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 1.8;
 }
 
-:is(.auth-modal-close-btn, .sidebar-close, .sidebar-close-btn, .staff-sidebar-close, .btn-close-cart, .modal-close, .co-modal-close, .cuenta-modal-close, .prov-modal-close, .cat-modal-close-btn, .va-modal-close-icon, .modal-close-caja, .comp-modal-close, .btn-close-universal, .product-detail-close, .btn-close-mobile-filtros, .ticket-modal-close):active {
-    transform: none !important;
+/* ==============================================================================
+   DRAWER GLOBAL DE NOTIFICACIONES ("MIS PEDIDOS")
+   ============================================================================== */
+.notif-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+    z-index: 999998;
 }
+
+.notif-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.notif-sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: min(420px, 92vw);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    transform: translateX(100%);
+    z-index: 999999;
+    box-shadow: -10px 0 35px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.notif-sidebar.active {
+    transform: translateX(0);
+}
+
+.notif-header {
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.notif-content {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.notif-item-row {
+    cursor: pointer;
+    padding: 16px 20px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    transition: all 0.2s ease;
+}
+
+.notif-item-row.notif-unread {
+    background-color: #f0fdf4 !important;
+    border-left: 3.5px solid #15803d !important;
+}
+
+.notif-item-row.notif-read {
+    background-color: #ffffff !important;
+    border-left: 3.5px solid transparent !important;
+}
+
+.notif-item-row:hover {
+    background-color: #f1f5f9 !important;
+}
+
+.notif-footer {
+    padding: 16px 20px;
+    border-top: 1px solid #f1f5f9;
+}
+
+
+/* ==========================================================================
+   DISEÑO MODERNO DE INVENTARIO Y STOCK (SIN ICONOS, ESTILO PREMIUM)
+   ========================================================================== */
+
+/* 1. Badge flotante en imagen de tarjeta */
+.badge-stock-minimal,
+.badge-stock-bajo {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 251, 235, 0.95);
+  color: #b45309;
+  border: 1px solid #fde68a;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  border-radius: 6px;
+  padding: 3px 8px;
+  z-index: 5;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 5px rgba(180, 83, 9, 0.12);
+  text-transform: none;
+}
+
+.badge-stock-minimal.out,
+.badge-agotado {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(254, 242, 242, 0.95);
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  border-radius: 6px;
+  padding: 3px 8px;
+  z-index: 5;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 5px rgba(220, 38, 38, 0.12);
+  text-transform: none;
+}
+
+/* 2. Micro-indicador de stock en tarjeta */
+.card-stock-pill-clean,
+.product-card-stock-warning {
+  margin: 4px 0 6px 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  color: #b45309;
+  font-size: 0.74rem;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 3px 9px;
+  width: fit-content;
+}
+
+.card-stock-pill-clean .stock-dot-live,
+.product-card-stock-warning .stock-dot-live {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f59e0b;
+  display: inline-block;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25);
+  flex-shrink: 0;
+}
+
+.card-stock-pill-clean.out-of-stock,
+.product-card-stock-warning.out-of-stock {
+  background: #fef2f2;
+  border-color: #fee2e2;
+  color: #dc2626;
+}
+
+.card-stock-pill-clean.out-of-stock .stock-dot-live,
+.product-card-stock-warning.out-of-stock .stock-dot-live {
+  background: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25);
+}
+
+/* 3. Pills de estado en cabecera de detalle de producto */
+.pill-tag-stock-few,
+.pill-tag-stock-bajo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.pill-tag-stock-few::before,
+.pill-tag-stock-bajo::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #d97706;
+  box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.25);
+}
+
+.pill-tag-stock-out,
+.pill-tag-stock-agotado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.pill-tag-stock-out::before,
+.pill-tag-stock-agotado::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25);
+}
+
+.pill-tag-stock-in,
+.pill-tag-stock {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.pill-tag-stock-in::before,
+.pill-tag-stock::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #16a34a;
+}
+
+/* 4. Tarjeta elegante de urgencia de stock en Detalle del Producto (SIN ICONOS) */
+.detalle-stock-urgency-card {
+  background: #ffffff;
+  border: 1px solid #f1f5f9;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin: 14px 0 16px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.detalle-stock-urgency-card .stock-urgency-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.detalle-stock-urgency-card .stock-urgency-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.detalle-stock-urgency-card .stock-urgency-units {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #b45309;
+}
+
+.detalle-stock-urgency-card .stock-urgency-track {
+  width: 100%;
+  height: 6px;
+  background: #f1f5f9;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.detalle-stock-urgency-card .stock-urgency-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+  border-radius: 6px;
+  transition: width 0.4s ease;
+}
+
+.detalle-stock-urgency-card .stock-urgency-notice {
+  display: block;
+  font-size: 0.78rem;
+  color: #78716c;
+  line-height: 1.4;
+}
+
+.detalle-stock-urgency-card.out-of-stock {
+  background: #fafafa;
+  border-color: #e2e8f0;
+}
+
+.detalle-stock-urgency-card.out-of-stock .stock-urgency-units {
+  color: #dc2626;
+}
+

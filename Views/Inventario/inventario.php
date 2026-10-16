@@ -35,7 +35,7 @@ require_once 'Core/ajaxHelper.php';
     <script src="Scripts/admin-spa.js?v=<?php echo time(); ?>" defer></script>
     <!-- Lector remoto desde el celular vinculado -->
     <script src="Scripts/scanner-camara.js"></script>
-    <link rel="icon" type="image/png" href="Images/logo.png">
+    <link rel="icon" type="image/png" href="Images/logo_backup.png">
 </head>
 <body>
     <div class="admin-layout">
@@ -265,7 +265,7 @@ require_once 'Core/ajaxHelper.php';
                             <th style="padding: 14px 16px; font-size: 0.78rem; font-weight: 800; color: #64748b; text-transform: uppercase;">UBICACIÓN</th>
                             <th style="padding: 14px 16px; font-size: 0.78rem; font-weight: 800; color: #64748b; text-transform: uppercase;">ESTADO</th>
                             <th style="padding: 14px 16px; font-size: 0.78rem; font-weight: 800; color: #64748b; text-transform: uppercase;">ÚLTIMA ACT.</th>
-                            <th class="text-right actions-col" style="padding: 14px 20px; font-size: 0.78rem; font-weight: 800; color: #64748b; text-transform: uppercase; text-align: right;">ACCIÓN</th>
+                            <th class="text-right actions-col" style="padding: 14px 20px; width: 48px; text-align: center;"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -327,40 +327,43 @@ require_once 'Core/ajaxHelper.php';
                                         </span>
                                     </td>
                                     <td style="padding: 14px 16px;">
-                                        <span class="badge-deliv <?= $isActivoProd ? 'disponible' : 'inactivo'; ?>">
-                                            <?= $isActivoProd ? 'Disponible' : 'Inactivo'; ?>
+                                        <span class="status-pill <?= $isActivoProd ? 'activo' : 'inactivo'; ?>">
+                                            <?= $isActivoProd ? 'Activo' : 'Inactivo'; ?>
                                         </span>
                                     </td>
                                     <td style="padding: 14px 16px; color: #64748b; font-size: 0.82rem;">
                                         <?php echo date('d/m/Y H:i', strtotime($item['ultima_act'])); ?>
                                     </td>
                                     <td class="actions-col" style="padding: 14px 20px; text-align: right; white-space: nowrap; vertical-align: middle;">
-                                        <div class="inventory-actions">
-                                        <button type="button" class="inventory-action-btn btn-editar-prod" aria-label="Editar producto" title="Editar producto" onclick='abrirModalEditarProducto(<?php echo json_encode($item, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>)'>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                                        </button>
-                                                <button type="button" class="inventory-action-btn btn-reponer" aria-label="Reponer stock" title="Reponer stock" onclick="abrirModalReposicion(
-                                                '<?php echo (int)$item['id_producto']; ?>',
-                                                '<?php echo htmlspecialchars($item['titulo'], ENT_QUOTES); ?>',
-                                                '<?php echo $unidad; ?>',
-                                                '<?php echo htmlspecialchars($item['codigo'] ?? '', ENT_QUOTES); ?>',
-                                                '<?php echo htmlspecialchars($item['codigo_barras'] ?? '', ENT_QUOTES); ?>'
-                                            )">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8v8"></path><path d="m8 12 4 4 4-4"></path><path d="M20 16.5A9 9 0 1 1 19.2 7"></path></svg>
-                                        </button>
-                                        <?php if ($puedeEliminar): ?>
-                                        <button type="button" class="inventory-action-btn btn-eliminar-prod" aria-label="Eliminar producto" title="Eliminar producto" onclick="confirmarEliminarProducto('<?php echo (int)$item['id_producto']; ?>', '<?php echo htmlspecialchars($item['titulo'], ENT_QUOTES); ?>', 0)">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="m19 6-1 14H6L5 6"></path><path d="M10 11v5"></path><path d="M14 11v5"></path></svg>
-                                        </button>
-                                        <?php else: ?>
-                                        <button type="button" class="inventory-action-btn <?= $isActivoProd ? 'btn-inactivar-prod' : 'btn-activar-prod'; ?>" aria-label="<?= $isActivoProd ? 'Inactivar' : 'Activar'; ?> producto" title="<?= $isActivoProd ? 'Inactivar' : 'Activar'; ?> producto" onclick='window.confirmarCambioEstadoProducto(<?= (int)$item['id_producto']; ?>, <?= $isActivoProd ? 0 : 1; ?>, <?= json_encode($item['titulo'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>)'>
-                                            <?php if ($isActivoProd): ?>
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
-                                            <?php else: ?>
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg>
-                                            <?php endif; ?>
-                                        </button>
-                                        <?php endif; ?>
+                                        <div class="table-kebab-container">
+                                            <button type="button" class="table-kebab-btn" aria-label="Acciones de producto" title="Opciones">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+                                            </button>
+                                            <div class="table-kebab-menu">
+                                                <button type="button" class="table-kebab-item" onclick='abrirModalEditarProducto(<?php echo json_encode($item, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>)'>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                                    Editar
+                                                </button>
+                                                <button type="button" class="table-kebab-item" onclick="abrirModalReposicion('<?php echo (int)$item['id_producto']; ?>', '<?php echo htmlspecialchars($item['titulo'], ENT_QUOTES); ?>', '<?php echo $unidad; ?>', '<?php echo htmlspecialchars($item['codigo'] ?? '', ENT_QUOTES); ?>', '<?php echo htmlspecialchars($item['codigo_barras'] ?? '', ENT_QUOTES); ?>')">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v8"></path><path d="m8 12 4 4 4-4"></path><path d="M20 16.5A9 9 0 1 1 19.2 7"></path></svg>
+                                                    Reponer stock
+                                                </button>
+                                                <button type="button" class="table-kebab-item" onclick='window.confirmarCambioEstadoProducto(<?= (int)$item['id_producto']; ?>, <?= $isActivoProd ? 0 : 1; ?>, <?= json_encode($item['titulo'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>)'>
+                                                    <?php if ($isActivoProd): ?>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+                                                        Desactivar
+                                                    <?php else: ?>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg>
+                                                        Activar
+                                                    <?php endif; ?>
+                                                </button>
+                                                <?php if ($puedeEliminar): ?>
+                                                <button type="button" class="table-kebab-item danger" onclick="confirmarEliminarProducto('<?php echo (int)$item['id_producto']; ?>', '<?php echo htmlspecialchars($item['titulo'], ENT_QUOTES); ?>', 0)">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="m19 6-1 14H6L5 6"></path><path d="M10 11v5"></path><path d="M14 11v5"></path></svg>
+                                                    Eliminar
+                                                </button>
+                                                <?php endif; ?>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>
@@ -864,7 +867,8 @@ require_once 'Core/ajaxHelper.php';
 
     <!-- Modal Confirmar Eliminar -->
     <div class="modal-overlay" id="modalConfirmarEliminarProd" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 12000; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
-        <div style="background: #ffffff; width: 100%; max-width: 400px; border-radius: 16px; padding: 26px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); margin: 16px;">
+        <div style="background: #ffffff; width: 100%; max-width: 400px; border-radius: 16px; padding: 26px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); margin: 16px; position: relative;">
+            <button type="button" class="btn-close-universal" onclick="cerrarModal('modalConfirmarEliminarProd')" aria-label="Cerrar modal" style="position: absolute; top: 14px; right: 14px;">&times;</button>
             <div style="width: 56px; height: 56px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
             </div>
@@ -878,7 +882,8 @@ require_once 'Core/ajaxHelper.php';
     </div>
 
     <div class="modal-overlay" id="modalConfirmarEstadoProd" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 12000; align-items: center; justify-content: center; backdrop-filter: blur(4px);" onclick="if (event.target === this) cerrarModal('modalConfirmarEstadoProd')">
-        <div style="background:#fff;width:100%;max-width:400px;border-radius:16px;padding:26px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,.2);margin:16px;">
+        <div style="background:#fff;width:100%;max-width:400px;border-radius:16px;padding:26px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,.2);margin:16px;position:relative;">
+            <button type="button" class="btn-close-universal" onclick="cerrarModal('modalConfirmarEstadoProd')" aria-label="Cerrar modal" style="position: absolute; top: 14px; right: 14px;">&times;</button>
             <div id="iconoConfirmarEstadoProd" style="width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;"></div>
             <h3 id="tituloConfirmarEstadoProd" style="margin:0 0 8px;color:#0f172a;font-size:1.2rem;font-weight:800;">Confirmar cambio de estado</h3>
             <p id="textoConfirmarEstadoProd" style="color:#64748b;font-size:.92rem;margin:0 0 22px;"></p>

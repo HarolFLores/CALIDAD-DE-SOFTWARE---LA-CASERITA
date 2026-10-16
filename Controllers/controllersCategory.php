@@ -46,7 +46,8 @@ class ControllerCategory {
         $ids = isset($_GET['ids']) ? trim($_GET['ids']) : null;
         $sub = isset($_GET['sub']) ? trim($_GET['sub']) : null;
         $id_grupo = isset($_GET['grupo']) ? (int)$_GET['grupo'] : (isset($_GET['id_grupo']) ? (int)$_GET['id_grupo'] : null);
-        $esOfertas = isset($_GET['ofertas']) && $_GET['ofertas'] == '1';
+        $esOfertas = (isset($_GET['ofertas']) && $_GET['ofertas'] == '1') || (isset($_GET['descuentos']) && $_GET['descuentos'] == '1');
+        $buscar = isset($_GET['buscar']) ? trim($_GET['buscar']) : (isset($_GET['q']) ? trim($_GET['q']) : null);
 
         // Modelos necesarios
         require_once 'Models/productModel.php';
@@ -74,12 +75,71 @@ class ControllerCategory {
         $iconoCategoria = '📦';
         $productosFiltrados = [];
 
-        if ($esOfertas || ($nombre && strtolower($nombre) === 'ofertas')) {
-            $tituloCategoria = 'Ofertas';
-            $descripcionCategoria = '';
+        if ($esOfertas || ($nombre && in_array(mb_strtolower($nombre), ['ofertas', 'descuentos', 'oferta', 'descuento']))) {
+            $tituloCategoria = 'Ofertas del Día';
+            $descripcionCategoria = 'Productos seleccionados con los mejores descuentos y promociones de La Caserita.';
             $productosFiltrados = array_filter($todosProductos, function($p) {
-                return (!empty($p['precio_anterior']) && (float)$p['precio_anterior'] > (float)$p['precio']) || !empty($p['es_sugerencia']);
+                return !empty($p['precio_anterior']) && ((float)$p['precio_anterior'] > (float)$p['precio']);
             });
+            // Si por alguna razón no hubiese ninguno con precio_anterior > precio, usar es_sugerencia
+            if (empty($productosFiltrados)) {
+                $productosFiltrados = array_filter($todosProductos, function($p) {
+                    return !empty($p['es_sugerencia']);
+                });
+            }
+            // Ordenar por mayor porcentaje de descuento de forma descendente
+            usort($productosFiltrados, function($a, $b) {
+                $antA = (float)($a['precio_anterior'] ?? 0);
+                $antB = (float)($b['precio_anterior'] ?? 0);
+                $pctA = ($antA > (float)$a['precio']) ? (($antA - (float)$a['precio']) / $antA) : 0;
+                $pctB = ($antB > (float)$b['precio']) ? (($antB - (float)$b['precio']) / $antB) : 0;
+                return $pctB <=> $pctA;
+            });
+        } elseif (!empty($buscar)) {
+            $term = mb_strtolower(trim($buscar));
+
+            // 1. Filtrar productos que contengan el término en el título (exactamente como en el dropdown de búsqueda)
+            $productosFiltrados = array_filter($todosProductos, function($p) use ($term) {
+                $tit = mb_strtolower(trim($p['titulo'] ?? ''));
+                return strpos($tit, $term) !== false;
+            });
+
+            // 2. Si no hubo coincidencia directa por título, buscar por nombre de subcategoría
+            if (empty($productosFiltrados)) {
+                $productosFiltrados = array_filter($todosProductos, function($p) use ($term) {
+                    $catNom = mb_strtolower(trim($p['categoria_nombre'] ?? ''));
+                    return strpos($catNom, $term) !== false;
+                });
+            }
+
+            // 3. Fallback en grupo o código exacto
+            if (empty($productosFiltrados)) {
+                $productosFiltrados = array_filter($todosProductos, function($p) use ($term) {
+                    $grpNom = mb_strtolower(trim($p['grupo_nombre'] ?? ''));
+                    $cod = mb_strtolower(trim($p['codigo'] ?? ''));
+                    $sku = mb_strtolower(trim($p['codigo_barras'] ?? ''));
+                    return (strpos($grpNom, $term) !== false || $cod === $term || $sku === $term);
+                });
+            }
+
+            // 4. Determinar título y jerarquía para mostrar la navegación limpia idéntica a la Imagen 3
+            $catNames = array_unique(array_filter(array_map(function($p) { return trim($p['categoria_nombre'] ?? ''); }, $productosFiltrados)));
+            $grupoNames = array_unique(array_filter(array_map(function($p) { return trim($p['grupo_nombre'] ?? ''); }, $productosFiltrados)));
+
+            if (count($catNames) === 1) {
+                $tituloCategoria = reset($catNames);
+            } elseif (count($grupoNames) === 1) {
+                $tituloCategoria = reset($grupoNames);
+            } else {
+                $subcatMatch = null;
+                foreach ($catNames as $sc) {
+                    if (strpos(mb_strtolower($sc), $term) !== false || strpos($term, mb_strtolower($sc)) !== false) {
+                        $subcatMatch = $sc;
+                        break;
+                    }
+                }
+                $tituloCategoria = $subcatMatch ?: ucfirst($buscar);
+            }
         } elseif ($id_momento) {
             $momentoActual = $momentModel->getMomentoById($id_momento);
             if ($momentoActual) {
@@ -196,8 +256,7 @@ class ControllerCategory {
             $pedidosUsuario = $pedidoModel->getPedidosByUsuario($_SESSION['usuario_id']);
             if (!empty($pedidosUsuario)) {
                 foreach ($pedidosUsuario as $ped) {
-                    $est = strtolower($ped['estado'] ?? '');
-                    if (in_array($est, ['pendiente', 'aceptado', 'confirmado', 'en camino', 'despachado'])) {
+                    if ((int)($ped['leido_cliente'] ?? 0) === 0) {
                         $cantPedidosActivos++;
                     }
                 }

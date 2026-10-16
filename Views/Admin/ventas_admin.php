@@ -76,7 +76,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ventas / Pedidos — Admin La Caserita</title>
-    <link rel="icon" type="image/png" href="Images/logo.png">
+    <link rel="icon" type="image/png" href="Images/logo_backup.png">
     <link rel="stylesheet" href="Styles/global.css?v=<?= time(); ?>">
     <link rel="stylesheet" href="Styles/styles-home.css?v=<?= time(); ?>">
     <link rel="stylesheet" href="Styles/styles-users-admin.css?v=<?= time(); ?>">
@@ -198,15 +198,15 @@
                 <table class="va-table-custom" id="vaTabla">
                     <thead>
                         <tr>
-                            <th>N° Pedido</th>
-                            <th>Cliente</th>
-                            <th>Correo</th>
-                            <th>T.Entrega</th>
-                            <th>Pago</th>
-                            <th>Total</th>
-                            <th>Fecha</th>
-                            <th>Estado</th>
-                            <th style="text-align: right;">Acción</th>
+                            <th>N° PEDIDO</th>
+                            <th>CLIENTE</th>
+                            <th>CORREO</th>
+                            <th>T. ENTREGA</th>
+                            <th>PAGO</th>
+                            <th>TOTAL</th>
+                            <th>FECHA</th>
+                            <th>ESTADO</th>
+                            <th style="width: 48px; text-align: center;"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -276,34 +276,25 @@
                                     <?= fechaAdminFmt($v['fecha']); ?>
                                 </td>
                                 <td style="text-align: center;">
-                                    <span class="va-badge-pill" style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 20px; font-size: 0.74rem; font-weight: 700; white-space: nowrap;">
-                                        <span style="width: 6px; height: 6px; border-radius: 50%; background: <?= $stInfo['dot']; ?>; flex-shrink: 0;"></span>
-                                        <span><?= $stInfo['label']; ?></span>
+                                    <span class="status-pill <?= strtolower($estadoCod); ?>">
+                                        <?= $stInfo['label']; ?>
                                     </span>
                                 </td>
                                 <td style="text-align: right; white-space: nowrap;">
-                                    <div style="display: inline-flex; align-items: center; gap: 4px; justify-content: flex-end;">
-                                        <button type="button" 
-                                            class="cat-action-btn cat-btn-edit va-action-btn va-abrir-modal" 
-                                            data-id="<?= $idPed; ?>" 
-                                            title="Previsualizar venta y pedido" 
-                                            aria-label="Previsualizar venta">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                                <circle cx="12" cy="12" r="3"></circle>
-                                            </svg>
+                                    <div class="table-kebab-container">
+                                        <button type="button" class="table-kebab-btn" aria-label="Acciones de pedido" title="Opciones">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
                                         </button>
-                                        <button type="button" 
-                                            class="va-action-btn va-btn-pdf" 
-                                            onclick="window.descargarPedidoPDF(<?= $idPed; ?>)" 
-                                            title="Imprimir / Descargar comprobante en PDF" 
-                                            aria-label="Imprimir o Descargar PDF">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                                <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                                                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                                                <rect x="6" y="14" width="12" height="8"></rect>
-                                            </svg>
-                                        </button>
+                                        <div class="table-kebab-menu">
+                                            <button type="button" class="table-kebab-item va-abrir-modal" data-id="<?= $idPed; ?>">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                                Ver detalle
+                                            </button>
+                                            <button type="button" class="table-kebab-item" onclick="window.descargarPedidoPDF(<?= $idPed; ?>)">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                                                Descargar PDF
+                                            </button>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
@@ -341,7 +332,8 @@
 
     <!-- Modal Confirmación para Guardar Cambio -->
     <div class="va-modal-overlay" id="vaConfirmModalOverlay" style="z-index: 99999; backdrop-filter: blur(3px);">
-        <div style="background: #ffffff; border-radius: 18px; width: min(440px, 94vw); padding: 28px 24px; text-align: center; box-shadow: 0 24px 60px rgba(0,0,0,0.25);">
+        <div style="background: #ffffff; border-radius: 18px; width: min(440px, 94vw); padding: 28px 24px; text-align: center; box-shadow: 0 24px 60px rgba(0,0,0,0.25); position: relative;">
+            <button type="button" class="btn-close-universal" id="vaBtnConfirmarCerrarX" onclick="document.getElementById('vaBtnConfirmarCancelar')?.click()" aria-label="Cerrar modal" style="position: absolute; top: 14px; right: 14px;">&times;</button>
             <div style="width: 56px; height: 56px; border-radius: 50%; background: #dcfce7; color: #15803d; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
             </div>

@@ -89,30 +89,41 @@
 
     function claseEstadoPedido($estado)
     {
+        $st = strtolower(str_replace(' ', '_', trim((string)$estado)));
         $clases = [
-            'pendiente'  => 'pedido-estado-pendiente',
-            'confirmado' => 'pedido-estado-confirmado',
-            'en_camino'  => 'pedido-estado-camino',
-            'entregado'  => 'pedido-estado-entregado',
-            'cancelado'  => 'pedido-estado-cancelado'
+            'pendiente'          => 'pedido-estado-pendiente',
+            'confirmado'         => 'pedido-estado-confirmado',
+            'en_preparacion'     => 'pedido-estado-en_preparacion',
+            'listo_para_recojo'  => 'pedido-estado-listo_para_recojo',
+            'listo_recojo'       => 'pedido-estado-listo_para_recojo',
+            'asignado'           => 'pedido-estado-asignado',
+            'en_camino'          => 'pedido-estado-en_camino',
+            'en_ruta'            => 'pedido-estado-en_camino',
+            'entregado'          => 'pedido-estado-entregado',
+            'cancelado'          => 'pedido-estado-cancelado',
+            'fallido'            => 'pedido-estado-cancelado'
         ];
 
-        return $clases[$estado] ?? 'pedido-estado-pendiente';
+        return $clases[$st] ?? ('pedido-estado-' . $st);
     }
 
     function textoEstadoPedido($estado)
     {
+        $st = strtolower(str_replace(' ', '_', trim((string)$estado)));
         $textos = [
-            'pendiente'  => 'Pendiente',
-            'confirmado' => 'Confirmado',
-            'en_camino'  => 'En camino',
-            'entregado'  => 'Entregado',
-            'cancelado'  => 'Cancelado'
+            'pendiente'         => 'Pendiente',
+            'confirmado'        => 'Confirmado',
+            'en_preparacion'    => 'En Preparación',
+            'listo_para_recojo' => 'Listo para Recojo',
+            'listo_recojo'      => 'Listo para Recojo',
+            'asignado'          => 'Asignado',
+            'en_camino'         => 'En Camino',
+            'en_ruta'           => 'En Camino',
+            'entregado'         => 'Entregado',
+            'cancelado'         => 'Cancelado'
         ];
 
-        return $textos[$estado] ?? ucfirst(
-            str_replace('_', ' ', $estado)
-        );
+        return $textos[$st] ?? ucfirst(str_replace('_', ' ', $st));
     }
 ?>
 <!DOCTYPE html>
@@ -130,7 +141,7 @@
     <link
         rel="icon"
         type="image/png"
-        href="Images/logo.png">
+        href="Images/logo_backup.png">
 
     <link
         rel="stylesheet"
@@ -140,7 +151,7 @@
         rel="stylesheet"
         href="Styles/styles-cuenta.css?v=<?= time(); ?>">
     <script src="Scripts/normalizador-modales.js?v=<?= filemtime(__DIR__ . '/../../Scripts/normalizador-modales.js'); ?>" defer></script>
-    <link rel="icon" type="image/png" href="Images/logo.png">
+    <link rel="icon" type="image/png" href="Images/logo_backup.png">
 </head>
 
 <body>
@@ -207,7 +218,6 @@
                     <span class="cuenta-status-badge">
                         <span class="cuenta-status-dot"></span>
                         Cuenta activa
-                    </span>
                 </div>
 
                 <div class="cuenta-profile-meta">
@@ -282,15 +292,15 @@
                     </button>
 
                     <form method="POST" action="index.php?action=logout" style="margin-top: 10px;">
-                        <button type="submit" class="cuenta-menu-item cuenta-logout-sidebar-btn" style="width: 100%; text-align: left; background: #c62828; border: none; border-radius: 14px; cursor: pointer; color: #ffffff;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <button type="submit" class="cuenta-menu-item cuenta-logout-sidebar-btn" style="width: 100%; text-align: left;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                                 <polyline points="16 17 21 12 16 7"></polyline>
                                 <line x1="21" y1="12" x2="9" y2="12"></line>
                             </svg>
                             <span>
-                                <strong style="color: #ffffff;">Cerrar sesión</strong>
-                                <small style="color: rgba(255, 255, 255, 0.85);">Salir de tu cuenta</small>
+                                <strong>Cerrar sesión</strong>
+                                <small>Salir de tu cuenta</small>
                             </span>
                         </button>
                     </form>
@@ -336,23 +346,26 @@
 
                         <div class="pedidos-toolbar">
                             <div class="pedidos-search-box">
-                                <i class="fa fa-search"></i>
-                                <input type="text" id="busquedaPedidos" placeholder="Buscar por N° de pedido...">
+
+                                <input type="text" id="busquedaPedidos" placeholder="Buscar por N° de pedido (ej. 30), total o método..." autocomplete="off">
                             </div>
                             <div class="pedidos-filters-container">
                                 <div class="pedidos-filter-box date-filter">
                                     <input type="date" id="filtroFechaPedidos" title="Filtrar por fecha">
                                 </div>
                                 <div class="pedidos-filter-box">
-                                    <select id="filtroEstadoPedidos">
+                                    <select id="filtroEstadoPedidos" title="Filtrar por estado">
                                         <option value="todos">Todos los estados</option>
                                         <option value="pendiente">Pendiente</option>
-                                        <option value="procesando">Procesando</option>
-                                        <option value="enviado">Enviado</option>
+                                        <option value="en_preparacion">En preparación</option>
+                                        <option value="en_camino">En camino</option>
                                         <option value="entregado">Entregado</option>
                                         <option value="cancelado">Cancelado</option>
                                     </select>
                                 </div>
+                                <button type="button" id="btnLimpiarFiltrosPedidos" class="btn-limpiar-filtros" title="Restablecer filtros">
+                                    Limpiar
+                                </button>
                             </div>
                         </div>
 
@@ -371,7 +384,14 @@
                                 </thead>
                                 <tbody>
                                     <?php foreach ($pedidos as $pedido): ?>
-                                        <tr class="pedido-row" data-estado="<?= htmlspecialchars($pedido['estado'] ?? 'pendiente', ENT_QUOTES, 'UTF-8'); ?>">
+                                        <?php 
+    $rawEst = strtolower(trim((string)($pedido['estado'] ?? 'pendiente')));
+    $rawDt = !empty($pedido['fecha']) ? date('Y-m-d', strtotime($pedido['fecha'])) : '';
+?>
+<tr class="pedido-row" 
+    data-id="<?= (int)$pedido['id_pedido']; ?>" 
+    data-estado="<?= htmlspecialchars($rawEst, ENT_QUOTES, 'UTF-8'); ?>"
+    data-fecha="<?= $rawDt; ?>">
                                             <td data-label="N° Pedido" class="pedido-id-cell">
                                                 <span class="pedido-id-text font-weight-bold">
                                                     #<?= str_pad((int)$pedido['id_pedido'], 5, '0', STR_PAD_LEFT); ?>
@@ -384,17 +404,12 @@
                                             </td>
                                             <td class="pedido-fecha-raw" style="display:none;" data-raw-date="<?= date('Y-m-d', strtotime($pedido['fecha'])); ?>"></td>
                                             <td data-label="Entrega" class="pedido-entrega-cell">
-                                                <span class="badge-tipo-entrega" style="display:inline-flex; align-items:center; gap:4px;">
-                                                    <?php if (($pedido['tipo_entrega'] ?? 'delivery') === 'delivery'): ?>
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>Delivery
-                                                    <?php else: ?>
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>Recojo
-                                                    <?php endif; ?>
+                                                <span class="badge-tipo-entrega">
+                                                    <?= ucfirst(escapar($pedido['tipo_entrega'] ?? 'Delivery')); ?>
                                                 </span>
                                             </td>
                                             <td data-label="Pago" class="pedido-pago-cell">
-                                                <span class="badge-metodo-pago" style="display:inline-flex; align-items:center; gap:4px;">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                                                <span class="badge-metodo-pago">
                                                     <?= escapar($pedido['metodo_pago'] ?? 'No especificado'); ?>
                                                 </span>
                                             </td>
@@ -415,6 +430,11 @@
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
+                                <tr id="noResultsPedidosRow" style="display: none;">
+                                        <td colspan="7" class="text-center" style="padding: 38px 20px; color: #64748b; font-size: 0.95rem; background: #f8fafc;">
+                                            No se encontraron pedidos que coincidan con los filtros aplicados.
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -1040,7 +1060,7 @@
                     </h2>
                 </div>
 
-                <button type="button" class="btn-close-universal cuenta-modal-close" data-close-modal="modalDireccion">&times;</button>
+                <button type="button" class="btn-close-universal cuenta-modal-close" data-close-modal="modalDireccion" aria-label="Cerrar"><span class="modal-close-glyph" aria-hidden="true">&times;</span></button>
 
             </div>
 
@@ -1232,7 +1252,7 @@
                     </h2>
                 </div>
 
-                <button type="button" class="btn-close-universal cuenta-modal-close" data-close-modal="modalDetallePedido">&times;</button>
+                <button type="button" class="btn-close-universal cuenta-modal-close" data-close-modal="modalDetallePedido" aria-label="Cerrar"><span class="modal-close-glyph" aria-hidden="true">&times;</span></button>
 
             </div>
 

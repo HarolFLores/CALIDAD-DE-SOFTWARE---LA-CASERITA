@@ -10,7 +10,12 @@
         align-items: center;
         flex-wrap: wrap;
         gap: 16px;
-        margin-bottom: 20px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 18px 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
     }
     .fin-header-titles h1 {
         font-size: 1.5rem;
@@ -142,31 +147,36 @@
         gap: 10px;
     }
 
-    /* Tabla Estilizada */
+    /* Tabla Estilizada Aesthetic */
     .fin-table {
         width: 100%;
-        border-collapse: collapse;
-        font-size: 0.9rem;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 0.88rem;
     }
     .fin-table th {
         background: #f8fafc;
         color: #475569;
         font-weight: 700;
         text-transform: uppercase;
-        font-size: 0.76rem;
-        letter-spacing: 0.05em;
-        padding: 12px 14px;
+        font-size: 0.72rem;
+        letter-spacing: 0.06em;
+        padding: 13px 18px;
         border-bottom: 1.5px solid #e2e8f0;
         text-align: left;
     }
     .fin-table td {
-        padding: 14px;
+        padding: 14px 18px;
         border-bottom: 1px solid #f1f5f9;
-        color: #334155;
+        color: #1e293b;
         vertical-align: middle;
+        transition: background-color 0.15s ease;
     }
     .fin-table tr:hover td {
-        background: #fafafa;
+        background: #f8fafc;
+    }
+    .fin-table tr:last-child td {
+        border-bottom: none;
     }
 
     /* Barras de progreso */

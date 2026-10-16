@@ -41,7 +41,7 @@ class ControllerCuenta
                 );
             }
 
-            header('Location: index.php?action=home_admin');
+            header('Location: index.php?action=dashboard_ganancias');
             exit();
         }
     }

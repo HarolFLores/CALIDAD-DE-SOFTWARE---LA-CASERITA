@@ -36,7 +36,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Usuarios — Admin</title>
-    <link rel="icon" type="image/png" href="Images/logo.png">
+    <link rel="icon" type="image/png" href="Images/logo_backup.png">
     <link rel="stylesheet" href="Styles/global.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="Styles/styles-home.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="Styles/styles-users-admin.css?v=<?php echo time(); ?>">
@@ -173,13 +173,13 @@
                     <table class="table" id="usersTable">
                         <thead>
                             <tr>
-                                <th>Usuario</th>
-                                <th>Correo</th>
-                                <th>Teléfono</th>
-                                <th>Rol</th>
-                                <th>Estado</th>
-                                <th>Registro</th>
-                                <th style="text-align: right;">Acciones</th>
+                                <th>USUARIO</th>
+                                <th>CORREO</th>
+                                <th>TELÉFONO</th>
+                                <th>ROL</th>
+                                <th>ESTADO</th>
+                                <th>REGISTRO</th>
+                                <th style="width: 48px; text-align: center;"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -218,39 +218,42 @@
                                     <span style="font-weight: 600; color: #0f172a; font-size: 0.875rem;"><?= $rolNombre; ?></span>
                                 </td>
                                 <td>
-                                    <!-- ESTADO PUNTO SIN BACKGROUND (Diseño anterior) -->
-                                    <span style="display:inline-flex; align-items:center; gap:6px; font-weight:600; color:#0f172a; font-size:0.875rem;">
-                                        <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background-color: <?= $activo === 1 ? '#16a34a' : '#dc2626'; ?>;"></span>
+                                    <span class="status-pill <?= $activo === 1 ? 'activo' : 'inactivo'; ?>">
                                         <?= $activo === 1 ? 'Activo' : 'Inactivo'; ?>
                                     </span>
                                 </td>
                                 <td><?php echo date('d/m/Y', strtotime($u['fecha_registro'])); ?></td>
                                 <td class="actions-col" style="text-align: right; white-space: nowrap;">
-                                    <div class="desktop-actions" style="display: inline-flex; gap: 6px; align-items: center; justify-content: flex-end;">
-                                        <!-- Editar: Verde (#15803d) 36x36 -->
-                                        <button type="button" class="btn-action-icon success" onclick='editarUsuario(<?php echo json_encode($u); ?>)' title="Editar">
-                                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                                    <div class="table-kebab-container">
+                                        <button type="button" class="table-kebab-btn" aria-label="Acciones de usuario" title="Opciones">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
                                         </button>
-
-                                        <?php if (!$esPropiaCuenta): ?>
-                                            <?php if ($tieneActividad): ?>
-                                                <!-- Con actividad: Inactivar (Rojo con prohibición Imagen 3) o Activar (Verde con círculo check Imagen 2) -->
-                                                <?php if ($activo === 1): ?>
-                                                    <button type="button" class="btn-action-icon danger" onclick='confirmarToggleUsuario(<?= (int)$u['id_usuario']; ?>, 0, <?= json_encode($nombreCompleto); ?>)' title="Inactivar">
-                                                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-                                                    </button>
+                                        <div class="table-kebab-menu">
+                                            <button type="button" class="table-kebab-item" onclick='editarUsuario(<?php echo json_encode($u); ?>)'>
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                                                Editar
+                                            </button>
+                                            <?php if (!$esPropiaCuenta): ?>
+                                                <?php if ($tieneActividad): ?>
+                                                    <?php if ($activo === 1): ?>
+                                                        <button type="button" class="table-kebab-item" onclick='confirmarToggleUsuario(<?= (int)$u['id_usuario']; ?>, 0, <?= json_encode($nombreCompleto); ?>)'>
+                                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                                                            Desactivar
+                                                        </button>
+                                                    <?php else: ?>
+                                                        <button type="button" class="table-kebab-item" onclick='confirmarToggleUsuario(<?= (int)$u['id_usuario']; ?>, 1, <?= json_encode($nombreCompleto); ?>)'>
+                                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="16 9 10 15 8 13"/></svg>
+                                                            Activar
+                                                        </button>
+                                                    <?php endif; ?>
                                                 <?php else: ?>
-                                                    <button type="button" class="btn-action-icon success" onclick='confirmarToggleUsuario(<?= (int)$u['id_usuario']; ?>, 1, <?= json_encode($nombreCompleto); ?>)' title="Activar">
-                                                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="16 9 10 15 8 13"/></svg>
+                                                    <button type="button" class="table-kebab-item danger" onclick='confirmarEliminarUsuario(<?= (int)$u['id_usuario']; ?>, <?= json_encode($nombreCompleto); ?>)'>
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                                        Eliminar
                                                     </button>
                                                 <?php endif; ?>
-                                            <?php else: ?>
-                                                <!-- Sin actividad: Eliminar (Rojo #dc2626 con papelera - Imagen 3 derecha) -->
-                                                <button type="button" class="btn-action-icon danger" onclick='confirmarEliminarUsuario(<?= (int)$u['id_usuario']; ?>, <?= json_encode($nombreCompleto); ?>)' title="Eliminar">
-                                                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                                                </button>
                                             <?php endif; ?>
-                                        <?php endif; ?>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
@@ -348,7 +351,8 @@
 
     <!-- MODAL CONFIRMAR ACTIVAR / INACTIVAR USUARIO -->
     <div class="modal-overlay" id="modalConfirmarEstadoUser">
-        <div class="modal-content" style="max-width: 420px; text-align: center; padding: 28px 24px;">
+        <div class="modal-content" style="max-width: 420px; text-align: center; padding: 28px 24px; position: relative;">
+            <button type="button" class="btn-close-universal" onclick="cerrarModalConfirmarEstado()" aria-label="Cerrar modal" style="position: absolute; top: 14px; right: 14px;">&times;</button>
             <div style="width: 58px; height: 58px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;" id="confEstadoUserIconWrapper">
                 <svg id="confEstadoUserIcon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></svg>
             </div>
@@ -363,7 +367,8 @@
 
     <!-- MODAL CONFIRMAR ELIMINAR USUARIO (SIN ACTIVIDAD) -->
     <div class="modal-overlay" id="modalConfirmarEliminarUser">
-        <div class="modal-content" style="max-width: 420px; text-align: center; padding: 28px 24px;">
+        <div class="modal-content" style="max-width: 420px; text-align: center; padding: 28px 24px; position: relative;">
+            <button type="button" class="btn-close-universal" onclick="cerrarModalEliminarUsuario()" aria-label="Cerrar modal" style="position: absolute; top: 14px; right: 14px;">&times;</button>
             <div style="width: 58px; height: 58px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
             </div>

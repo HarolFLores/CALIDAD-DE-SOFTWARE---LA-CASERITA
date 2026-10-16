@@ -17,9 +17,7 @@ $csrf_token = $_SESSION['csrf_token'];
 <div class="auth-modal-overlay" id="authModal" onclick="cerrarModalAuth(event)">
     <div class="auth-container-redesign" onclick="event.stopPropagation()">
         <!-- Botón cerrar modal -->
-        <a href="index.php" class="btn-close-universal" style="position: absolute; top: 16px; right: 16px; z-index: 50;" onclick="cerrarModalAuth(); event.preventDefault();" title="Volver a la tienda" aria-label="Cerrar">
-            &times;
-        </a>
+        <button type="button" class="btn-close-cart" id="closeAuthModal" onclick="cerrarModalAuth();" title="Cerrar" aria-label="Cerrar" style="position: absolute; top: 16px; right: 16px; z-index: 50;">&times;</button>
 
         <!-- Columna Izquierda: Panel de Marca "La Caserita" (Estilo Teal Caserita) -->
         <div class="auth-visual auth-brand-side">

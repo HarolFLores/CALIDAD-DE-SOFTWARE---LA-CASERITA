@@ -35,7 +35,7 @@ foreach ($verificaciones as $v) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Auditoría de Pagos Yape & Plin — ERP La Caserita</title>
-    <link rel="icon" type="image/png" href="Images/logo.png">
+    <link rel="icon" type="image/png" href="Images/logo_backup.png">
     <link rel="stylesheet" href="Styles/global.css?v=<?= time(); ?>">
     <link rel="stylesheet" href="Styles/styles-home.css?v=<?= time(); ?>">
     <link rel="stylesheet" href="Styles/styles-users-admin.css?v=<?= time(); ?>">
@@ -83,7 +83,8 @@ foreach ($verificaciones as $v) {
 
 <!-- Modal Confirmación Reutilizable (Imagen 3 / Ventas) -->
 <div class="verif-modal-overlay" id="verifConfirmModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.60); z-index: 999999; backdrop-filter: blur(3px); align-items: center; justify-content: center; padding: 16px;">
-    <div style="background: #ffffff; border-radius: 18px; width: min(440px, 94vw); padding: 28px 24px; text-align: center; box-shadow: 0 24px 60px rgba(0,0,0,0.25); margin: auto;">
+    <div style="background: #ffffff; border-radius: 18px; width: min(440px, 94vw); padding: 28px 24px; text-align: center; box-shadow: 0 24px 60px rgba(0,0,0,0.25); margin: auto; position: relative;">
+        <button type="button" class="btn-close-universal" onclick="window.cerrarVerifConfirmacion()" aria-label="Cerrar modal" style="position: absolute; top: 14px; right: 14px;">&times;</button>
         <div id="verifConfirmIconBox" style="width: 56px; height: 56px; border-radius: 50%; background: #dcfce7; color: #15803d; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
         </div>
@@ -105,17 +106,15 @@ foreach ($verificaciones as $v) {
 <main class="main-content container-admin" style="padding-top: 25px; padding-bottom: 50px;">
     
 
-    <!-- HEADER DE SECCIÓN (CON MÁS ESPACIO) -->
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 22px;">
-        <div>
-            <h1 style="font-size: 1.55rem; font-weight: 800; color: #0f172a; margin: 0 0 6px 0; letter-spacing: -0.02em;">Auditoría de Pagos Yape & Plin</h1>
-            <p style="color: #64748b; font-size: 0.88rem; margin: 0;">
-                Valida comprobantes emitidos por billeteras digitales, aprueba la liberación automática del pedido o recházalo con motivo documentado.
-            </p>
+    <!-- HEADER DE SECCIÓN EN RECUADRO UNIFICADO -->
+    <div class="admin-header">
+        <div class="admin-header-titles">
+            <h1>Auditoría de Pagos Digitales</h1>
+            <p>Reporte de auditoría de transacciones y estados de pago emitidos automáticamente por el sistema para los clientes.</p>
         </div>
     </div>
 
-    <!-- TARJETAS CUADRADAS COMPACTAS (IMAGEN 2) -->
+    <!-- TARJETAS DE ESTADÍSTICAS -->
     <div class="verif-stats-grid">
         <div class="verif-stat-card <?= $filtro === 'todos' ? 'active-card' : ''; ?>" id="cardVerifTodos" onclick="window.filtrarEstadoVerif('todos')">
             <span class="verif-stat-title">TOTAL AUDITADOS</span>
@@ -142,7 +141,7 @@ foreach ($verificaciones as $v) {
     <!-- PANEL PRINCIPAL CON TABLA -->
     <div class="verif-card-panel">
         <div class="verif-card-header">
-            <div class="verif-card-title">Bandeja de Vouchers & Comprobantes</div>
+            <div class="verif-card-title">Reporte de Auditoría de Pagos</div>
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                 <input type="text" id="busquedaVerifInput" class="verif-search-input" placeholder="Buscar por código, cliente o pedido..." oninput="window.filtrarVerificacionesEnVivo()">
             </div>
@@ -156,12 +155,11 @@ foreach ($verificaciones as $v) {
                         <th>PEDIDO</th>
                         <th>CLIENTE</th>
                         <th>MÉTODO</th>
-                        <th>CÓD. OPERACIÓN</th>
+                        <th>CÓD. OPERACIÓN / OTP</th>
                         <th>TELÉFONO EMISOR</th>
                         <th style="text-align: right;">MONTO</th>
-                        <th style="text-align: center;">VOUCHER</th>
-                        <th style="text-align: center;">ESTADO</th>
-                        <th style="text-align: right;">ACCIONES</th>
+                        <th style="text-align: center;">ESTADO SISTEMA</th>
+                        <th>CANAL / AUDITORÍA</th>
                     </tr>
                 </thead>
                 <tbody id="tbodyVerif">
@@ -186,7 +184,10 @@ foreach ($verificaciones as $v) {
 <!-- Modal Rechazo -->
 <div id="modalRechazo" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99999; justify-content: center; align-items: center; padding: 20px;">
     <div style="background: #ffffff; border-radius: 16px; width: 100%; max-width: 460px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15);">
-        <h3 style="margin: 0 0 10px; font-size: 1.2rem; font-weight: 800; color: #dc2626;">Rechazar Comprobante de Pago</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: #dc2626;">Rechazar Comprobante de Pago</h3>
+            <button type="button" class="btn-close-universal" onclick="window.cerrarModalRechazo()" aria-label="Cerrar modal">&times;</button>
+        </div>
         <p style="margin: 0 0 16px; font-size: 0.85rem; color: #64748b;">Indique el motivo por el cual no coincide el comprobante. El pedido quedará cancelado en el sistema.</p>
         <form id="formRechazoModal" onsubmit="window.enviarRechazoAjax(event)">
             <input type="hidden" name="id_verificacion" id="idVerifRechazo">
@@ -489,29 +490,15 @@ foreach ($verificaciones as $v) {
                             S/ ${parseFloat(v.monto_reportado || 0).toFixed(2)}
                         </td>
                         <td style="text-align:center;">
-                            ${v.captura_voucher ? 
-                                `<img src="${v.captura_voucher}" class="voucher-thumb" alt="Voucher" onclick="window.verVoucherZoom('${v.captura_voucher}')">` : 
-                                `<span style="color:#94a3b8; font-size:0.78rem;">Sin foto</span>`
-                            }
-                        </td>
-                        <td style="text-align:center;">
-                            <span class="badge-verif ${estLower}">
+                            <span class="status-pill ${estLower}">
                                 ${v.estado_verificacion || 'Pendiente'}
                             </span>
                         </td>
-                        <td style="text-align:right; white-space:nowrap;">
-                            ${esPend ? `
-                                <div style="display:inline-flex; gap:6px; justify-content: flex-end;">
-                                    <button type="button" class="btn-action-icon aprobar" title="Aprobar Pago" onclick="window.aprobarPagoDirecto(${v.id_verificacion}, ${parseFloat(v.monto_reportado || 0)})">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                                    </button>
-                                    <button type="button" class="btn-action-icon rechazar" title="Rechazar" onclick="window.abrirModalRechazo(${v.id_verificacion})">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                                    </button>
-                                </div>
-                            ` : `
-                                <small style="color:#64748b; font-size:0.75rem;">Auditado por ${v.verificador_nombre || 'Sistema'}</small>
-                            `}
+                        <td>
+                            <span style="font-size:0.82rem; font-weight:700; color:#334155; display:block;">
+                                ${v.canal_pasarela || 'Pasarela Digital'}
+                            </span>
+                            <small style="color:#64748b; font-size:0.74rem;">Auditado por ${v.verificador_nombre || 'Sistema'}</small>
                         </td>
                     </tr>
                 `;

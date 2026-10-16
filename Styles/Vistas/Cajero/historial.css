@@ -17,7 +17,7 @@
         .ticket-barcode { margin-top: 6px; letter-spacing: 2px; font-size: 14px; font-weight: bold; }
 
 .cashier-history{max-width:1180px;margin:10px auto 30px;padding:0;color:#183a31}
-        .cashier-history-heading{display:flex;justify-content:space-between;align-items:center;gap:18px;padding-bottom:18px;border-bottom:1px solid #dce8df;margin-bottom:18px}
+        .cashier-history-heading{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:18px 24px;margin-bottom:24px;box-shadow:0 1px 3px rgba(0,0,0,0.02)}
         .staff-section-kicker{font-size:.7rem;font-weight:850;letter-spacing:.1em;color:#15803d}
         .cashier-history h1{margin:4px 0;font-size:1.75rem;color:#0f172a}
         .cashier-history p{margin:0;color:#64748b}

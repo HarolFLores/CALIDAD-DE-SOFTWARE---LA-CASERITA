@@ -53,7 +53,7 @@ if (!empty($categorias_bd)) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gestion de Categorias - ERP La Caserita</title>
-<link rel="icon" type="image/png" href="Images/icono.png">
+<link rel="icon" type="image/png" href="Images/logo_backup.png">
 <link rel="stylesheet" href="Styles/global.css?v=<?= time(); ?>">
 <link rel="stylesheet" href="Styles/styles-home.css?v=<?= time(); ?>">
 <link rel="stylesheet" href="Styles/styles-users-admin.css?v=<?= time(); ?>">
@@ -83,20 +83,21 @@ if (!empty($categorias_bd)) {
 <div class="categorias-admin-wrapper" style="padding:26px 24px;min-height:calc(100vh - 75px);">
 
 
-<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:24px;">
-<div>
-<h1 id="mainTitleAdmin" style="font-size:1.65rem;font-weight:800;color:#0f172a;margin:0 0 6px 0;">Gestion de Categorias</h1>
-</div>
-<div style="display:flex;gap:10px;flex-wrap:wrap;">
-<button type="button" id="btnNuevoGrupo" onclick="window.abrirModalGrupo()" style="background:#15803d;color:#fff;border:none;font-weight:700;padding:10px 18px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(21,128,61,.25);transition:all .2s ease;">
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-<span>Nueva Categoria</span>
-</button>
-<button type="button" id="btnNuevaCategoria" onclick="window.abrirModalCategoria()" style="background:#0284c7;color:#fff;border:none;font-weight:700;padding:10px 18px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(2,132,199,.25);transition:all .2s ease;">
-<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-<span>Nueva Subcategoria</span>
-</button>
-</div>
+<div class="admin-header">
+    <div class="admin-header-titles">
+        <h1 id="mainTitleAdmin">Gestión de Categorías</h1>
+        <p>Organiza las categorías maestras, subcategorías y clasificación del catálogo de productos.</p>
+    </div>
+    <div class="admin-header-actions" style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button type="button" id="btnNuevoGrupo" onclick="window.abrirModalGrupo()" style="background:#15803d;color:#fff;border:none;font-weight:700;padding:10px 18px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(21,128,61,.25);transition:all .2s ease;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Nueva Categoría</span>
+        </button>
+        <button type="button" id="btnNuevaCategoria" onclick="window.abrirModalCategoria()" style="background:#0284c7;color:#fff;border:none;font-weight:700;padding:10px 18px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(2,132,199,.25);transition:all .2s ease;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Nueva Subcategoría</span>
+        </button>
+    </div>
 </div>
 
 <?php if ($flash_success || $flash_error || in_array($avisoAccion, ['estado_actualizado', 'estado_error'], true)): 
@@ -243,7 +244,7 @@ if (!empty($categorias_bd)) {
 <th style="padding:12px 18px;font-size:.76rem;font-weight:800;color:#475569;text-transform:uppercase;">Macrocategoria (Nivel 1)</th>
 <th style="padding:12px 18px;font-size:.76rem;font-weight:800;color:#475569;text-transform:uppercase;">Descripcion</th>
 <th style="padding:12px 18px;font-size:.76rem;font-weight:800;color:#475569;text-transform:uppercase;">Estado</th>
-<th style="padding:12px 18px;font-size:.76rem;font-weight:800;color:#475569;text-transform:uppercase;text-align:right;">Acciones</th>
+<th style="width: 48px; text-align: center;"></th>
 </tr></thead>
 <tbody>
 <?php if (!empty($grupMomento_bd)): ?>
@@ -310,7 +311,7 @@ if (!empty($categorias_bd)) {
 <th style="padding:12px 18px;font-size:.76rem;font-weight:800;color:#475569;text-transform:uppercase;">Macrocategoria / Categoria</th>
 <th style="padding:12px 18px;font-size:.76rem;font-weight:800;color:#475569;text-transform:uppercase;">Descripcion</th>
 <th style="padding:12px 18px;font-size:.76rem;font-weight:800;color:#475569;text-transform:uppercase;">Estado</th>
-<th style="padding:12px 18px;font-size:.76rem;font-weight:800;color:#475569;text-transform:uppercase;text-align:right;">Acciones</th>
+<th style="width: 48px; text-align: center;"></th>
 </tr></thead>
 <tbody>
 <?php if (!empty($categorias_bd)): ?>
@@ -337,23 +338,33 @@ if (!empty($categorias_bd)) {
 </td>
 <td style="padding:14px 18px;color:#64748b;font-size:.88rem;max-width:240px;"><?= !empty($cat['descripcion']) ? htmlspecialchars($cat['descripcion']) : '<span style="color:#94a3b8;font-style:italic;">Sin descripcion</span>'; ?></td>
 <td style="padding:14px 18px;">
-    <?php if ($esActivo): ?>
-        <span class="badge-status-activo"><svg width="8" height="8" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4"/></svg>Activo</span>
-    <?php else: ?>
-        <span class="badge-status-inactivo"><svg width="8" height="8" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4"/></svg>Inactivo</span>
-    <?php endif; ?>
+    <span class="status-pill <?= $esActivo ? 'activo' : 'inactivo'; ?>">
+        <?= $esActivo ? 'Activo' : 'Inactivo'; ?>
+    </span>
 </td>
 <td style="padding:14px 18px;text-align:right;white-space:nowrap;">
-<button type="button" class="cat-action-btn cat-btn-edit" aria-label="Editar subcategoria" title="Editar subcategoria" onclick='window.editarCategoria(<?= json_encode($cat,JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP); ?>)'>
-<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></button>
-
-<?php if ($esActivo): ?>
-<button type="button" class="cat-action-btn cat-btn-inactivar" aria-label="Inactivar subcategoria" title="Inactivar subcategoria" onclick='window.confirmarCambioEstadoCategoria("categoria", <?= (int)$cat['id_categoria']; ?>, 0, <?= json_encode($cat['nombre'], JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP); ?>)'>
-<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg></button>
-<?php else: ?>
-<button type="button" class="cat-action-btn cat-btn-activar" aria-label="Activar subcategoria" title="Activar subcategoria" onclick='window.confirmarCambioEstadoCategoria("categoria", <?= (int)$cat['id_categoria']; ?>, 1, <?= json_encode($cat['nombre'], JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP); ?>)'>
-<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg></button>
-<?php endif; ?>
+<div class="table-kebab-container">
+    <button type="button" class="table-kebab-btn" aria-label="Acciones de categoría" title="Opciones">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+    </button>
+    <div class="table-kebab-menu">
+        <button type="button" class="table-kebab-item" onclick='window.editarCategoria(<?= json_encode($cat,JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP); ?>)'>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+            Editar
+        </button>
+        <?php if ($esActivo): ?>
+        <button type="button" class="table-kebab-item" onclick='window.confirmarCambioEstadoCategoria("categoria", <?= (int)$cat['id_categoria']; ?>, 0, <?= json_encode($cat['nombre'], JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP); ?>)'>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+            Desactivar
+        </button>
+        <?php else: ?>
+        <button type="button" class="table-kebab-item" onclick='window.confirmarCambioEstadoCategoria("categoria", <?= (int)$cat['id_categoria']; ?>, 1, <?= json_encode($cat['nombre'], JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP); ?>)'>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg>
+            Activar
+        </button>
+        <?php endif; ?>
+    </div>
+</div>
 </td>
 </tr>
 <?php endforeach; ?>
@@ -493,7 +504,8 @@ if (!empty($categorias_bd)) {
 </div>
 
 <div class="cat-modal-overlay" id="modalConfirmarEstadoCategoria" onclick="if(event.target===this)window.cerrarModalId('modalConfirmarEstadoCategoria')">
-    <div class="cat-modal-card" style="max-width:420px;text-align:center;">
+    <div class="cat-modal-card" style="max-width:420px;text-align:center;position:relative;">
+        <button type="button" class="btn-close-universal" onclick="window.cerrarModalId('modalConfirmarEstadoCategoria')" aria-label="Cerrar modal" style="position: absolute; top: 14px; right: 14px;">&times;</button>
         <div id="iconoEstadoCategoria" style="width:56px;height:56px;margin:0 auto 16px;border-radius:50%;display:flex;align-items:center;justify-content:center;"></div>
         <h3 id="tituloEstadoCategoria" style="margin:0 0 8px;font-size:1.2rem;font-weight:800;color:#0f172a;">Confirmar cambio</h3>
         <p id="textoEstadoCategoria" style="margin:0 0 22px;color:#64748b;font-size:.92rem;"></p>

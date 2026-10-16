@@ -145,7 +145,7 @@ class DeliveryModel {
                 $estadoPedido = 'Cancelado';
             }
 
-            $sqlP = "UPDATE pedido SET estado = :est";
+            $sqlP = "UPDATE pedido SET estado = :est, leido_cliente = 0";
             if (!empty($notas)) {
                 $sqlP .= ", observacion = CONCAT(COALESCE(observacion, ''), ' | ', :notas)";
             }
@@ -160,11 +160,11 @@ class DeliveryModel {
         } elseif ($idEnvio > 0) {
             // Sincronizar por id_envio si no se pasó id_pedido
             if ($nuevoEstado === 'Entregado') {
-                $this->conn->query("UPDATE pedido p JOIN envio_delivery ed ON p.id_pedido = ed.id_pedido SET p.estado = 'Entregado' WHERE ed.id_envio = {$idEnvio}");
+                $this->conn->query("UPDATE pedido p JOIN envio_delivery ed ON p.id_pedido = ed.id_pedido SET p.estado = 'Entregado', p.leido_cliente = 0 WHERE ed.id_envio = {$idEnvio}");
             } elseif ($nuevoEstado === 'En Ruta') {
-                $this->conn->query("UPDATE pedido p JOIN envio_delivery ed ON p.id_pedido = ed.id_pedido SET p.estado = 'En Camino' WHERE ed.id_envio = {$idEnvio}");
+                $this->conn->query("UPDATE pedido p JOIN envio_delivery ed ON p.id_pedido = ed.id_pedido SET p.estado = 'En Camino', p.leido_cliente = 0 WHERE ed.id_envio = {$idEnvio}");
             } elseif ($nuevoEstado === 'Fallido') {
-                $this->conn->query("UPDATE pedido p JOIN envio_delivery ed ON p.id_pedido = ed.id_pedido SET p.estado = 'Cancelado' WHERE ed.id_envio = {$idEnvio}");
+                $this->conn->query("UPDATE pedido p JOIN envio_delivery ed ON p.id_pedido = ed.id_pedido SET p.estado = 'Cancelado', p.leido_cliente = 0 WHERE ed.id_envio = {$idEnvio}");
             }
         }
 

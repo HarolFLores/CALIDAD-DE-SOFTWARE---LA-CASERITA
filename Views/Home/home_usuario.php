@@ -48,12 +48,12 @@ if (isset($_SESSION['usuario_id'])) {
 $cantPedidosActivos = 0;
 if (!empty($pedidosUsuario)) {
     foreach ($pedidosUsuario as $p) {
-        $e = strtolower($p['estado'] ?? '');
-        if ($e !== 'entregado' && $e !== 'cancelado') {
+        if ((int)($p['leido_cliente'] ?? 0) === 0) {
             $cantPedidosActivos++;
         }
     }
 }
+
 
 $carruselConfigFile = __DIR__ . '/../../Config/carrusel.json';
 $slidesCarrusel = file_exists($carruselConfigFile) ? json_decode(file_get_contents($carruselConfigFile), true) : null;
@@ -115,9 +115,9 @@ foreach ($product_bd as $prod) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tienda La Caserita</title>
-    <link rel="icon" type="image/png" href="Images/logo.png">
-    <link rel="shortcut icon" href="Images/logo.png">
-    <link rel="apple-touch-icon" href="Images/logo.png">
+    <link rel="icon" type="image/png" href="Images/logo_backup.png">
+    <link rel="shortcut icon" href="Images/logo_backup.png">
+    <link rel="apple-touch-icon" href="Images/logo_backup.png">
     <link rel="stylesheet" href="Styles/global.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="Styles/styles-home.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="Styles/styles-carrito.css?v=<?php echo time(); ?>">
@@ -132,76 +132,8 @@ foreach ($product_bd as $prod) {
 <body class="<?= in_array($_SESSION['usuario_rol'] ?? '', ['admin', 'cajero', 'repartidor'], true) ? 'role-staff' : ''; ?>">
     <?php include __DIR__ . '/partials/mobile_sidebar.php'; ?>
 
-    <!-- Encabezado Principal Completo (Tier 1 + Tier 2) -->
+    <!-- Encabezado Principal Completo (Tier 1 + Tier 2 + Notificaciones Drawer) -->
     <?php include __DIR__ . '/partials/header_principal.php'; ?>
-
-    
-    <div class="notif-overlay" id="notifOverlay" onclick="cerrarNotificaciones(event)"></div>
-    <aside class="notif-sidebar" id="notifDropdown">
-        <div class="notif-header" style="color: #0f172a; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between;">
-            <div>
-                <h2 style="display:flex; align-items:center; gap:8px; margin: 0; font-size: 1.25rem;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                    Mis Pedidos
-                </h2>
-                <p class="notif-header-subtitle" style="margin: 4px 0 0 0; font-size: 0.85rem; opacity: 0.9;">Estado de tus compras en tiempo real</p>
-            </div>
-            <button type="button" class="btn-close-universal" id="closeNotifDropdown" onclick="cerrarNotificaciones(event)" aria-label="Cerrar notificaciones" style="position: static; margin-left: auto;">
-                &times;
-            </button>
-        </div>
-
-        <div class="notif-content" id="notifItems">
-            <?php if (!empty($pedidosUsuario)): ?>
-                <?php foreach (array_slice($pedidosUsuario, 0, 10) as $ped):
-                    $est = strtolower($ped['estado'] ?? 'pendiente');
-                    $badgeStyle = 'background:#fef3c7;color:#92400e;';
-                    $badgeText = ucfirst($est);
-                    if ($est === 'confirmado' || $est === 'aceptado') {
-                        $badgeStyle = 'background:#d1fae5;color:#065f46;';
-                    } elseif ($est === 'en camino' || $est === 'despachado') {
-                        $badgeStyle = 'background:#e0f2fe;color:#0369a1;';
-                    } elseif ($est === 'entregado') {
-                        $badgeStyle = 'background:#dcfce7;color:#15803d;';
-                    } elseif ($est === 'cancelado') {
-                        $badgeStyle = 'background:#fee2e2;color:#b91c1c;';
-                    }
-                    $fechaFormat = !empty($ped['fecha']) ? date('d M Y, h:i A', strtotime($ped['fecha'])) : 'Reciente';
-                ?>
-                <div class="stock-dropdown-item" style="cursor:pointer; padding: 16px 20px; border-bottom: 1px solid #f1f5f9; display: flex; gap: 14px; align-items: flex-start;" onclick="window.location.href='index.php?action=detalle_pedido_usuario&id=<?= (int)$ped['id_pedido']; ?>'">
-                    <div style="width:42px;height:42px;background:#e0f2fe;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#0284c7;flex-shrink:0;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-                    </div>
-                    <div style="flex:1;">
-                        <div style="display:flex;justify-content:space-between;align-items:center;">
-                            <strong style="font-size:0.95rem;color:#0f172a;">Pedido #<?= str_pad((int)$ped['id_pedido'], 5, '0', STR_PAD_LEFT); ?></strong>
-                            <small style="font-size:0.74rem;color:#94a3b8;"><?= $fechaFormat; ?></small>
-                        </div>
-                        <p style="margin:4px 0;color:#15803D;font-size:0.85rem;font-weight:600;">Total: S/ <?= number_format((float)($ped['total'] ?? 0), 2); ?> - <?= htmlspecialchars($ped['tipo_entrega'] ?? 'Delivery'); ?></p>
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
-                            <span style="<?= $badgeStyle; ?>padding:3px 8px;border-radius:10px;font-size:0.72rem;font-weight:800;"><?= $badgeText; ?></span>
-                            <span style="font-size:0.8rem;color:#10b981;font-weight:bold;">Ver detalle →</span>
-                        </div>
-                    </div>
-                </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <div style="padding: 50px 20px; text-align: center; color: #64748b;">
-                    <div style="margin-bottom: 10px; display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 50%; background: #f1f5f9; color: #94a3b8;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-                    </div>
-                    <strong style="font-size: 1rem; color: #0f172a; display: block;">Aún no has realizado pedidos</strong>
-                    <p style="font-size: 0.85rem; margin-top: 4px;">Agrega productos al carrito para realizar tu primera compra.</p>
-                </div>
-            <?php endif; ?>
-        </div>
-
-        <div class="notif-footer">
-            <a href="index.php?action=mi_cuenta" class="btn-notif-action">
-                Ver todos mis pedidos →
-            </a>
-        </div>
-    </aside>
 
     <main>
         <section class="search-results-section" id="searchResultsSection" style="display: none;">
@@ -284,17 +216,25 @@ foreach ($product_bd as $prod) {
                                     <?php 
                                         $tieneDesc = !empty($producto['precio_anterior']) && (float)$producto['precio_anterior'] > (float)$producto['precio'];
                                         $pctDesc = $tieneDesc ? round((((float)$producto['precio_anterior'] - (float)$producto['precio']) / (float)$producto['precio_anterior']) * 100) : 0;
-                                    ?>
-                                    <?php 
                                         $idProd = (int) $producto['id_producto'];
                                         $enCart = isset($carritoCantidadesHome[$idProd]) && $carritoCantidadesHome[$idProd] > 0;
                                         $cantCart = $enCart ? $carritoCantidadesHome[$idProd] : 1;
+
+                                        $stockProd = (int)($producto['stock'] ?? 0);
+                                        $stockMinProd = (int)($producto['stock_minimo'] ?? 5);
+                                        $esAgotado = ($stockProd <= 0);
+                                        $esStockBajo = (!$esAgotado && $stockProd <= $stockMinProd);
                                     ?>
-                                    <div class="producto-card <?= $enCart ? 'is-in-cart' : ''; ?>">
+                                    <div class="producto-card <?= $enCart ? 'is-in-cart' : ''; ?>" data-stock="<?= $stockProd; ?>" data-stock-minimo="<?= $stockMinProd; ?>">
                                         <a href="index.php?action=detalle_producto&id=<?= $idProd; ?>" class="product-card-link">
                                             <div class="producto-img">
                                                 <?php if ($tieneDesc && $pctDesc > 0): ?>
                                                     <span class="badge-descuento-porcentual">-<?= $pctDesc; ?>%</span>
+                                                <?php endif; ?>
+                                                <?php if ($esAgotado): ?>
+                                                    <span class="badge-stock-minimal out">Agotado</span>
+                                                <?php elseif ($esStockBajo): ?>
+                                                    <span class="badge-stock-minimal">Últimas <?= $stockProd; ?> unid.</span>
                                                 <?php endif; ?>
                                                 <img src="<?= htmlspecialchars($producto['imagen']); ?>" alt="<?= htmlspecialchars($producto['titulo']); ?>" loading="lazy" onerror="this.src='Images/logo.png'">
                                             </div>
@@ -303,6 +243,18 @@ foreach ($product_bd as $prod) {
                                             <h4 class="producto-titulo"><?= htmlspecialchars($producto['titulo']); ?></h4>
                                         </a>
                                         <span class="product-card-unit"><?= htmlspecialchars(formatearUnidadMedidaImg4($producto)); ?></span>
+
+                                        <?php if ($esStockBajo): ?>
+                                            <div class="card-stock-pill-clean">
+                                                <span class="stock-dot-live"></span>
+                                                <span>Últimas <?= $stockProd; ?> unidades</span>
+                                            </div>
+                                        <?php elseif ($esAgotado): ?>
+                                            <div class="card-stock-pill-clean out-of-stock">
+                                                <span class="stock-dot-live"></span>
+                                                <span>Agotado</span>
+                                            </div>
+                                        <?php endif; ?>
 
                                         <div class="product-card-price-row">
                                             <span class="product-card-price">S/ <?= number_format((float) $producto['precio'], 2); ?></span>
@@ -317,16 +269,22 @@ foreach ($product_bd as $prod) {
                                                 <span class="card-qty-val"><?= $cantCart; ?></span>
                                                 <button type="button" class="btn-qty-plus" onclick="cambiarCardQty(this, 1)">+</button>
                                             </div>
-                                            <button type="button" class="btn-add-cart-pill btn-agregar-carrito <?= $enCart ? 'is-added' : ''; ?>"
-                                                data-id-producto="<?= $idProd; ?>"
-                                                onclick="agregarConQty(this, <?= $idProd; ?>);">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                                    <circle cx="9" cy="21" r="1"></circle>
-                                                    <circle cx="20" cy="21" r="1"></circle>
-                                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                                                </svg>
-                                                <span><?= $enCart ? 'Agregado' : 'Agregar'; ?></span>
-                                            </button>
+                                            <?php if ($esAgotado): ?>
+                                                <button type="button" class="btn-add-cart-pill btn-agotado" disabled style="opacity:0.6; cursor:not-allowed; background:#94a3b8;">
+                                                    <span>Agotado</span>
+                                                </button>
+                                            <?php else: ?>
+                                                <button type="button" class="btn-add-cart-pill btn-agregar-carrito <?= $enCart ? 'is-added' : ''; ?>"
+                                                    data-id-producto="<?= $idProd; ?>"
+                                                    onclick="agregarConQty(this, <?= $idProd; ?>);">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                        <circle cx="9" cy="21" r="1"></circle>
+                                                        <circle cx="20" cy="21" r="1"></circle>
+                                                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                                    </svg>
+                                                    <span><?= $enCart ? 'Agregado' : 'Agregar'; ?></span>
+                                                </button>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 <?php endif; ?>
@@ -406,17 +364,25 @@ foreach ($product_bd as $prod) {
                                 foreach ($itemsAMostrar as $producto): 
                                     $tieneDesc = !empty($producto['precio_anterior']) && (float)$producto['precio_anterior'] > (float)$producto['precio'];
                                     $pctDesc = $tieneDesc ? round((((float)$producto['precio_anterior'] - (float)$producto['precio']) / (float)$producto['precio_anterior']) * 100) : 0;
+                                    $idProd = (int) $producto['id_producto'];
+                                    $enCart = isset($carritoCantidadesHome[$idProd]) && $carritoCantidadesHome[$idProd] > 0;
+                                    $cantCart = $enCart ? $carritoCantidadesHome[$idProd] : 1;
+
+                                    $stockProd = (int)($producto['stock'] ?? 0);
+                                    $stockMinProd = (int)($producto['stock_minimo'] ?? 5);
+                                    $esAgotado = ($stockProd <= 0);
+                                    $esStockBajo = (!$esAgotado && $stockProd <= $stockMinProd);
                                 ?>
-                                    <?php 
-                                        $idProd = (int) $producto['id_producto'];
-                                        $enCart = isset($carritoCantidadesHome[$idProd]) && $carritoCantidadesHome[$idProd] > 0;
-                                        $cantCart = $enCart ? $carritoCantidadesHome[$idProd] : 1;
-                                    ?>
-                                    <div class="producto-card <?= $enCart ? 'is-in-cart' : ''; ?>">
+                                    <div class="producto-card <?= $enCart ? 'is-in-cart' : ''; ?>" data-stock="<?= $stockProd; ?>" data-stock-minimo="<?= $stockMinProd; ?>">
                                         <a href="index.php?action=detalle_producto&id=<?= $idProd; ?>" class="product-card-link">
                                             <div class="producto-img">
                                                 <?php if ($tieneDesc && $pctDesc > 0): ?>
                                                     <span class="badge-descuento-porcentual">-<?= $pctDesc; ?>%</span>
+                                                <?php endif; ?>
+                                                <?php if ($esAgotado): ?>
+                                                    <span class="badge-stock-minimal out">Agotado</span>
+                                                <?php elseif ($esStockBajo): ?>
+                                                    <span class="badge-stock-minimal">Últimas <?= $stockProd; ?> unid.</span>
                                                 <?php endif; ?>
                                                 <img src="<?= htmlspecialchars($producto['imagen']); ?>" alt="<?= htmlspecialchars($producto['titulo']); ?>" loading="lazy" onerror="this.src='Images/logo.png'">
                                             </div>
@@ -424,6 +390,19 @@ foreach ($product_bd as $prod) {
                                             <h4 class="producto-titulo"><?= htmlspecialchars($producto['titulo']); ?></h4>
                                         </a>
                                         <span class="product-card-unit"><?= htmlspecialchars(formatearUnidadMedidaImg4($producto)); ?></span>
+
+                                        <?php if ($esStockBajo): ?>
+                                            <div class="card-stock-pill-clean">
+                                                <span class="stock-dot-live"></span>
+                                                <span>Últimas <?= $stockProd; ?> unidades</span>
+                                            </div>
+                                        <?php elseif ($esAgotado): ?>
+                                            <div class="card-stock-pill-clean out-of-stock">
+                                                <span class="stock-dot-live"></span>
+                                                <span>Agotado</span>
+                                            </div>
+                                        <?php endif; ?>
+
                                         <div class="product-card-price-row">
                                             <span class="product-card-price">S/ <?= number_format((float)$producto['precio'], 2); ?></span>
                                             <?php if ($tieneDesc): ?>
@@ -436,16 +415,22 @@ foreach ($product_bd as $prod) {
                                                 <span class="card-qty-val"><?= $cantCart; ?></span>
                                                 <button type="button" class="btn-qty-plus" onclick="cambiarCardQty(this, 1)">+</button>
                                             </div>
-                                            <button type="button" class="btn-add-cart-pill btn-agregar-carrito <?= $enCart ? 'is-added' : ''; ?>"
-                                                data-id-producto="<?= $idProd; ?>"
-                                                onclick="agregarConQty(this, <?= $idProd; ?>);">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                                    <circle cx="9" cy="21" r="1"></circle>
-                                                    <circle cx="20" cy="21" r="1"></circle>
-                                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                                                </svg>
-                                                <span><?= $enCart ? 'Agregado' : 'Agregar'; ?></span>
-                                            </button>
+                                            <?php if ($esAgotado): ?>
+                                                <button type="button" class="btn-add-cart-pill btn-agotado" disabled style="opacity:0.6; cursor:not-allowed; background:#94a3b8;">
+                                                    <span>Agotado</span>
+                                                </button>
+                                            <?php else: ?>
+                                                <button type="button" class="btn-add-cart-pill btn-agregar-carrito <?= $enCart ? 'is-added' : ''; ?>"
+                                                    data-id-producto="<?= $idProd; ?>"
+                                                    onclick="agregarConQty(this, <?= $idProd; ?>);">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                        <circle cx="9" cy="21" r="1"></circle>
+                                                        <circle cx="20" cy="21" r="1"></circle>
+                                                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                                    </svg>
+                                                    <span><?= $enCart ? 'Agregado' : 'Agregar'; ?></span>
+                                                </button>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
@@ -880,7 +865,8 @@ foreach ($product_bd as $prod) {
 
     <!-- MODAL DE ALERTAS -->
     <div class="modal-overlay" id="alertModal">
-        <div class="modal-content" style="text-align:center;max-width:380px;">
+        <div class="modal-content" style="text-align:center;max-width:380px;position:relative;">
+            <button type="button" class="btn-close-universal" onclick="cerrarModal('alertModal')" aria-label="Cerrar modal" style="position: absolute; top: 14px; right: 14px;">&times;</button>
             <div id="alertIcon" style="font-size:50px;margin-bottom:15px;">⚠️</div>
             <h3 id="alertTitle" style="margin-bottom:10px;">Mensaje</h3>
             <p id="alertMessage" style="color:#666;margin-bottom:25px;"></p>
@@ -971,7 +957,7 @@ foreach ($product_bd as $prod) {
         </div>
     </div>
 
-    <?php include 'Views/Carrito/partials/carrito_sidebar.php'; ?>    <script src="Scripts/app.js"></script>
+    <?php include 'Views/Carrito/partials/carrito_sidebar.php'; ?>
     <script>window.productosBD = <?= json_encode($product_bd); ?>;</script>
     <script src="Scripts/carrito.js?v=<?php echo time(); ?>"></script>
 
@@ -1267,6 +1253,26 @@ foreach ($product_bd as $prod) {
             const precio = parseFloat(producto.precio).toFixed(2);
             const precioAntHtml = tieneDesc ? `<span class="product-card-old-price">S/ ${parseFloat(producto.precio_anterior).toFixed(2)}</span>` : '';
 
+            const stockProd = parseInt(producto.stock !== undefined ? producto.stock : (producto.stock_actual !== undefined ? producto.stock_actual : 999), 10);
+            const stockMin = parseInt(producto.stock_minimo !== undefined ? producto.stock_minimo : 5, 10);
+            const esAgotado = stockProd <= 0;
+            const esStockBajo = !esAgotado && stockProd <= stockMin;
+
+            let stockBadgeHtml = '';
+            let stockWarningHtml = '';
+            if (esAgotado) {
+                stockBadgeHtml = '<span class="badge-stock-minimal out">Agotado</span>';
+                stockWarningHtml = '<div class="card-stock-pill-clean out-of-stock"><span class="stock-dot-live"></span><span>Agotado</span></div>';
+            } else if (esStockBajo) {
+                stockBadgeHtml = `<span class="badge-stock-minimal">Últimas ${stockProd} unid.</span>`;
+                stockWarningHtml = `
+                    <div class="card-stock-pill-clean">
+                        <span class="stock-dot-live"></span>
+                        <span>Últimas ${stockProd} unidades</span>
+                    </div>
+                `;
+            }
+
             const adminDeleteBtn = esAdmin ? `
                 <button type="button"
                     class="btn-delete-item"
@@ -1281,18 +1287,21 @@ foreach ($product_bd as $prod) {
             const qtyCart = enCart ? window.cartItemsMap[idProdNum] : 1;
 
             return `
-                <div class="producto-card ${enCart ? 'is-in-cart' : ''}">
+                <div class="producto-card ${enCart ? 'is-in-cart' : ''}" data-stock="${stockProd}" data-stock-minimo="${stockMin}">
                     ${adminDeleteBtn}
                     <a href="index.php?action=detalle_producto&id=${producto.id_producto}" class="product-card-link">
                         <div class="producto-img">
                             ${badgeHtml}
+                            ${stockBadgeHtml}
                             <img src="${producto.imagen || 'Imagenes/producto-placeholder.png'}" alt="${producto.titulo}">
                         </div>
 
                         <span class="product-card-sku">SKU: ${sku}</span>
                         <h3 class="producto-titulo">${producto.titulo}</h3>
-                        <span class="product-card-unit">${unit}</span>
                     </a>
+                    <span class="product-card-unit">${unit}</span>
+
+                    ${stockWarningHtml}
 
                     <div class="product-card-price-row">
                         <span class="product-card-price">S/ ${precio}</span>
@@ -1305,16 +1314,22 @@ foreach ($product_bd as $prod) {
                             <span class="card-qty-val">${qtyCart}</span>
                             <button type="button" class="btn-qty-plus" onclick="cambiarCardQty(this, 1)">+</button>
                         </div>
-                        <button type="button" class="btn-add-cart-pill btn-agregar-carrito ${enCart ? 'is-added' : ''}"
-                            data-id-producto="${producto.id_producto}"
-                            onclick="agregarConQty(this, ${producto.id_producto});">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="9" cy="21" r="1"></circle>
-                                <circle cx="20" cy="21" r="1"></circle>
-                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                            </svg>
-                            <span>${enCart ? 'Agregado' : 'Agregar'}</span>
-                        </button>
+                        ${esAgotado ? `
+                            <button type="button" class="btn-add-cart-pill btn-agotado" disabled style="opacity:0.6; cursor:not-allowed; background:#94a3b8;">
+                                <span>Agotado</span>
+                            </button>
+                        ` : `
+                            <button type="button" class="btn-add-cart-pill btn-agregar-carrito ${enCart ? 'is-added' : ''}"
+                                data-id-producto="${producto.id_producto}"
+                                onclick="agregarConQty(this, ${producto.id_producto});">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="9" cy="21" r="1"></circle>
+                                    <circle cx="20" cy="21" r="1"></circle>
+                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                </svg>
+                                <span>${enCart ? 'Agregado' : 'Agregar'}</span>
+                            </button>
+                        `}
                     </div>
                 </div>
             `;

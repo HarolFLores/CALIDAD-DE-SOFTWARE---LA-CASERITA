@@ -30,7 +30,7 @@ if (!isset($metricas) || !is_array($metricas)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Financiero & Ganancias — ERP La Caserita</title>
-    <link rel="icon" type="image/png" href="Images/logo.png">
+    <link rel="icon" type="image/png" href="Images/logo_backup.png">
     <link rel="stylesheet" href="Styles/global.css?v=<?= time(); ?>">
     <link rel="stylesheet" href="Styles/styles-home.css?v=<?= time(); ?>">
     <link rel="stylesheet" href="Styles/styles-users-admin.css?v=<?= time(); ?>">

@@ -6,7 +6,8 @@
     <title>Tienda La Caserita - Recuperar Contraseña</title>
     <link rel="stylesheet" href="Styles/global.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="Styles/styles-login.css?v=<?php echo time(); ?>">
-    <link rel="icon" type="image/png" href="Images/logo.png">
+    <link rel="stylesheet" href="Styles/styles-carrito.css?v=<?php echo time(); ?>">
+    <link rel="icon" type="image/png" href="Images/logo_backup.png">
 </head>
 <body>
     <div class="container">
@@ -20,9 +21,7 @@
 
         <div class="right-panel">
             <div class="login-card" style="position: relative;">
-                <a href="index.php" class="btn-close-universal" style="position: absolute; top: 16px; right: 16px; z-index: 50;" title="Volver a la tienda" aria-label="Cerrar">
-                    <span class="modal-close-glyph" aria-hidden="true">&times;</span>
-                </a>
+                <a href="index.php" class="btn-close-cart" style="position: absolute; top: 16px; right: 16px; z-index: 50; text-decoration: none;" title="Volver a la tienda" aria-label="Cerrar">&times;</a>
 
                 <h2 class="titulo">RECUPERAR CONTRASEÑA</h2>
                 <p class="subtitulo">Ingresa tu correo para buscar tu cuenta</p>
