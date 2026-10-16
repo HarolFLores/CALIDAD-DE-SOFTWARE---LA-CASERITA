@@ -66,6 +66,8 @@ header.main-header {
 }
 
 .header-tier1 {
+  position: relative;
+  z-index: 2100;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -380,9 +382,35 @@ body.role-staff .notif-sidebar {
 
 .search-quick-products {
   display: flex;
-  gap: 15px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 4px;
   flex: 1;
+}
+
+.search-quick-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 8px 12px !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  transition: background 0.15s ease !important;
+}
+
+.search-quick-item:hover {
+  background: #f8fafc !important;
+}
+
+.search-quick-item img {
+  width: 44px !important;
+  height: 44px !important;
+  object-fit: contain !important;
+  border-radius: 8px !important;
+  border: 1px solid #e2e8f0 !important;
+  flex-shrink: 0 !important;
+  background: #ffffff !important;
+  padding: 2px !important;
 }
 
 .search-view-all-btn {
@@ -438,6 +466,7 @@ body.role-staff .notif-sidebar {
   box-sizing: border-box;
 }
 
+
 .btn-user-pill-img1 svg,
 .btn-cart-circle-img1 svg,
 .btn-user svg,
@@ -474,6 +503,140 @@ body.role-staff .notif-sidebar {
   stroke: #15803d;
 }
 
+/* ==============================================================================
+   DROPDOWN HOVER DE USUARIO (PERFIL / SALIR)
+   ============================================================================== */
+.user-menu-wrapper {
+  position: relative;
+  display: inline-flex;
+  z-index: 2500;
+}
+
+.user-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 240px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.22), 0 4px 14px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  padding: 8px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.22s;
+  z-index: 3000;
+  pointer-events: none;
+}
+
+.user-dropdown-menu::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 0;
+  right: 0;
+  height: 12px;
+}
+
+.user-menu-wrapper.active .user-dropdown-menu,
+.user-menu-wrapper:hover .user-dropdown-menu,
+.user-dropdown-menu:hover {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.user-dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px 8px;
+}
+
+.user-dropdown-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #dcfce7;
+  color: #15803d;
+  font-weight: 800;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.user-dropdown-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.user-dropdown-name {
+  font-size: 0.92rem;
+  color: #0f172a;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-dropdown-email {
+  font-size: 0.76rem;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-dropdown-divider {
+  height: 1px;
+  background: #f1f5f9;
+  margin: 6px 0;
+}
+
+.user-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: #334155;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  cursor: pointer;
+}
+
+.user-dropdown-item svg {
+  color: #64748b;
+  stroke: currentColor;
+  transition: color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.user-dropdown-item:hover {
+  background-color: #f0fdf4;
+  color: #15803d;
+}
+
+.user-dropdown-item:hover svg {
+  color: #15803d;
+}
+
+.user-dropdown-item.user-dropdown-logout:hover {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+
+.user-dropdown-item.user-dropdown-logout:hover svg {
+  color: #dc2626;
+}
+
 .btn-icon {
   width: 40px;
   height: 40px;
@@ -497,6 +660,7 @@ body.role-staff .notif-sidebar {
 }
 
 .cart-count-badge-img1,
+.user-notif-badge-img1,
 .stock-badge {
   position: absolute;
   top: -4px;
@@ -2411,16 +2575,18 @@ main,
 .sidebar-close {
   width: 36px;
   height: 36px;
+  min-width: 36px;
+  min-height: 36px;
   background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  border: 1.5px solid transparent;
   border-radius: 50%;
   color: #64748b;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.06);
-  transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: none;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 0;
   outline: none;
 }
@@ -2429,12 +2595,17 @@ main,
   background: #f0fdf4;
   color: #15803d;
   border-color: #15803d;
-  transform: scale(1.15) rotate(90deg);
-  box-shadow: 0 6px 18px rgba(21, 128, 61, 0.25);
+  transform: rotate(90deg);
 }
 
 .sidebar-close:active {
-  transform: scale(0.95) rotate(90deg);
+  transform: rotate(90deg) scale(0.95);
+}
+
+.sidebar-close svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 1.8;
 }
 
 .sidebar-content {
@@ -2725,6 +2896,14 @@ main,
   color: #ffffff;
 }
 
+/* El overlay permanece transparente para no ocultar el drawer. */
+.notif-overlay,
+#notifOverlay {
+  background: transparent;
+  backdrop-filter: none;
+  z-index: 100000;
+}
+
 .notif-sidebar {
   position: fixed;
   top: 0;
@@ -2752,19 +2931,78 @@ main,
   border-bottom: 1px solid #e2e8f0;
 }
 
-.btn-close-notif {
-  border: none;
-  background: #f1f5f9;
+.btn-close-notif,
+.notif-header .btn-close-universal,
+#closeNotifDropdown {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 2px solid transparent;
   border-radius: 50%;
-  width: 34px;
-  height: 34px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 1.6rem;
+  line-height: 1;
   cursor: pointer;
-  font-size: 1.5rem;
+  text-decoration: none;
+  box-shadow: none;
+  aspect-ratio: 1 / 1;
+  padding: 0;
+  box-sizing: border-box;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.btn-close-notif:hover,
+.notif-header .btn-close-universal:hover,
+#closeNotifDropdown:hover {
+  background: #f0fdf4;
+  color: #15803d;
+  border-color: #15803d;
+  transform: rotate(90deg);
+}
+
+.btn-close-notif:active,
+.notif-header .btn-close-universal:active,
+#closeNotifDropdown:active {
+  transform: rotate(90deg) scale(0.92);
 }
 
 .notif-content {
   flex: 1;
   overflow-y: auto;
+}
+
+.notif-item-row {
+  cursor: pointer;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  transition: all 0.2s ease;
+}
+
+.notif-item-row.notif-unread {
+  background-color: #f0fdf4 !important;
+  border-left: 3.5px solid #15803d !important;
+}
+
+.notif-item-row.notif-read {
+  background-color: #ffffff !important;
+  border-left: 3.5px solid transparent !important;
+}
+
+.notif-item-row:hover {
+  background-color: #f1f5f9 !important;
 }
 
 .notif-footer {
@@ -2951,10 +3189,10 @@ main,
   .btn-cart-circle-img1 .btn-cart-label,
   .btn-user .btn-user-label,
   .btn-cart .btn-cart-label,
-  .btn-user-pill-img1 span:not(.cart-count-badge-img1):not(.stock-badge):not(.badge):not(.avatar-letter),
-  .btn-cart-circle-img1 span:not(.cart-count-badge-img1):not(.stock-badge):not(.badge),
-  .btn-user span:not(.cart-count-badge-img1):not(.stock-badge):not(.badge):not(.avatar-letter),
-  .btn-cart span:not(.cart-count-badge-img1):not(.stock-badge):not(.badge) {
+  .btn-user-pill-img1 span:not(.cart-count-badge-img1):not(.user-notif-badge-img1):not(.stock-badge):not(.badge):not(.avatar-letter),
+  .btn-cart-circle-img1 span:not(.cart-count-badge-img1):not(.user-notif-badge-img1):not(.stock-badge):not(.badge),
+  .btn-user span:not(.cart-count-badge-img1):not(.user-notif-badge-img1):not(.stock-badge):not(.badge):not(.avatar-letter),
+  .btn-cart span:not(.cart-count-badge-img1):not(.user-notif-badge-img1):not(.stock-badge):not(.badge) {
     display: none;
   }
 
@@ -2967,8 +3205,9 @@ main,
     flex-shrink: 0;
   }
 
-  /* Burbuja roja de notificación para el carrito en móvil */
-  .btn-cart-circle-img1 .cart-count-badge-img1 {
+  /* Burbuja roja de notificación para el usuario y el carrito en móvil */
+  .btn-cart-circle-img1 .cart-count-badge-img1,
+  .btn-user-pill-img1 .user-notif-badge-img1 {
     position: absolute;
     top: -4px;
     right: -4px;
@@ -4479,6 +4718,265 @@ main.categoria-vista-main {
   }
 }
 
+.pill-tag-oferta {
+  background: #C62828;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: none;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(198, 40, 40, 0.25);
+}
+
+/* ==========================================================================
+   DISEÑO MODERNO DE INVENTARIO Y STOCK (SIN ICONOS, ESTILO PREMIUM)
+   ========================================================================== */
+
+/* 1. Badge flotante en imagen de tarjeta */
+.badge-stock-minimal,
+.badge-stock-bajo {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 251, 235, 0.95);
+  color: #b45309;
+  border: 1px solid #fde68a;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  border-radius: 6px;
+  padding: 3px 8px;
+  z-index: 5;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 5px rgba(180, 83, 9, 0.12);
+  text-transform: none;
+}
+
+.badge-stock-minimal.out,
+.badge-agotado {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(254, 242, 242, 0.95);
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  border-radius: 6px;
+  padding: 3px 8px;
+  z-index: 5;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 5px rgba(220, 38, 38, 0.12);
+  text-transform: none;
+}
+
+/* 2. Micro-indicador de stock en tarjeta */
+.card-stock-pill-clean,
+.product-card-stock-warning {
+  margin: 4px 0 6px 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  color: #b45309;
+  font-size: 0.74rem;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 3px 9px;
+  width: fit-content;
+}
+
+.card-stock-pill-clean .stock-dot-live,
+.product-card-stock-warning .stock-dot-live {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f59e0b;
+  display: inline-block;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25);
+  flex-shrink: 0;
+}
+
+.card-stock-pill-clean.out-of-stock,
+.product-card-stock-warning.out-of-stock {
+  background: #fef2f2;
+  border-color: #fee2e2;
+  color: #dc2626;
+}
+
+.card-stock-pill-clean.out-of-stock .stock-dot-live,
+.product-card-stock-warning.out-of-stock .stock-dot-live {
+  background: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25);
+}
+
+/* 3. Pills de estado en cabecera de detalle de producto */
+.pill-tag-stock-few,
+.pill-tag-stock-bajo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.pill-tag-stock-few::before,
+.pill-tag-stock-bajo::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #d97706;
+  box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.25);
+}
+
+.pill-tag-stock-out,
+.pill-tag-stock-agotado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.pill-tag-stock-out::before,
+.pill-tag-stock-agotado::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25);
+}
+
+.pill-tag-stock-in,
+.pill-tag-stock {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.pill-tag-stock-in::before,
+.pill-tag-stock::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #16a34a;
+}
+
+/* 4. Tarjeta elegante de urgencia de stock en Detalle del Producto (SIN ICONOS) */
+.detalle-stock-urgency-card {
+  background: #ffffff;
+  border: 1px solid #f1f5f9;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin: 14px 0 16px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.detalle-stock-urgency-card .stock-urgency-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.detalle-stock-urgency-card .stock-urgency-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.detalle-stock-urgency-card .stock-urgency-units {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #b45309;
+}
+
+.detalle-stock-urgency-card .stock-urgency-track {
+  width: 100%;
+  height: 6px;
+  background: #f1f5f9;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.detalle-stock-urgency-card .stock-urgency-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+  border-radius: 6px;
+  transition: width 0.4s ease;
+}
+
+.detalle-stock-urgency-card .stock-urgency-notice {
+  display: block;
+  font-size: 0.78rem;
+  color: #78716c;
+  line-height: 1.4;
+}
+
+.detalle-stock-urgency-card.out-of-stock {
+  background: #fafafa;
+  border-color: #e2e8f0;
+}
+
+.detalle-stock-urgency-card.out-of-stock .stock-urgency-units {
+  color: #dc2626;
+}
 
 
+.detalle-alerta-stock-bajo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  border-left: 4px solid #f59e0b;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 12px 0;
+}
 
+.detalle-alerta-stock-bajo strong {
+  display: block;
+  font-size: 0.88rem;
+  color: #92400e;
+}
+
+.detalle-alerta-stock-bajo p {
+  margin: 2px 0 0 0;
+  font-size: 0.8rem;
+  color: #b45309;
+}
+
+.detalle-alerta-stock-bajo p span {
+  font-weight: 800;
+  text-decoration: underline;
+}

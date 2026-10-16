@@ -1,4 +1,4 @@
-.delivery-heading{display:flex;justify-content:space-between;align-items:center;gap:24px;padding-bottom:20px;border-bottom:1px solid #dce7e5;margin-bottom:20px}
+.delivery-heading{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:18px 24px;margin-bottom:24px;box-shadow:0 1px 3px rgba(0,0,0,0.02)}
         .delivery-eyebrow{font-size:.72rem;font-weight:800;letter-spacing:.12em;color:#15803d}
         .delivery-heading h1{margin:6px 0;font-size:1.85rem;line-height:1.1;color:#103a32}
         .delivery-heading p{margin:0;color:#64748b}

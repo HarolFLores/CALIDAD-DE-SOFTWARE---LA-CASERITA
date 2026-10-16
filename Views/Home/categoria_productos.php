@@ -60,7 +60,7 @@ if (!function_exists('formatearSkuImg4')) {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="icon" type="image/png" href="Images/logo.png">
+    <link rel="icon" type="image/png" href="Images/logo_backup.png">
 </head>
 <body class="<?= in_array($_SESSION['usuario_rol'] ?? '', ['admin', 'cajero', 'repartidor'], true) ? 'role-staff' : ''; ?>">
     <?php include __DIR__ . '/partials/mobile_sidebar.php'; ?>
@@ -70,7 +70,7 @@ if (!function_exists('formatearSkuImg4')) {
 
     <main class="categoria-vista-main">
         <?php
-        require_once __DIR__ . '/partials/navigation_data.php';
+        require __DIR__ . '/partials/navigation_data.php';
 
         if (!function_exists('obtenerTagsProductoCat')) {
             function obtenerTagsProductoCat($producto) {
@@ -189,20 +189,33 @@ if (!function_exists('formatearSkuImg4')) {
                 $precioFormatted = number_format((float) $producto['precio'], 2);
                 $precioAntFormatted = number_format((float) $producto['precio_anterior'], 2);
                 $tagsAttr = htmlspecialchars(obtenerTagsProductoCat($producto));
+
+                $stockProd = (int)($producto['stock'] ?? 0);
+                $stockMinProd = (int)($producto['stock_minimo'] ?? 5);
+                $esAgotado = ($stockProd <= 0);
+                $esStockBajo = (!$esAgotado && $stockProd <= $stockMinProd);
                 
                 ob_start();
                 ?>
                 <div class="producto-card <?= $enCart ? 'is-in-cart' : ''; ?>" 
+                     data-id="<?= (int)$idProd; ?>"
                      data-titulo="<?= htmlspecialchars(mb_strtolower($producto['titulo'])); ?>" 
                      data-precio="<?= (float)$producto['precio']; ?>" 
                      data-descuento="<?= $pctDesc; ?>" 
                      data-sugerencia="<?= !empty($producto['es_sugerencia']) ? '1' : '0'; ?>"
                      data-grupo="<?= htmlspecialchars(trim($producto['grupo_nombre'] ?? 'Otros')); ?>"
-                     data-tags="<?= $tagsAttr; ?>">
+                     data-tags="<?= $tagsAttr; ?>"
+                     data-stock="<?= $stockProd; ?>"
+                     data-stock-minimo="<?= $stockMinProd; ?>">
                     <a href="index.php?action=detalle_producto&id=<?= $idProd; ?>" class="product-card-link">
                         <div class="producto-img">
                             <?php if ($tieneDesc && $pctDesc > 0): ?>
                                 <span class="badge-descuento-porcentual">-<?= $pctDesc; ?>%</span>
+                            <?php endif; ?>
+                            <?php if ($esAgotado): ?>
+                                <span class="badge-stock-minimal out">Agotado</span>
+                            <?php elseif ($esStockBajo): ?>
+                                <span class="badge-stock-minimal">Últimas <?= $stockProd; ?> unid.</span>
                             <?php endif; ?>
                             <img src="<?= htmlspecialchars($producto['imagen']); ?>" alt="<?= htmlspecialchars($producto['titulo']); ?>" loading="lazy" onerror="this.onerror=null;this.src='Imagenes/producto-placeholder.png';">
                         </div>
@@ -210,6 +223,17 @@ if (!function_exists('formatearSkuImg4')) {
                         <h3 class="producto-titulo" style="font-size:14px; margin: 8px 0;"><?= htmlspecialchars($producto['titulo']); ?></h3>
                         <span class="product-card-unit"><?= htmlspecialchars(formatearUnidadMedidaImg4($producto)); ?></span>
                     </a>
+                    <?php if ($esStockBajo): ?>
+                        <div class="card-stock-pill-clean">
+                            <span class="stock-dot-live"></span>
+                            <span>Últimas <?= $stockProd; ?> unidades</span>
+                        </div>
+                    <?php elseif ($esAgotado): ?>
+                        <div class="card-stock-pill-clean out-of-stock">
+                            <span class="stock-dot-live"></span>
+                            <span>Agotado</span>
+                        </div>
+                    <?php endif; ?>
                     <div class="product-card-price-row">
                         <span class="product-card-price">S/ <?= $precioFormatted; ?></span>
                         <?php if ($tieneDesc): ?>
@@ -222,13 +246,19 @@ if (!function_exists('formatearSkuImg4')) {
                             <span class="card-qty-val"><?= $cantCart; ?></span>
                             <button type="button" class="btn-qty-plus" onclick="cambiarCardQty(this, 1)">+</button>
                         </div>
-                        <button type="button" class="btn-add-cart-pill btn-agregar-carrito <?= $enCart ? 'is-added' : ''; ?>" data-id-producto="<?= $idProd; ?>" onclick="agregarConQty(this, <?= $idProd; ?>);">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle>
-                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                            </svg>
-                            <span><?= $enCart ? 'Agregado' : 'Agregar'; ?></span>
-                        </button>
+                        <?php if ($esAgotado): ?>
+                            <button type="button" class="btn-add-cart-pill btn-agotado" disabled style="opacity:0.6; cursor:not-allowed; background:#94a3b8;">
+                                <span>Agotado</span>
+                            </button>
+                        <?php else: ?>
+                            <button type="button" class="btn-add-cart-pill btn-agregar-carrito <?= $enCart ? 'is-added' : ''; ?>" data-id-producto="<?= $idProd; ?>" onclick="agregarConQty(this, <?= $idProd; ?>);">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle>
+                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                </svg>
+                                <span><?= $enCart ? 'Agregado' : 'Agregar'; ?></span>
+                            </button>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <?php
@@ -257,11 +287,11 @@ if (!function_exists('formatearSkuImg4')) {
                     'is_current' => false
                 ];
 
-                $isOfertas = (strtolower($tituloCategoria) === 'ofertas');
+                $isOfertas = (isset($esOfertas) && $esOfertas) || (strtolower($tituloCategoria ?? '') === 'ofertas') || (strpos(strtolower($tituloCategoria ?? ''), 'ofertas') !== false) || (strpos(strtolower($tituloCategoria ?? ''), 'descuento') !== false);
 
                 if ($isOfertas) {
                     $breadcrumbs[] = [
-                        'label' => 'Ofertas',
+                        'label' => 'Ofertas del Día',
                         'url'   => null,
                         'is_current' => true
                     ];
@@ -314,8 +344,8 @@ if (!function_exists('formatearSkuImg4')) {
                     }
                 }
             ?>
-            <!-- Breadcrumb Limpio Sin Tarjeta ni Botón Volver (Estilo Imagen 2) -->
-            <nav class="categoria-breadcrumb-uncontained" style="display:flex; align-items:center; gap:8px; margin: 0 0 16px 0; padding: 4px 0; font-size:0.9rem; color:#64748b; font-weight:500; flex-wrap:wrap;">
+            <!-- Breadcrumb Limpio Sin Tarjeta ni Botón Volver -->
+            <nav class="categoria-breadcrumb-uncontained" style="display:flex; align-items:center; gap:8px; margin: 0 0 14px 0; padding: 4px 0; font-size:0.9rem; color:#64748b; font-weight:500; flex-wrap:wrap;">
                 <?php foreach ($breadcrumbs as $idx => $bc): ?>
                     <?php if ($idx > 0): ?>
                         <span class="breadcrumb-sep" style="color:#cbd5e1; font-weight:400;">/</span>
@@ -328,6 +358,23 @@ if (!function_exists('formatearSkuImg4')) {
                     <?php endif; ?>
                 <?php endforeach; ?>
             </nav>
+
+            <!-- Encabezado de la Sección -->
+            <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <h1 style="font-size: 1.65rem; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.02em;">
+                        <?= htmlspecialchars($tituloCategoria); ?>
+                    </h1>
+                    <?php if ($isOfertas): ?>
+                        <span style="background: #fee2e2; color: #dc2626; font-size: 0.8rem; font-weight: 700; padding: 3px 10px; border-radius: 9999px;">
+                            Descuentos activos
+                        </span>
+                    <?php endif; ?>
+                </div>
+                <span style="font-size: 0.92rem; color: #64748b; font-weight: 600;">
+                    <?= count($product_bd); ?> <?= count($product_bd) === 1 ? 'producto' : 'productos'; ?>
+                </span>
+            </div>
 
             <!-- 2. Layout Principal de 2 Columnas (Filtros a la izquierda, Productos a la derecha AL MISMO NIVEL EXACTO) -->
             <div class="categoria-layout" style="display:flex; gap:20px; align-items: flex-start; margin-top: 0;">
@@ -400,9 +447,13 @@ if (!function_exists('formatearSkuImg4')) {
                             <label for="selectOrdenCatalogo" style="font-size: 13px; font-weight: 600; color: #64748b;">Ordenar por:</label>
                             <div class="select-custom-wrapper">
                                 <select id="selectOrdenCatalogo" class="select-orden-custom">
-                                    <option value="mas_vendidos">Más vendidos / Recomendados</option>
-                                    <option value="menor_precio">Menor precio</option>
-                                    <option value="mayor_descuento">Mayor descuento</option>
+                                    <option value="recomendados" <?= !$isOfertas ? 'selected' : ''; ?>>Recomendados</option>
+                                    <option value="mejor_descuento" <?= $isOfertas ? 'selected' : ''; ?>>Mejor descuento</option>
+                                    <option value="mas_nuevos">Más Nuevos</option>
+                                    <option value="precio_menor_mayor">Precio menor a mayor</option>
+                                    <option value="precio_mayor_menor">Precio mayor a menor</option>
+                                    <option value="a_z">A - Z</option>
+                                    <option value="z_a">Z - A</option>
                                 </select>
                             </div>
                         </div>
@@ -451,9 +502,13 @@ if (!function_exists('formatearSkuImg4')) {
                     <label for="selectOrdenCatalogoMobile" style="font-size: 13px; font-weight: 600; color: #64748b;">Ordenar por:</label>
                     <div class="select-custom-wrapper" style="flex:1;">
                         <select id="selectOrdenCatalogoMobile" class="select-orden-custom" style="width:100%;">
-                            <option value="mas_vendidos">Más vendidos / Recomendados</option>
-                            <option value="menor_precio">Menor precio</option>
-                            <option value="mayor_descuento">Mayor descuento</option>
+                            <option value="recomendados" <?= !$isOfertas ? 'selected' : ''; ?>>Recomendados</option>
+                            <option value="mejor_descuento" <?= $isOfertas ? 'selected' : ''; ?>>Mejor descuento</option>
+                            <option value="mas_nuevos">Más Nuevos</option>
+                            <option value="precio_menor_mayor">Precio menor a mayor</option>
+                            <option value="precio_mayor_menor">Precio mayor a menor</option>
+                            <option value="a_z">A - Z</option>
+                            <option value="z_a">Z - A</option>
                         </select>
                     </div>
                 </div>

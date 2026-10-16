@@ -18,7 +18,7 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="Styles/styles-pos.css?v=<?= filemtime(__DIR__ . '/../../Styles/styles-pos.css') ?>">
-    <link rel="icon" type="image/png" href="Images/logo.png">
+    <link rel="icon" type="image/png" href="Images/logo_backup.png">
     <?php if ($isAdminPOS || $isCashierPOS): ?>
     <link rel="stylesheet" href="Styles/global.css?v=<?= filemtime(__DIR__ . '/../../Styles/global.css') ?>">
     <link rel="stylesheet" href="Styles/styles-home.css?v=<?= filemtime(__DIR__ . '/../../Styles/styles-home.css') ?>">

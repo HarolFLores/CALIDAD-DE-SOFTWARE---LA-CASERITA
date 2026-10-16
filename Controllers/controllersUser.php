@@ -166,7 +166,16 @@ class UserController{
 
                         session_regenerate_id(true);
 
+                        $rol = strtolower(trim($usuario['rol'] ?? 'cliente'));
                         $redirect = 'index.php?action=home_usuario';
+
+                        if ($rol === 'admin') {
+                            $redirect = 'index.php?action=dashboard_ganancias';
+                        } elseif ($rol === 'cajero') {
+                            $redirect = 'index.php?action=panel_cajero';
+                        } elseif ($rol === 'repartidor' || $rol === 'delivery') {
+                            $redirect = 'index.php?action=panel_repartidor';
+                        }
 
                         if ($esAjax) {
                             header('Content-Type: application/json; charset=utf-8');
@@ -240,6 +249,10 @@ class UserController{
                 exit();
             }
         }else{
+            if (isset($_SESSION['usuario_rol']) && $_SESSION['usuario_rol'] === 'admin') {
+                header('Location: index.php?action=dashboard_ganancias');
+                exit();
+            }
             // Redirigir siempre a la tienda e-commerce y abrir modal
             header('Location: index.php?action=home_usuario&open_auth=1');
             exit();
@@ -504,11 +517,21 @@ class UserController{
 
         session_regenerate_id(true);
 
+        $redirectGoogle = 'index.php?action=home_usuario';
+        $rolG = strtolower(trim($usuario['rol'] ?? 'cliente'));
+        if ($rolG === 'admin') {
+            $redirectGoogle = 'index.php?action=dashboard_ganancias';
+        } elseif ($rolG === 'cajero') {
+            $redirectGoogle = 'index.php?action=panel_cajero';
+        } elseif ($rolG === 'repartidor' || $rolG === 'delivery') {
+            $redirectGoogle = 'index.php?action=panel_repartidor';
+        }
+
         echo json_encode([
             'ok' => true,
             'mensaje' => '¡Sesión iniciada con Google!',
             'rol' => $usuario['rol'],
-            'redirect' => 'index.php?action=home_usuario'
+            'redirect' => $redirectGoogle
         ]);
         exit();
     }
@@ -750,8 +773,8 @@ class UserController{
     }
 
     public function homeAdmin(): void{
-        // El administrador tiene la misma experiencia de tienda/inicio que el cliente, con acceso a su panel desde el botón de usuario
-        $this->homeUsuario();
+        header('Location: index.php?action=dashboard_ganancias');
+        exit();
     }
 
     public function logout(): void{

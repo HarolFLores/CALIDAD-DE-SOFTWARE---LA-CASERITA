@@ -26,6 +26,11 @@ $idProdActual = (int)$producto['id_producto'];
 $enCarritoDetalle = isset($carritoCantidadesDetalle[$idProdActual]) && $carritoCantidadesDetalle[$idProdActual] > 0;
 $cantInicialDetalle = $enCarritoDetalle ? $carritoCantidadesDetalle[$idProdActual] : 1;
 
+$stockActual = (int)($producto['stock'] ?? 0);
+$stockMinimo = (int)($producto['stock_minimo'] ?? 5);
+$esAgotado = ($stockActual <= 0);
+$esStockBajo = (!$esAgotado && $stockActual <= $stockMinimo);
+
 function formatearSkuDetalle($p) {
     if (!empty($p['codigo_sku'])) return $p['codigo_sku'];
     return '00' . str_pad((int)($p['id_producto'] ?? 1000), 4, '0', STR_PAD_LEFT);
@@ -62,7 +67,7 @@ function formatearUnidadMedidaDetalle($p) {
     
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="Styles/Vistas/Home/detalle_producto.css?v=<?= time(); ?>">
-    <link rel="icon" type="image/png" href="Images/logo.png">
+    <link rel="icon" type="image/png" href="Images/logo_backup.png">
 </head>
 <body class="<?= in_array($_SESSION['usuario_rol'] ?? '', ['admin', 'cajero', 'repartidor'], true) ? 'role-staff' : ''; ?>">
     <?php include __DIR__ . '/partials/mobile_sidebar.php'; ?>
@@ -134,7 +139,13 @@ function formatearUnidadMedidaDetalle($p) {
                         <?php if ($tieneDesc && $pctDesc > 0): ?>
                             <span class="pill-tag-oferta">OFERTA ESPECIAL</span>
                         <?php endif; ?>
-                        <span class="pill-tag-stock">● Stock Disponible</span>
+                        <?php if ($esAgotado): ?>
+                            <span class="pill-tag-stock-out">Agotado temporalmente</span>
+                        <?php elseif ($esStockBajo): ?>
+                            <span class="pill-tag-stock-few">Últimas <?= $stockActual; ?> unidades disponibles</span>
+                        <?php else: ?>
+                            <span class="pill-tag-stock-in">Stock disponible</span>
+                        <?php endif; ?>
                     </div>
 
                     <h1 class="detalle-prod-title"><?= htmlspecialchars($producto['titulo']); ?></h1>
@@ -159,26 +170,56 @@ function formatearUnidadMedidaDetalle($p) {
                         <?php endif; ?>
                     </div>
 
+                    <?php if ($esStockBajo): 
+                        $pctStock = min(100, max(18, round(($stockActual / max(1, $stockMinimo * 2)) * 100)));
+                    ?>
+                        <div class="detalle-stock-urgency-card">
+                            <div class="stock-urgency-top">
+                                <span class="stock-urgency-label">Disponibilidad en almacén</span>
+                                <span class="stock-urgency-units">Solo quedan <?= $stockActual; ?> unidades</span>
+                            </div>
+                            <div class="stock-urgency-track">
+                                <div class="stock-urgency-fill" style="width: <?= $pctStock; ?>%;"></div>
+                            </div>
+                            <span class="stock-urgency-notice">Alta demanda: quedan pocas unidades listas para despacho inmediato</span>
+                        </div>
+                    <?php elseif ($esAgotado): ?>
+                        <div class="detalle-stock-urgency-card out-of-stock">
+                            <div class="stock-urgency-top">
+                                <span class="stock-urgency-label">Disponibilidad en almacén</span>
+                                <span class="stock-urgency-units">Sin stock disponible</span>
+                            </div>
+                            <span class="stock-urgency-notice">Este producto se ha agotado por alta demanda</span>
+                        </div>
+                    <?php endif; ?>
+
                     <!-- Fila de Compra / Agregar al Carrito -->
                     <div class="detalle-buy-row" id="detalleBuyRow">
-                        <!-- Selector qty: oculto por default, visible si ya está en carrito -->
-                        <div class="detalle-page-qty-pill" id="detallePill" style="display: <?= $enCarritoDetalle ? 'flex' : 'none'; ?>;">
-                            <button type="button" class="detalle-page-qty-btn" id="detalleQtyMinus">−</button>
-                            <span class="detalle-page-qty-val" id="pageQtyVal"><?= $cantInicialDetalle; ?></span>
-                            <button type="button" class="detalle-page-qty-btn" id="detalleQtyPlus">+</button>
-                        </div>
+                        <?php if ($esAgotado): ?>
+                            <button type="button" class="detalle-page-btn-add btn-agotado" disabled style="opacity:0.6; cursor:not-allowed; background:#94a3b8; pointer-events:none;">
+                                <span>Producto Agotado</span>
+                            </button>
+                        <?php else: ?>
+                            <!-- Selector qty: oculto por default, visible si ya está en carrito -->
+                            <div class="detalle-page-qty-pill" id="detallePill" style="display: <?= $enCarritoDetalle ? 'flex' : 'none'; ?>;">
+                                <button type="button" class="detalle-page-qty-btn" id="detalleQtyMinus">−</button>
+                                <span class="detalle-page-qty-val" id="pageQtyVal"><?= $cantInicialDetalle; ?></span>
+                                <button type="button" class="detalle-page-qty-btn" id="detalleQtyPlus">+</button>
+                            </div>
 
-                        <button type="button"
-                            class="detalle-page-btn-add btn-agregar-carrito <?= $enCarritoDetalle ? 'is-added' : ''; ?>"
-                            id="detalleBtnAdd"
-                            data-id-producto="<?= $idProdActual; ?>">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="9" cy="21" r="1"></circle>
-                                <circle cx="20" cy="21" r="1"></circle>
-                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                            </svg>
-                            <span><?= $enCarritoDetalle ? 'Agregado' : 'Agregar al carrito'; ?></span>
-                        </button>
+                            <button type="button"
+                                class="detalle-page-btn-add btn-agregar-carrito <?= $enCarritoDetalle ? 'is-added' : ''; ?>"
+                                id="detalleBtnAdd"
+                                data-id-producto="<?= $idProdActual; ?>"
+                                data-stock="<?= $stockActual; ?>">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="9" cy="21" r="1"></circle>
+                                    <circle cx="20" cy="21" r="1"></circle>
+                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                </svg>
+                                <span><?= $enCarritoDetalle ? 'Agregado' : 'Agregar al carrito'; ?></span>
+                            </button>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -198,12 +239,22 @@ function formatearUnidadMedidaDetalle($p) {
                         $idRel = (int)$rel['id_producto'];
                         $enCartRel = isset($carritoCantidadesDetalle[$idRel]) && $carritoCantidadesDetalle[$idRel] > 0;
                         $cantCartRel = $enCartRel ? $carritoCantidadesDetalle[$idRel] : 1;
+
+                        $stockRel = (int)($rel['stock'] ?? 0);
+                        $stockMinRel = (int)($rel['stock_minimo'] ?? 5);
+                        $relAgotado = ($stockRel <= 0);
+                        $relStockBajo = (!$relAgotado && $stockRel <= $stockMinRel);
                     ?>
-                        <div class="producto-card <?= $enCartRel ? 'is-in-cart' : ''; ?>">
+                        <div class="producto-card <?= $enCartRel ? 'is-in-cart' : ''; ?>" data-stock="<?= $stockRel; ?>" data-stock-minimo="<?= $stockMinRel; ?>">
                             <a href="index.php?action=detalle_producto&id=<?= $idRel; ?>" class="product-card-link">
                                 <div class="producto-img">
                                     <?php if ($relDesc && $relPct > 0): ?>
                                         <span class="badge-descuento-porcentual">-<?= $relPct; ?>%</span>
+                                    <?php endif; ?>
+                                    <?php if ($relAgotado): ?>
+                                        <span class="badge-stock-minimal out">Agotado</span>
+                                    <?php elseif ($relStockBajo): ?>
+                                        <span class="badge-stock-minimal">Últimas <?= $stockRel; ?> unid.</span>
                                     <?php endif; ?>
                                     <img src="<?= htmlspecialchars($rel['imagen']); ?>" alt="<?= htmlspecialchars($rel['titulo']); ?>" loading="lazy" onerror="this.src='Images/logo.png'">
                                 </div>
@@ -211,6 +262,18 @@ function formatearUnidadMedidaDetalle($p) {
                                 <h4 class="producto-titulo"><?= htmlspecialchars($rel['titulo']); ?></h4>
                             </a>
                             <span class="product-card-unit"><?= htmlspecialchars(formatearUnidadMedidaDetalle($rel)); ?></span>
+
+                            <?php if ($relStockBajo): ?>
+                                <div class="card-stock-pill-clean">
+                                    <span class="stock-dot-live"></span>
+                                    <span>Últimas <?= $stockRel; ?> unidades</span>
+                                </div>
+                            <?php elseif ($relAgotado): ?>
+                                <div class="card-stock-pill-clean out-of-stock">
+                                    <span class="stock-dot-live"></span>
+                                    <span>Agotado</span>
+                                </div>
+                            <?php endif; ?>
 
                             <div class="product-card-price-row">
                                 <span class="product-card-price">S/ <?= number_format((float)$rel['precio'], 2); ?></span>
@@ -225,16 +288,22 @@ function formatearUnidadMedidaDetalle($p) {
                                     <span class="card-qty-val"><?= $cantCartRel; ?></span>
                                     <button type="button" class="btn-qty-plus" onclick="cambiarCardQty(this, 1)">+</button>
                                 </div>
-                                <button type="button" class="btn-add-cart-pill btn-agregar-carrito <?= $enCartRel ? 'is-added' : ''; ?>"
-                                    data-id-producto="<?= $idRel; ?>"
-                                    onclick="agregarConQty(this, <?= $idRel; ?>);">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="9" cy="21" r="1"></circle>
-                                        <circle cx="20" cy="21" r="1"></circle>
-                                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                                    </svg>
-                                    <span><?= $enCartRel ? 'Agregado' : 'Agregar'; ?></span>
-                                </button>
+                                <?php if ($relAgotado): ?>
+                                    <button type="button" class="btn-add-cart-pill btn-agotado" disabled style="opacity:0.6; cursor:not-allowed; background:#94a3b8;">
+                                        <span>Agotado</span>
+                                    </button>
+                                <?php else: ?>
+                                    <button type="button" class="btn-add-cart-pill btn-agregar-carrito <?= $enCartRel ? 'is-added' : ''; ?>"
+                                        data-id-producto="<?= $idRel; ?>"
+                                        onclick="agregarConQty(this, <?= $idRel; ?>);">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="9" cy="21" r="1"></circle>
+                                            <circle cx="20" cy="21" r="1"></circle>
+                                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                        </svg>
+                                        <span><?= $enCartRel ? 'Agregado' : 'Agregar'; ?></span>
+                                    </button>
+                                <?php endif; ?>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -357,34 +426,55 @@ function formatearUnidadMedidaDetalle($p) {
             if (btnMinus) {
                 btnMinus.addEventListener('click', async function() {
                     let cant = parseInt(qtyEl ? qtyEl.textContent : '1', 10) || 1;
-                    cant--;
-                    if (cant <= 0) {
+                    if (cant <= 1) {
+                        let aceptada = false;
+                        if (typeof window.solicitarConfirmacionCarrito === 'function') {
+                            const titEl = document.querySelector('.detalle-prod-title');
+                            const nombre = titEl ? titEl.textContent.trim() : 'este producto';
+                            aceptada = await window.solicitarConfirmacionCarrito(
+                                '¿Eliminar producto?',
+                                'Se quitará "' + nombre + '" del carrito.',
+                                'Eliminar'
+                            );
+                        } else {
+                            aceptada = confirm('¿Eliminar producto del carrito?');
+                        }
+
+                        if (!aceptada) {
+                            if (qtyEl) qtyEl.textContent = '1';
+                            if (typeof window.cargarCarrito === 'function') {
+                                window.cargarCarrito();
+                            }
+                            return;
+                        }
+
                         setEstadoAgregar();
-                        // Actualizar mapa global
                         if (window.cartItemsMap) delete window.cartItemsMap[idProducto];
-                        const total = typeof obtenerContadorHeader === 'function' ? obtenerContadorHeader() : 0;
-                        if (typeof window.actualizarBurbujaHeader === 'function') window.actualizarBurbujaHeader(Math.max(0, total - 1));
-                        await syncDetalleQty(0);
+                        if (typeof window.eliminarProducto === 'function') {
+                            await window.eliminarProducto(idProducto, true);
+                        }
                     } else {
+                        cant--;
                         if (qtyEl) qtyEl.textContent = cant;
                         if (window.cartItemsMap) window.cartItemsMap[idProducto] = cant;
-                        const total = typeof obtenerContadorHeader === 'function' ? obtenerContadorHeader() : 0;
-                        if (typeof window.actualizarBurbujaHeader === 'function') window.actualizarBurbujaHeader(Math.max(0, total - 1));
                         await syncDetalleQty(cant);
                     }
                 });
             }
 
+            const maxStockDetalle = <?= $stockActual; ?>;
             if (btnPlus) {
                 btnPlus.addEventListener('click', async function() {
                     let cant = parseInt(qtyEl ? qtyEl.textContent : '1', 10) || 1;
+                    if (maxStockDetalle > 0 && cant >= maxStockDetalle) {
+                        if (typeof window.mostrarToast === 'function') {
+                            window.mostrarToast(`Límite alcanzado. Solo quedan ${maxStockDetalle} unidades disponibles.`, 'warning');
+                        }
+                        return;
+                    }
                     cant++;
                     if (qtyEl) qtyEl.textContent = cant;
                     if (window.cartItemsMap) window.cartItemsMap[idProducto] = cant;
-                    if (typeof window.actualizarBurbujaHeader === 'function') {
-                        const total = parseInt((document.getElementById('cartCountHeader') || {}).textContent || '0', 10);
-                        window.actualizarBurbujaHeader(total + 1);
-                    }
                     setEstadoAgregado(cant);
                     await syncDetalleQty(cant);
                 });

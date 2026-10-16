@@ -117,7 +117,7 @@ function resolverNombreDestino($url, $destinosList) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Banners & Carrusel — ERP La Caserita</title>
-    <link rel="icon" type="image/png" href="Images/logo.png">
+    <link rel="icon" type="image/png" href="Images/logo_backup.png">
     <link rel="stylesheet" href="Styles/global.css?v=<?= time(); ?>">
     <link rel="stylesheet" href="Styles/styles-home.css?v=<?= time(); ?>">
     <link rel="stylesheet" href="Styles/styles-users-admin.css?v=<?= time(); ?>">
@@ -166,7 +166,8 @@ function resolverNombreDestino($url, $destinosList) {
 
 <!-- Modal Confirmación Reutilizable (Imagen 3 / Ventas) -->
 <div class="carrusel-modal-overlay" id="carruselConfirmModal" style="display: none; z-index: 999999; backdrop-filter: blur(3px);">
-    <div style="background: #ffffff; border-radius: 18px; width: min(440px, 94vw); padding: 28px 24px; text-align: center; box-shadow: 0 24px 60px rgba(0,0,0,0.25); margin: auto;">
+    <div style="background: #ffffff; border-radius: 18px; width: min(440px, 94vw); padding: 28px 24px; text-align: center; box-shadow: 0 24px 60px rgba(0,0,0,0.25); margin: auto; position: relative;">
+        <button type="button" class="btn-close-universal" onclick="window.cerrarConfirmacionModal()" aria-label="Cerrar modal" style="position: absolute; top: 14px; right: 14px;">&times;</button>
         <div id="confirmIconBox" style="width: 56px; height: 56px; border-radius: 50%; background: #dcfce7; color: #15803d; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
         </div>
@@ -190,7 +191,7 @@ function resolverNombreDestino($url, $destinosList) {
     <div style="background: #ffffff; border-radius: 18px; width: min(620px, 95vw); max-height: 92vh; overflow-y: auto; box-shadow: 0 24px 60px rgba(0,0,0,0.22); margin: auto; display: flex; flex-direction: column;">
         <div style="padding: 18px 24px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between;">
             <h3 id="editModalTitulo" style="margin: 0; font-size: 1.18rem; font-weight: 800; color: #0f172a;">Editar Banner #1</h3>
-            <button type="button" class="btn-close-universal" onclick="window.cerrarModalEditarBanner()" style="background: none; border: none; font-size: 1.3rem; color: #94a3b8; cursor: pointer; line-height: 1;" aria-label="Cerrar modal"><span class="modal-close-glyph" aria-hidden="true">&times;</span></button>
+            <button type="button" class="btn-close-universal" onclick="window.cerrarModalEditarBanner()" aria-label="Cerrar modal">&times;</button>
         </div>
         
         <div style="padding: 22px 24px; display: flex; flex-direction: column; gap: 18px;">
@@ -263,15 +264,13 @@ function resolverNombreDestino($url, $destinosList) {
 <main class="main-content container-admin" style="padding-top: 25px; padding-bottom: 50px;">
     
 
-    <!-- HEADER DE SECCIÓN (ESPACIO ARRIBA Y A LOS COSTADOS IDÉNTICO A IMAGEN 2) -->
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 22px;">
-        <div>
-            <h1 style="font-size: 1.6rem; font-weight: 800; color: #0f172a; margin: 0 0 4px 0; letter-spacing: -0.02em;">Banners Principales del Carrusel</h1>
-            <p style="color: #64748b; font-size: 0.90rem; margin: 0;">
-                Configura los banners interactivos de la tienda. Puedes seleccionar directamente la macrocategoría o categoría sin buscar enlaces manuales.
-            </p>
+    <!-- HEADER DE SECCIÓN EN RECUADRO UNIFICADO -->
+    <div class="admin-header">
+        <div class="admin-header-titles">
+            <h1>Banners Principales del Carrusel</h1>
+            <p>Configura los banners interactivos de la tienda. Puedes seleccionar directamente la macrocategoría o categoría sin buscar enlaces manuales.</p>
         </div>
-        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <div class="admin-header-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
             <button type="button" onclick="window.agregarNuevoBanner()" style="background: #15803d; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 0.88rem; color: #ffffff; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(21,128,61,0.25);">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 <span>Agregar Banner</span>

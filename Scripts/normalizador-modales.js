@@ -5,10 +5,8 @@
     window.normalizadorModalesActivo = true;
 
     const selectoresCierre = [
-        '.btn-close-universal', '[class*="modal" i][class*="close" i]:not(.modal-close-glyph)',
-        '.sidebar-close', '.sidebar-close-btn', '.staff-sidebar-close', '.btn-close-cart',
-        '.product-detail-close', '.btn-close-mobile-filtros',
-        '[aria-label*="cerrar" i]', '[title*="cerrar" i]'
+        '.sidebar-close', '.sidebar-close-btn', '.staff-sidebar-close',
+        '.product-detail-close', '.btn-close-mobile-filtros'
     ].join(',');
     const selectorDialogo = '[class*="modal" i], [role="dialog"], [aria-modal="true"]';
 
@@ -19,16 +17,9 @@
     }
 
     function normalizarCierre(boton) {
+        if (boton.classList.contains('btn-close-cart')) return;
         if (boton.closest('[class*="toast" i]')) return;
         boton.classList.add('btn-close-universal');
-        const simbolo = (boton.textContent || '').trim();
-        if (!/^(×|✕|✖|x)$/i.test(simbolo) || boton.children.length > 0) return;
-        const icono = document.createElement('span');
-        icono.className = 'modal-close-glyph';
-        icono.setAttribute('aria-hidden', 'true');
-        icono.textContent = simbolo;
-        boton.textContent = '';
-        boton.appendChild(icono);
     }
 
     function normalizar(raiz) {

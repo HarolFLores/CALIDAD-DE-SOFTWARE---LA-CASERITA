@@ -10,7 +10,7 @@ class PedidoModel{
     }
 
     public function getPedidosByUsuario($idUsuario){
-        $sql = "SELECT p.id_pedido, p.total, p.estado, p.tipo_entrega, p.observacion, p.fecha, mp.nombre AS metodo_pago,
+        $sql = "SELECT p.id_pedido, p.total, p.estado, p.tipo_entrega, p.observacion, p.fecha, p.leido_cliente, mp.nombre AS metodo_pago,
                     d.departamento, d.provincia, d.distrito, d.calle, d.referencia
                 FROM pedido p LEFT JOIN metodo_pago mp ON mp.id_metodo = p.id_metodo
                 LEFT JOIN direccion d ON d.id_direccion = p.id_direccion
@@ -21,6 +21,43 @@ class PedidoModel{
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function obtenerPedidosActivosPorUsuario($idUsuario){
+        $sql = "SELECT id_pedido, total, estado, tipo_entrega, fecha, leido_cliente 
+                FROM pedido 
+                WHERE id_usuario = :id_usuario 
+                  AND LOWER(estado) NOT IN ('entregado', 'cancelado', 'rechazado')
+                ORDER BY fecha DESC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':id_usuario', (int)$idUsuario, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function obtenerCantidadPedidosNoLeidos($idUsuario){
+        $sql = "SELECT COUNT(*) FROM pedido 
+                WHERE id_usuario = :id_usuario 
+                  AND leido_cliente = 0";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':id_usuario', (int)$idUsuario, PDO::PARAM_INT);
+        $stmt->execute();
+        return (int)$stmt->fetchColumn();
+    }
+
+    public function marcarPedidoLeido($idPedido, $idUsuario){
+        $sql = "UPDATE pedido SET leido_cliente = 1 WHERE id_pedido = :id_pedido AND id_usuario = :id_usuario";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':id_pedido', (int)$idPedido, PDO::PARAM_INT);
+        $stmt->bindValue(':id_usuario', (int)$idUsuario, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
+    public function marcarTodosPedidosLeidos($idUsuario){
+        $sql = "UPDATE pedido SET leido_cliente = 1 WHERE id_usuario = :id_usuario AND leido_cliente = 0";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':id_usuario', (int)$idUsuario, PDO::PARAM_INT);
+        return $stmt->execute();
     }
 
     public function getPedidoByIdAndUsuario($idPedido, $idUsuario){
@@ -153,15 +190,39 @@ class PedidoModel{
             $codigoPedido = 'PED-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -5));
 
             $nombreMetodo = strtolower(trim($metodoPago['nombre']));
-            $esDigital = (strpos($nombreMetodo, 'yape') !== false || strpos($nombreMetodo, 'plin') !== false || strpos($nombreMetodo, 'transferencia') !== false);
-            $requiereVerificacion = !empty($metodoPago['requiere_comprobante']) || $esDigital;
+            $esEfectivo = (strpos($nombreMetodo, 'efectivo') !== false || strpos($nombreMetodo, 'recibir') !== false);
+            $esAprobacionDirecta = !empty($datosVoucher['aprobacion_directa']);
+            $esPasarela = !$esEfectivo && !$esAprobacionDirecta && !empty($metodoPago['activo']);
+            $requiereVerificacion = !empty($metodoPago['requiere_comprobante']);
 
-            if ($requiereVerificacion) {
+            if ($esAprobacionDirecta) {
+                $estadoPedido = 'En Preparacion';
+                $estadoPago = 'pagado';
+                $pasarelaId = $datosVoucher['pasarela_id'] ?? 'mercadopago';
+                $pasarelaStatus = 'approved';
+                $pasarelaPaymentId = $datosVoucher['codigo'] ?? null;
+                $pasarelaPaymentType = $datosVoucher['billetera'] ?? null;
+            } elseif ($esPasarela) {
+                $estadoPedido = 'Pendiente';
+                $estadoPago = 'pendiente_pasarela';
+                $pasarelaId = 'mercadopago';
+                $pasarelaStatus = 'pending';
+                $pasarelaPaymentId = null;
+                $pasarelaPaymentType = null;
+            } elseif ($requiereVerificacion) {
                 $estadoPedido = 'Por Verificar';
                 $estadoPago = 'pendiente_verificacion';
+                $pasarelaId = null;
+                $pasarelaStatus = null;
+                $pasarelaPaymentId = null;
+                $pasarelaPaymentType = null;
             } else {
                 $estadoPedido = 'En Preparacion';
                 $estadoPago = ($tipoEntrega === 'delivery') ? 'pendiente' : 'pagado';
+                $pasarelaId = null;
+                $pasarelaStatus = null;
+                $pasarelaPaymentId = null;
+                $pasarelaPaymentType = null;
             }
 
             $tipoEntregaBD = ($tipoEntrega === 'delivery') ? 'delivery' : 'tienda';
@@ -210,6 +271,10 @@ class PedidoModel{
                             total,
                             estado,
                             metodo_pago,
+                            pasarela_id,
+                            pasarela_status,
+                            pasarela_payment_id,
+                            pasarela_payment_type,
                             direccion_envio,
                             observacion,
                             fecha,
@@ -228,6 +293,10 @@ class PedidoModel{
                             :total,
                             :estado,
                             :metodo_pago,
+                            :pasarela_id,
+                            :pasarela_status,
+                            :pasarela_payment_id,
+                            :pasarela_payment_type,
                             :direccion_envio,
                             :observacion,
                             NOW(),
@@ -253,6 +322,10 @@ class PedidoModel{
             $stmtPedido->bindValue(':total', $total);
             $stmtPedido->bindValue(':estado', $estadoPedido);
             $stmtPedido->bindValue(':metodo_pago', $metodoPago['nombre'] ?? 'Web');
+            $stmtPedido->bindValue(':pasarela_id', $pasarelaId);
+            $stmtPedido->bindValue(':pasarela_status', $pasarelaStatus);
+            $stmtPedido->bindValue(':pasarela_payment_id', $pasarelaPaymentId);
+            $stmtPedido->bindValue(':pasarela_payment_type', $pasarelaPaymentType);
             $stmtPedido->bindValue(':direccion_envio', $direccionTexto);
             $stmtPedido->bindValue(':observacion', $observacion);
             $stmtPedido->execute();
@@ -294,27 +367,28 @@ class PedidoModel{
                 ]);
             }
 
-            // Si es Pago Digital (Yape / Plin / Transferencia): Registrar verificación de pago
-            if ($requiereVerificacion) {
-                if (!empty($datosVoucher['voucher'])) {
-                    $sqlPV = "INSERT INTO pago_verificacion (
-                                id_pedido, id_metodo, codigo_operacion, celular_remitente, titular_origen, captura_voucher, monto_reportado, estado_verificacion, fecha_envio
-                              ) VALUES (
-                                :id_pedido, :id_metodo, :cod, :cel, :tit, :cap, :monto, 'Pendiente', NOW()
-                              )";
-                    $stmtPV = $this->conn->prepare($sqlPV);
-                    $stmtPV->execute([
-                        ':id_pedido' => $idPedido,
-                        ':id_metodo' => $idMetodo,
-                        ':cod' => $datosVoucher['codigo'] ?? 'S/C',
-                        ':cel' => $datosVoucher['celular'] ?? '',
-                        ':tit' => $datosVoucher['titular'] ?? '',
-                        ':cap' => $datosVoucher['voucher'],
-                        ':monto' => $total
-                    ]);
-                }
-            } else {
-                // Si no requiere verificación (Efectivo / Pago directo): Descontar stock y registrar Kardex
+            // Si es Pago Digital (Voucher tradicional o Aprobación Directa con datos ingresados):
+            if (!empty($datosVoucher['celular']) || !empty($datosVoucher['codigo'])) {
+                $sqlPV = "INSERT INTO pago_verificacion (
+                            id_pedido, id_metodo, codigo_operacion, celular_remitente, titular_origen, captura_voucher, monto_reportado, estado_verificacion, fecha_envio, fecha_verificacion
+                          ) VALUES (
+                            :id_pedido, :id_metodo, :cod, :cel, :tit, :cap, :monto, :estado_v, NOW(), " . ($esAprobacionDirecta ? "NOW()" : "NULL") . "
+                          )";
+                $stmtPV = $this->conn->prepare($sqlPV);
+                $stmtPV->execute([
+                    ':id_pedido' => $idPedido,
+                    ':id_metodo' => $idMetodo,
+                    ':cod' => $datosVoucher['codigo'] ?? 'S/C',
+                    ':cel' => $datosVoucher['celular'] ?? '',
+                    ':tit' => $datosVoucher['titular'] ?? 'Cliente Web',
+                    ':cap' => $datosVoucher['voucher'] ?? 'VERIFICACION_AUTOMATICA',
+                    ':monto' => $total,
+                    ':estado_v' => $esAprobacionDirecta ? 'Aprobado' : 'Pendiente'
+                ]);
+            }
+
+            if (!$esPasarela) {
+                // Si es Efectivo o Aprobación Directa: Descontar stock y registrar Kardex de inmediato
                 require_once __DIR__ . '/kardexModel.php';
                 $kardex = new KardexModel();
 
@@ -429,7 +503,8 @@ class PedidoModel{
                 'total' => $total,
                 'estado' => $estadoPedido,
                 'estado_pago' => $estadoPago,
-                'numero_comprobante' => $numeroComprobante
+                'numero_comprobante' => $numeroComprobante,
+                'es_pasarela' => $esPasarela
             ];
         } catch (Throwable $e) {
             if ($this->conn->inTransaction()) {
@@ -583,10 +658,151 @@ class PedidoModel{
             return false;
         }
 
-        $sql = "UPDATE pedido SET estado = :estado WHERE id_pedido = :id_pedido";
+        $sql = "UPDATE pedido
+                SET leido_cliente = CASE
+                        WHEN LOWER(estado) <> LOWER(:estado_comparar) THEN 0
+                        ELSE leido_cliente
+                    END,
+                    estado = :estado
+                WHERE id_pedido = :id_pedido";
         $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':estado_comparar', $estadoFinal, PDO::PARAM_STR);
         $stmt->bindValue(':estado', $estadoFinal, PDO::PARAM_STR);
         $stmt->bindValue(':id_pedido', $idPedido, PDO::PARAM_INT);
         return $stmt->execute();
+    }
+
+    public function getPedidoByCodigo(string $codigoPedido)
+    {
+        $sql = "SELECT p.*, mp.nombre AS metodo_pago, u.nombre, u.apellido, u.correo, u.telefono
+                FROM pedido p
+                INNER JOIN usuario u ON u.id_usuario = p.id_usuario
+                LEFT JOIN metodo_pago mp ON mp.id_metodo = p.id_metodo
+                WHERE p.codigo_pedido = :codigo LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([':codigo' => $codigoPedido]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getPedidoByPreferenceId(string $preferenceId)
+    {
+        $sql = "SELECT p.*, mp.nombre AS metodo_pago, u.nombre, u.apellido, u.correo, u.telefono
+                FROM pedido p
+                INNER JOIN usuario u ON u.id_usuario = p.id_usuario
+                LEFT JOIN metodo_pago mp ON mp.id_metodo = p.id_metodo
+                WHERE p.pasarela_preference_id = :pref LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([':pref' => $preferenceId]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function actualizarPreferenciaPasarela(int $idPedido, string $preferenceId): bool
+    {
+        $sql = "UPDATE pedido SET pasarela_preference_id = :pref WHERE id_pedido = :id";
+        $stmt = $this->conn->prepare($sql);
+        return $stmt->execute([':pref' => $preferenceId, ':id' => $idPedido]);
+    }
+
+    public function confirmarPagoPasarela(int $idPedido, string $paymentId, string $status = 'approved', string $paymentType = 'credit_card'): bool
+    {
+        try {
+            $this->conn->beginTransaction();
+
+            $stmtP = $this->conn->prepare("SELECT * FROM pedido WHERE id_pedido = :id FOR UPDATE");
+            $stmtP->execute([':id' => $idPedido]);
+            $pedido = $stmtP->fetch(PDO::FETCH_ASSOC);
+
+            if (!$pedido) {
+                $this->conn->rollBack();
+                return false;
+            }
+
+            // Si ya fue aprobado y procesado, retornar true sin duplicar kardex
+            if ($pedido['pasarela_status'] === 'approved' && $pedido['estado'] === 'En Preparacion') {
+                $this->conn->commit();
+                return true;
+            }
+
+            // 1. Actualizar estado del pedido
+            $sqlUpd = "UPDATE pedido SET 
+                        estado = 'En Preparacion',
+                        leido_cliente = 0,
+                        pasarela_id = 'mercadopago',
+                        pasarela_payment_id = :payment_id,
+                        pasarela_status = :status,
+                        pasarela_payment_type = :payment_type
+                       WHERE id_pedido = :id";
+            $stmtUpd = $this->conn->prepare($sqlUpd);
+            $stmtUpd->execute([
+                ':payment_id'   => $paymentId,
+                ':status'       => $status,
+                ':payment_type' => $paymentType,
+                ':id'           => $idPedido
+            ]);
+
+            // 2. Actualizar estado de pago en venta
+            $this->conn->prepare("UPDATE venta SET estado_pago = 'pagado' WHERE id_pedido = :id")
+                       ->execute([':id' => $idPedido]);
+
+            // 3. Descontar stock de inventario y registrar Kardex de salida
+            require_once __DIR__ . '/kardexModel.php';
+            $kardex = new KardexModel();
+
+            $sqlDet = "SELECT dp.*, p.stock, COALESCE(p.precio_costo, 0.00) AS precio_costo, i.id_inventario, COALESCE(i.stock_actual, p.stock) AS stock_actual
+                       FROM detalle_pedido dp
+                       JOIN producto p ON dp.id_producto = p.id_producto
+                       LEFT JOIN inventario i ON i.id_producto = p.id_producto
+                       WHERE dp.id_pedido = :id";
+            $stmtDet = $this->conn->prepare($sqlDet);
+            $stmtDet->execute([':id' => $idPedido]);
+            $detalles = $stmtDet->fetchAll(PDO::FETCH_ASSOC);
+
+            $sqlInv = "UPDATE inventario SET stock_actual = stock_actual - :cantidad WHERE id_producto = :id_producto AND stock_actual >= :cantidad";
+            $stmtInv = $this->conn->prepare($sqlInv);
+
+            $sqlProd = "UPDATE producto SET stock = stock - :cantidad WHERE id_producto = :id_producto AND stock >= :cantidad";
+            $stmtProd = $this->conn->prepare($sqlProd);
+
+            foreach ($detalles as $det) {
+                $cant = (float)$det['cantidad'];
+                if (!empty($det['id_inventario'])) {
+                    $stmtInv->execute([':cantidad' => $cant, ':id_producto' => $det['id_producto']]);
+                }
+                $stmtProd->execute([':cantidad' => $cant, ':id_producto' => $det['id_producto']]);
+
+                $stockAnt = (float)$det['stock_actual'];
+                $stockNuevo = max(0, $stockAnt - $cant);
+
+                $kardex->registrarMovimiento(
+                    $det['id_producto'],
+                    $pedido['id_usuario'],
+                    'SALIDA',
+                    'Pago Aprobado Mercado Pago #' . $pedido['codigo_pedido'],
+                    $cant,
+                    (float)$det['precio_costo'],
+                    (float)$det['precio_unitario'],
+                    $stockAnt,
+                    $stockNuevo,
+                    $idPedido,
+                    'pedido'
+                );
+            }
+
+            $this->conn->commit();
+            return true;
+        } catch (Throwable $e) {
+            if ($this->conn->inTransaction()) {
+                $this->conn->rollBack();
+            }
+            error_log("Error confirmando pago pasarela: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function cancelarPedidoPasarela(int $idPedido, string $status = 'rejected'): bool
+    {
+        $sql = "UPDATE pedido SET estado = 'Cancelado', leido_cliente = 0, pasarela_status = :status WHERE id_pedido = :id";
+        $stmt = $this->conn->prepare($sql);
+        return $stmt->execute([':status' => $status, ':id' => $idPedido]);
     }
 }

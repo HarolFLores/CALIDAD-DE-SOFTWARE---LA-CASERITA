@@ -1,17 +1,10 @@
 <?php
-try {
-    $pdo = new PDO('mysql:host=localhost;dbname=lacaserita_db;charset=utf8', 'root', '');
-    $stmt = $pdo->query("SHOW TABLES");
-    $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
-    echo "TABLES:\n" . implode("\n", $tables) . "\n\n";
-
-    foreach ($tables as $table) {
-        if (strpos($table, 'img') !== false || strpos($table, 'galer') !== false || strpos($table, 'foto') !== false || strpos($table, 'prod') !== false) {
-            echo "--- Table: $table ---\n";
-            $stmtCols = $pdo->query("DESCRIBE `$table`");
-            print_r($stmtCols->fetchAll(PDO::FETCH_ASSOC));
-        }
-    }
-} catch (Exception $e) {
-    echo "Error: " . $e->getMessage();
+require_once __DIR__ . '/../Core/dataBase.php';
+$db = (new DataBase())->getConnection();
+$st = $db->query("SHOW TABLES LIKE 'configuracion_correo'");
+$row = $st->fetch();
+var_dump($row);
+if ($row) {
+    $q = $db->query("SELECT * FROM configuracion_correo");
+    print_r($q->fetchAll(PDO::FETCH_ASSOC));
 }

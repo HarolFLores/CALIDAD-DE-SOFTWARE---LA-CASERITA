@@ -279,7 +279,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 'Se quitará "' + (nombreProd || 'este producto') + '" del carrito.',
                 'Eliminar'
             );
-            if (!aceptada) return null;
+            if (!aceptada) {
+                cargarCarrito();
+                return null;
+            }
         }
 
         if (boton && boton.disabled) return;
@@ -414,7 +417,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 'Se quitará "' + (nombre || 'este producto') + '" del carrito.',
                 'Eliminar'
             );
-            if (!aceptada) return null;
+            if (!aceptada) {
+                cargarCarrito();
+                return null;
+            }
         }
 
         const formData = new FormData();
@@ -442,6 +448,9 @@ document.addEventListener('DOMContentLoaded', function () {
     window.eliminarProducto = eliminarProducto;
 
     function renderizarCarrito(data) {
+        const cantidadTotal = Number(data?.cantidad_total || 0);
+        actualizarContadorHeader(cantidadTotal);
+
         if (!cartItems || !cartEmpty) {
             console.error(
                 'No se encontró #cartItems o #cartEmpty. Revisa carrito_sidebar.php'
@@ -476,7 +485,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        const cantidadTotal = Number(data?.cantidad_total || 0);
         const subtotal = Number(data?.subtotal || 0);
         const entrega = Number(data?.entrega || 0);
         const total = Number(data?.total || 0);
@@ -759,6 +767,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const nuevaCantidad = cantidadActual + delta;
 
+        // Validar límite de stock si la tarjeta contiene data-stock
+        const maxStock = card && card.dataset.stock !== undefined && card.dataset.stock !== '' ? parseInt(card.dataset.stock, 10) : null;
+        if (delta > 0 && maxStock !== null && !isNaN(maxStock) && maxStock > 0 && nuevaCantidad > maxStock) {
+            if (typeof mostrarToast === 'function') {
+                mostrarToast(`Límite alcanzado. Solo quedan ${maxStock} unidades disponibles.`, 'warning');
+            }
+            return;
+        }
+
         // Cancelar timer debounce pendiente para este producto
         if (debounceActualizarMap.has(idProducto)) {
             clearTimeout(debounceActualizarMap.get(idProducto));
@@ -781,6 +798,7 @@ document.addEventListener('DOMContentLoaded', function () {
             );
             if (!aceptada) {
                 if (qtySpan) qtySpan.textContent = String(cantidadActual);
+                cargarCarrito();
                 return;
             }
 
@@ -1080,4 +1098,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
     window.vaciarCarritoCompleto = vaciarCarritoCompleto;
+    window.solicitarConfirmacionCarrito = solicitarConfirmacionCarrito;
+    window.cargarCarrito = cargarCarrito;
+    window.actualizarCantidad = actualizarCantidad;
+    window.agregarProducto = agregarProducto;
 });

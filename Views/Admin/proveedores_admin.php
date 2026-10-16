@@ -28,7 +28,7 @@ $stats        = $stats ?? ($estadisticas ?? [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Proveedores & Compras - ERP La Caserita</title>
-    <link rel="icon" type="image/png" href="Images/logo.png">
+    <link rel="icon" type="image/png" href="Images/logo_backup.png">
     <link rel="stylesheet" href="Styles/global.css?v=<?= time(); ?>">
     <link rel="stylesheet" href="Styles/styles-home.css?v=<?= time(); ?>">
     <link rel="stylesheet" href="Styles/styles-users-admin.css?v=<?= time(); ?>">
@@ -65,16 +65,16 @@ $stats        = $stats ?? ($estadisticas ?? [
 
 
 <main class="proveedores-view-wrapper">
-    <!-- Header Principal -->
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:22px;">
-        <div>
-            <h1 style="font-size:1.55rem; font-weight:800; color:#0f172a; margin:0 0 4px 0; display:flex; align-items:center; gap:10px;">
+    <!-- Header Principal en Recuadro Unificado -->
+    <div class="admin-header">
+        <div class="admin-header-titles">
+            <h1 style="display:flex; align-items:center; gap:10px;">
                 <i class="fa-solid fa-handshake" style="color:#15803D;"></i>
                 Directorio de Proveedores
             </h1>
-            <p style="color:#64748b; font-size:0.90rem; margin:0;">Catálogo maestro de empresas proveedoras, datos fiscales (RUC), contactos y acuerdos comerciales.</p>
+            <p>Catálogo maestro de empresas proveedoras, datos fiscales (RUC), contactos y acuerdos comerciales.</p>
         </div>
-        <div style="display:flex; gap:10px; align-items:center;" class="prov-header-actions">
+        <div class="admin-header-actions prov-header-actions" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
             <button type="button" onclick="abrirModalProveedor()" class="btn btn-primary" style="background:#15803D; color:#fff; border:none; padding:10px 18px; border-radius:10px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 12px rgba(21,128,61,0.22); transition:all 0.2s ease;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 <span>Nuevo Proveedor</span>
@@ -163,7 +163,7 @@ $stats        = $stats ?? ($estadisticas ?? [
                         <th style="width: 90px; white-space: nowrap;">ESTADO</th>
                         <th style="width: 70px; text-align: center; white-space: nowrap;">COMPRAS</th>
                         <th style="width: 90px; text-align: right; white-space: nowrap;">MONTO</th>
-                        <th style="width: 130px; text-align: right; white-space: nowrap;">ACCIONES</th>
+                        <th style="width: 48px; text-align: center;"></th>
                     </tr>
                 </thead>
                 <tbody id="tbodyProveedores">
@@ -455,7 +455,8 @@ $stats        = $stats ?? ($estadisticas ?? [
 
 <!-- MODAL: CONFIRMACIÓN DE ESTADO (Idéntico a Imagen 2) -->
 <div class="prov-modal-overlay" id="modalConfirmacion" onclick="if(event.target===this)cerrarModal('modalConfirmacion')">
-    <div class="prov-modal-card" style="max-width: 420px; text-align: center; padding: 26px; border-radius: 20px;">
+    <div class="prov-modal-card" style="max-width: 420px; text-align: center; padding: 26px; border-radius: 20px; position: relative;">
+        <button type="button" class="btn-close-universal" onclick="cerrarModal('modalConfirmacion')" aria-label="Cerrar modal" style="position: absolute; top: 14px; right: 14px;">&times;</button>
         <div id="confIconoWrapper" style="width: 56px; height: 56px; margin: 0 auto 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #fee2e2;">
             <svg id="confIcono" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
@@ -586,27 +587,29 @@ $stats        = $stats ?? ($estadisticas ?? [
                         <td style="white-space: nowrap;"><span style="font-weight:600; color:#334155; font-size:0.85rem;">${p.telefono || 'Sin teléfono'}</span></td>
                         <td><span style="color:#64748b; font-size:0.82rem; word-break: break-all;">${p.correo || 'Sin correo'}</span></td>
                         <td style="white-space: nowrap;">
-                            <span class="badge-status ${esActivo ? 'activo' : 'inactivo'}">
-                                <span class="badge-status-dot"></span>
+                            <span class="status-pill ${esActivo ? 'activo' : 'inactivo'}">
                                 ${esActivo ? 'Activo' : 'Inactivo'}
                             </span>
                         </td>
                         <td style="text-align: center; white-space: nowrap;"><span style="font-weight:700; color:#0f172a;">${comprasCount}</span></td>
                         <td style="text-align: right; white-space: nowrap;"><span style="font-weight:800; color:#0f172a;">S/ ${montoComp}</span></td>
-                        <td style="text-align: right; white-space: nowrap;">
-                            <div style="display:inline-flex; gap:6px; justify-content: flex-end; align-items: center;">
-                                <a href="index.php?action=compras_admin" class="btn-action-icon primary" style="background:#0284c7; width:36px; height:36px; min-width:36px; min-height:36px; padding:0; margin:0; box-sizing:border-box; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; text-decoration:none;" title="Ir a Compras y Reposiciones">
-                                    <svg width="17" height="17" viewBox="0 0 640 512" fill="#ffffff"><path d="M256 48c0-26.5 21.5-48 48-48L592 0c26.5 0 48 21.5 48 48l0 416c0 26.5-21.5 48-48 48l-210.7 0c1.8-5 2.7-10.4 2.7-16l0-242.7c18.6-6.6 32-24.4 32-45.3l0-32c0-26.5-21.5-48-48-48l-112 0 0-80zM571.3 347.3c6.2-6.2 6.2-16.4 0-22.6l-64-64c-6.2-6.2-16.4-6.2-22.6 0l-64 64c-6.2 6.2-6.2 16.4 0 22.6s16.4 6.2 22.6 0L480 310.6 480 432c0 8.8 7.2 16 16 16s16-7.2 16-16l0-121.4 36.7 36.7c6.2 6.2 16.4 6.2 22.6 0zM0 176c0-8.8 7.2-16 16-16l352 0c8.8 0 16 7.2 16 16l0 32c0 8.8-7.2 16-16 16L16 224c-8.8 0-16-7.2-16-16l0-32zm352 80l0 224c0 17.7-14.3 32-32 32L64 512c-17.7 0-32-14.3-32-32l0-224 320 0zM144 320c-8.8 0-16 7.2-16 16s7.2 16 16 16l96 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-96 0z"/></svg>
-                                </a>
-                                <button type="button" class="btn-action-icon" style="background:#15803d; width:36px; height:36px; min-width:36px; min-height:36px; padding:0; margin:0; box-sizing:border-box; border-radius:10px; display:inline-flex; align-items:center; justify-content:center;" title="Editar" onclick='abrirModalEditarProveedor(${JSON.stringify(p)})'>
-                                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-                                </button>
-                                <button type="button" class="btn-action-icon ${esActivo ? 'danger' : 'success'}" style="width:36px; height:36px; min-width:36px; min-height:36px; padding:0; margin:0; box-sizing:border-box; border-radius:10px; display:inline-flex; align-items:center; justify-content:center;" title="${esActivo ? 'Inactivar' : 'Activar'}" onclick="confirmarCambioEstado(${p.id_proveedor}, '${esActivo ? 'inactivar' : 'activar'}', '${p.razon_social}')">
-                                    ${esActivo ? 
-                                        '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>' :
-                                        '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="16 9 10 15 8 13"/></svg>'
-                                    }
-                                </button>
+                        <td style="text-align: right; white-space: nowrap; position: relative;">
+                            <div class="table-kebab-wrapper" style="display:inline-block; position:relative; text-align:left;">
+                                <button type="button" class="table-kebab-btn" aria-label="Acciones">⋮</button>
+                                <div class="table-kebab-menu">
+                                    <a href="index.php?action=compras_admin" class="kebab-item">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                                        Ver compras
+                                    </a>
+                                    <button type="button" class="kebab-item" onclick='abrirModalEditarProveedor(${JSON.stringify(p)})'>
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                                        Editar
+                                    </button>
+                                    <button type="button" class="kebab-item ${esActivo ? 'danger' : ''}" onclick="confirmarCambioEstado(${p.id_proveedor}, '${esActivo ? 'inactivar' : 'activar'}', '${p.razon_social}')">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                                        ${esActivo ? 'Desactivar' : 'Activar'}
+                                    </button>
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -665,7 +668,7 @@ $stats        = $stats ?? ($estadisticas ?? [
                         <td><span style="font-weight:700; color:#2563eb; font-family:monospace;">${h.tipo_comprobante || 'Compra'} - ${h.numero_comprobante || 'S/N'}</span></td>
                         <td><div style="font-weight:700; color:#0f172a;">${h.proveedor_nombre || 'Proveedor Desconocido'}</div></td>
                         <td><span style="font-size:0.95rem; font-weight:800; color:#15803d;">S/ ${totalC}</span></td>
-                        <td><span class="badge-status activo"><span class="badge-status-dot"></span>${h.estado || 'Procesada'}</span></td>
+                        <td><span class="status-pill activo">${h.estado || 'Procesada'}</span></td>
                         <td><span style="color:#64748b; font-size:0.82rem;">${h.usuario_nombre || 'Administrador'}</span></td>
                     </tr>
                 `;

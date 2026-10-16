@@ -58,7 +58,7 @@ $distritosJson = json_encode(array_map(function($d) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout &mdash; La Caserita</title>
     <meta name="description" content="Completa tu pedido. Selecciona modalidad de entrega, m&eacute;todo de pago y confirma tu orden.">
-    <link rel="icon" type="image/png" href="Images/logo.png">
+    <link rel="icon" type="image/png" href="Images/logo_backup.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -410,71 +410,134 @@ $distritosJson = json_encode(array_map(function($d) {
                         </label>
                         
                         <?php if (strpos($nombreM, 'efectivo') !== false || strpos($nombreM, 'recibir') !== false): ?>
-                            <!-- Panel Efectivo -->
-                            <div id="seccionEfectivo" class="co-dynamic-panel" style="display:<?= $idx === 0 ? 'block' : 'none'; ?>; margin-bottom:20px; padding:20px; background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0; width:100%;">
-                                <h4 style="margin:0 0 12px; color:#1e293b; font-size:1.1rem;">Pago en efectivo</h4>
-                                <p style="margin:0 0 16px; font-size:0.95rem; color:#475569;">Monto a pagar: <strong id="montoEfectivoTexto" style="color:#d32f2f; font-size:1.2rem;"><?= $formatearMoneda($total); ?></strong></p>
-                                <div class="co-form-group">
-                                    <label style="font-weight:600; font-size:0.95rem;">¿Con cuánto vas a pagar? <span class="co-required">*</span></label>
-                                    <input type="number" step="0.10" name="monto_efectivo" id="monto_efectivo" placeholder="Ej. 50.00" style="width:100%; padding:14px; border:1px solid #cbd5e1; border-radius:8px; font-size:1.1rem; margin-top:8px;">
-                                    <small id="efectivoError" style="color:#d32f2f; display:none; margin-top:6px;">El monto ingresado debe ser mayor o igual al total a pagar.</small>
+                            <!-- Panel Efectivo Moderno y Centrado (Imagen 5) -->
+                            <div id="seccionEfectivo" class="co-dynamic-panel" style="display:<?= $idx === 0 ? 'block' : 'none'; ?>; margin-bottom:20px; padding:24px; background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0; width:100%;">
+                                <!-- Tarjeta Visual Efectivo (Color Sólido, Sin Degradado) -->
+                                <div style="background:#15803d; border-radius:16px; padding:20px 24px; color:#fff; box-shadow:0 8px 24px rgba(21, 128, 61, 0.22); max-width:340px; margin:0 auto 20px; text-align:center;">
+                                    <div style="display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; background:#4ade80; border-radius:50%; color:#052e16; font-weight:900; font-size:1.3rem; margin-bottom:6px; box-shadow:0 3px 10px rgba(74,222,128,0.4);">
+                                        💵
+                                    </div>
+                                    <div style="font-family:'Inter', sans-serif; font-size:1.6rem; font-weight:800; letter-spacing:-0.5px; line-height:1.2; margin-bottom:4px;">
+                                        Pago en Efectivo
+                                    </div>
+                                    <div style="font-size:0.85rem; opacity:0.95; font-weight:500;">
+                                        Pagas contra entrega al recibir tu pedido
+                                    </div>
+                                </div>
+
+                                <div style="max-width:360px; margin:0 auto;">
+                                    <!-- Tarjeta con Total a pagar -->
+                                    <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:12px 16px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
+                                        <span style="font-size:0.92rem; color:#64748b; font-weight:600;">Total a pagar:</span>
+                                        <strong id="montoEfectivoTexto" style="color:#15803d; font-size:1.3rem; font-weight:800;"><?= $formatearMoneda($total); ?></strong>
+                                    </div>
+
+                                    <!-- Campo: ¿Con cuánto vas a pagar? -->
+                                    <div class="co-form-group" style="margin-bottom:12px;">
+                                        <label for="monto_efectivo" style="display:block; font-weight:600; font-size:0.9rem; color:#1e293b; margin-bottom:6px;">
+                                            ¿Con cuánto vas a pagar? <span class="co-required" style="color:#d32f2f;">*</span>
+                                        </label>
+                                        <div style="display:flex; align-items:center; border:1.5px solid #cbd5e1; border-radius:8px; overflow:hidden; background:#fff; transition:border 0.2s;" id="boxMontoEfectivo">
+                                            <span style="background:#f1f5f9; color:#475569; font-weight:700; font-size:1rem; padding:12px 14px; border-right:1px solid #cbd5e1; user-select:none;">
+                                                S/
+                                            </span>
+                                            <input type="number" step="0.10" name="monto_efectivo" id="monto_efectivo" placeholder="Ej. <?= number_format($total, 2, '.', ''); ?>" style="flex:1; border:none; padding:12px 14px; font-size:1.05rem; font-weight:600; font-family:monospace; outline:none; color:#0f172a;">
+                                        </div>
+                                        <small id="efectivoError" style="color:#d32f2f; display:none; margin-top:6px; font-size:0.85rem; font-weight:500;">El monto ingresado debe ser mayor o igual al total a pagar.</small>
+                                    </div>
+
+                                    <!-- Botones rápidos de sugerencia de montos -->
+                                    <div style="display:flex; gap:6px; margin-bottom:14px;">
+                                        <button type="button" class="btn-sugerencia-efectivo" data-monto="exacto" style="flex:1; padding:7px 2px; font-size:0.78rem; font-weight:700; background:#fff; border:1px solid #cbd5e1; border-radius:6px; cursor:pointer; color:#334155; transition:all 0.2s;">Exacto</button>
+                                        <button type="button" class="btn-sugerencia-efectivo" data-monto="20" style="flex:1; padding:7px 2px; font-size:0.78rem; font-weight:700; background:#fff; border:1px solid #cbd5e1; border-radius:6px; cursor:pointer; color:#334155; transition:all 0.2s;">S/ 20</button>
+                                        <button type="button" class="btn-sugerencia-efectivo" data-monto="50" style="flex:1; padding:7px 2px; font-size:0.78rem; font-weight:700; background:#fff; border:1px solid #cbd5e1; border-radius:6px; cursor:pointer; color:#334155; transition:all 0.2s;">S/ 50</button>
+                                        <button type="button" class="btn-sugerencia-efectivo" data-monto="100" style="flex:1; padding:7px 2px; font-size:0.78rem; font-weight:700; background:#fff; border:1px solid #cbd5e1; border-radius:6px; cursor:pointer; color:#334155; transition:all 0.2s;">S/ 100</button>
+                                    </div>
+
+                                    <!-- Indicador dinámico de vuelto -->
+                                    <div id="boxVueltoEfectivo" style="display:none; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:8px; padding:10px 14px; margin-bottom:14px; align-items:center; justify-content:space-between;">
+                                        <span style="font-size:0.85rem; color:#065f46; font-weight:600;">Vuelto estimado:</span>
+                                        <strong id="textoVueltoEfectivo" style="color:#047857; font-size:1.15rem; font-weight:800;">S/ 0.00</strong>
+                                    </div>
+
+                                    <!-- Nota informativa repartidor -->
+                                    <div style="display:flex; align-items:center; gap:8px; font-size:0.82rem; color:#64748b; line-height:1.4;">
+                                        <span style="font-size:1.1rem;">🛵</span>
+                                        <span>El repartidor llevará el cambio indicado al entregar tu pedido en tu puerta.</span>
+                                    </div>
                                 </div>
                             </div>
                         <?php elseif ($esYapePlin): ?>
-                            <!-- Panel Yape / Plin -->
-                            <div id="seccionYapePlin" class="co-dynamic-panel" style="display:<?= $idx === 0 ? 'block' : 'none'; ?>; margin-bottom:20px; width:100%;">
-                                <div class="co-yape-plin-tabs" style="display:flex; gap:12px; margin-bottom:16px;">
-                                    <button type="button" class="co-yp-tab active" data-target="yape" style="flex:1; padding:12px; border-radius:8px; border:1.5px solid #d32f2f; background:transparent; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; font-weight:bold; color:#111; transition:all 0.2s;">
-                                        <span style="color:#6A1B9A; background:#e1bee7; padding:2px 4px; border-radius:4px; font-size:12px;">Yape</span> Yape
-                                    </button>
-                                    <button type="button" class="co-yp-tab" data-target="plin" style="flex:1; padding:12px; border-radius:8px; border:1.5px solid #e2e8f0; background:transparent; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; font-weight:bold; color:#111; transition:all 0.2s;">
-                                        <span style="color:#00BFA5; background:#b2dfdb; padding:2px 4px; border-radius:4px; font-size:12px;">Plin</span> Plin
-                                    </button>
+                            <!-- Panel Oficial Yape Directo (Imagen 4) -->
+                            <div id="seccionYapePlin" class="co-dynamic-panel" style="display:<?= $idx === 0 ? 'block' : 'none'; ?>; margin-bottom:20px; padding:24px; background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0; width:100%;">
+                                <!-- Tarjeta Visual Yape (Color Sólido, Sin Degradado) -->
+                                <div style="background:#73228B; border-radius:16px; padding:20px 24px; color:#fff; box-shadow:0 8px 24px rgba(115, 34, 139, 0.22); max-width:340px; margin:0 auto 20px; text-align:center;">
+                                    <div style="display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; background:#00d3b8; border-radius:50%; color:#fff; font-weight:900; font-size:1.25rem; margin-bottom:4px; box-shadow:0 3px 10px rgba(0,211,184,0.4);">
+                                        S/
+                                    </div>
+                                    <div style="font-family:'Inter', sans-serif; font-size:2.4rem; font-weight:900; letter-spacing:-1px; line-height:1; font-style:italic; margin-bottom:4px;">
+                                        yape
+                                    </div>
+                                    <div style="font-size:0.85rem; opacity:0.95; font-weight:500;">
+                                        Pago directo por aplicación
+                                    </div>
                                 </div>
-                                <div style="background:#f8fafc; border-radius:12px; padding:20px; border:1px solid #e2e8f0;">
-                                    <div style="display:flex; flex-wrap:wrap; gap:20px; margin-bottom:20px; border-bottom:1px solid #cbd5e1; padding-bottom:20px;">
-                                        <div style="text-align:center; background:#fff; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
-                                            <img id="qrBilletera" src="uploads/qr/qr_yape.svg" alt="QR Oficial" style="max-width:120px; display:block; margin:0 auto;">
-                                            <small style="color:#64748b; margin-top:8px; display:block;">Escanea para pagar</small>
-                                        </div>
-                                        <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
-                                            <h3 style="margin:0 0 8px; font-size:1.1rem; color:#0f172a;">La Caserita S.A.C.</h3>
-                                            <p style="margin:0 0 4px; color:#475569; font-size:0.9rem;">Número: <strong id="numeroBilletera">999-111-222</strong></p>
-                                            <p style="margin:0; color:#475569; font-size:0.9rem;">Monto a transferir: <strong style="color:#d32f2f;"><?= $formatearMoneda($total); ?></strong></p>
-                                        </div>
-                                    </div>
-                                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
-                                        <div class="co-form-group">
-                                            <label id="lblCelularYP" style="font-weight:600; font-size:0.9rem;">Tu celular emisor <span class="co-required">*</span></label>
-                                            <input type="text" name="celular_yape_plin" id="celular_yape_plin" placeholder="Ej: 987 654 321" maxlength="11" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; margin-top:6px;">
-                                        </div>
-                                        <div class="co-form-group">
-                                            <label style="font-weight:600; font-size:0.9rem;">Código de aprobación <span class="co-required">*</span></label>
-                                            <input type="text" name="codigo_yape_plin" id="codigo_yape_plin" placeholder="123 456" maxlength="8" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; margin-top:6px;">
-                                        </div>
-                                    </div>
-                                    <div class="co-form-group" style="margin-top:16px;">
-                                        <label style="font-weight:600; font-size:0.9rem;">Sube la captura de pago <span class="co-required">*</span></label>
-                                        <label for="captura_voucher" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; border: 2px dashed #cbd5e1; border-radius: 12px; background: #fff; cursor: pointer; transition: all 0.3s; color: #475569; margin-top: 6px;">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" stroke="#d32f2f" stroke-width="2" style="margin-bottom:8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                                            <span id="file-upload-name" style="font-weight:600;">Haz clic para seleccionar imagen</span>
+
+                                <p style="margin:0 auto 24px; font-size:0.92rem; color:#475569; text-align:center; max-width:360px; line-height:1.45;">
+                                    Ingresa a tu app <strong>Yape</strong>, abre el menú para ver tu <strong>código de aprobación</strong> y cópialo aquí para completar tu compra.
+                                </p>
+
+                                <!-- Contenedor de formulario centrado simétricamente -->
+                                <div style="max-width:360px; margin:0 auto;">
+                                    <!-- Campo: Celular Yape -->
+                                    <div class="co-form-group" style="margin-bottom:20px;">
+                                        <label for="celular_yape_plin" style="display:block; font-weight:600; font-size:0.9rem; color:#1e293b; margin-bottom:6px;">
+                                            Ingresa tu celular Yape <span class="co-required" style="color:#d32f2f;">*</span>
                                         </label>
-                                        <input type="file" name="captura_voucher" id="captura_voucher" accept="image/*" style="display:none;" onchange="document.getElementById('file-upload-name').textContent = this.files[0] ? this.files[0].name : 'Haz clic para seleccionar imagen';">
+                                        <div style="display:flex; align-items:center; border:1.5px solid #cbd5e1; border-radius:8px; overflow:hidden; background:#fff; transition:border 0.2s;" id="boxCelularYape">
+                                            <span style="background:#f1f5f9; color:#475569; font-weight:700; font-size:1rem; padding:12px 14px; border-right:1px solid #cbd5e1; user-select:none;">
+                                                +51
+                                            </span>
+                                            <input type="tel" name="celular_yape_plin" id="celular_yape_plin" placeholder="987 654 321" maxlength="11" inputmode="numeric" style="flex:1; border:none; padding:12px 14px; font-size:1.05rem; font-weight:600; font-family:monospace; outline:none; color:#0f172a;">
+                                        </div>
                                     </div>
-                                    <input type="hidden" name="billetera_seleccionada" id="billetera_seleccionada" value="Yape">
+
+                                    <!-- Campo: Código de aprobación (6 casillas OTP) -->
+                                    <div class="co-form-group" style="margin-bottom:8px;">
+                                        <label style="display:block; font-weight:600; font-size:0.9rem; color:#1e293b; margin-bottom:8px;">
+                                            Código de aprobación <span class="co-required" style="color:#d32f2f;">*</span>
+                                        </label>
+                                        <div class="yape-otp-wrapper" style="display:flex; gap:8px; justify-content:space-between; width:100%;">
+                                            <input type="text" class="yape-otp-box" maxlength="1" data-idx="0" inputmode="numeric" pattern="[0-9]*" placeholder="0" style="flex:1; min-width:0; height:52px; text-align:center; font-size:1.4rem; font-weight:800; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; color:#73228B; transition:all 0.2s; background:#fff;">
+                                            <input type="text" class="yape-otp-box" maxlength="1" data-idx="1" inputmode="numeric" pattern="[0-9]*" placeholder="0" style="flex:1; min-width:0; height:52px; text-align:center; font-size:1.4rem; font-weight:800; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; color:#73228B; transition:all 0.2s; background:#fff;">
+                                            <input type="text" class="yape-otp-box" maxlength="1" data-idx="2" inputmode="numeric" pattern="[0-9]*" placeholder="0" style="flex:1; min-width:0; height:52px; text-align:center; font-size:1.4rem; font-weight:800; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; color:#73228B; transition:all 0.2s; background:#fff;">
+                                            <input type="text" class="yape-otp-box" maxlength="1" data-idx="3" inputmode="numeric" pattern="[0-9]*" placeholder="0" style="flex:1; min-width:0; height:52px; text-align:center; font-size:1.4rem; font-weight:800; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; color:#73228B; transition:all 0.2s; background:#fff;">
+                                            <input type="text" class="yape-otp-box" maxlength="1" data-idx="4" inputmode="numeric" pattern="[0-9]*" placeholder="0" style="flex:1; min-width:0; height:52px; text-align:center; font-size:1.4rem; font-weight:800; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; color:#73228B; transition:all 0.2s; background:#fff;">
+                                            <input type="text" class="yape-otp-box" maxlength="1" data-idx="5" inputmode="numeric" pattern="[0-9]*" placeholder="0" style="flex:1; min-width:0; height:52px; text-align:center; font-size:1.4rem; font-weight:800; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; color:#73228B; transition:all 0.2s; background:#fff;">
+                                        </div>
+                                        <input type="hidden" name="codigo_yape_plin" id="codigo_yape_plin" value="">
+                                        <input type="hidden" name="billetera_seleccionada" id="billetera_seleccionada" value="Yape">
+                                    </div>
                                 </div>
                             </div>
                         <?php elseif ($esTarjeta): ?>
-                            <!-- Panel Tarjeta -->
-                            <div id="seccionTarjeta" class="co-dynamic-panel" style="display:<?= $idx === 0 ? 'block' : 'none'; ?>; margin-bottom:20px; padding:20px; background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0; width:100%;">
-                                <!-- Tarjeta Visual 3D Flip -->
+                            <!-- Panel Tarjeta con Detección Automática de Marcas (Imagen 2 y 3) -->
+                            <div id="seccionTarjeta" class="co-dynamic-panel" style="display:<?= $idx === 0 ? 'block' : 'none'; ?>; margin-bottom:20px; padding:24px; background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0; width:100%;">
+                                <!-- Tarjeta Visual 3D Flip (Color Sólido, Sin Degradado) -->
                                 <div class="cc-flip-container" style="perspective:1000px; max-width:340px; margin:0 auto 24px;">
                                     <div class="cc-flipper" id="ccFlipper" style="transition:0.6s; transform-style:preserve-3d; position:relative; height:200px; width:100%;">
                                         <!-- Front -->
-                                        <div class="cc-front" style="backface-visibility:hidden; position:absolute; top:0; left:0; width:100%; height:100%; background:#1e3a8a; border-radius:16px; padding:24px; color:#fff; box-shadow:0 8px 24px rgba(30,58,138,0.4); box-sizing:border-box;">
-                                            <div style="display:flex; justify-content:space-between; margin-bottom:30px;">
-                                                <div style="width:48px; height:32px; background:#fbbf24; border-radius:6px; opacity:0.9;"></div>
-                                                <div style="font-weight:800; font-size:1.4rem; font-style:italic;">VISA</div>
+                                        <div class="cc-front" id="ccFrontCard" style="backface-visibility:hidden; position:absolute; top:0; left:0; width:100%; height:100%; background:#1e293b; border-radius:16px; padding:24px; color:#fff; box-shadow:0 8px 24px rgba(0,0,0,0.22); box-sizing:border-box; transition:background 0.35s ease;">
+                                            <div style="display:flex; justify-content:space-between; margin-bottom:28px; align-items:center;">
+                                                <!-- Chip EMV con contactos realistas -->
+                                                <div style="width:44px; height:32px; background:#d97706; border-radius:6px; border:1px solid #fbbf24; position:relative; overflow:hidden;">
+                                                    <div style="width:100%; height:1px; background:#fde047; position:absolute; top:10px;"></div>
+                                                    <div style="width:100%; height:1px; background:#fde047; position:absolute; bottom:10px;"></div>
+                                                    <div style="height:100%; width:1px; background:#fde047; position:absolute; left:20px;"></div>
+                                                </div>
+                                                <div id="ccBrandVisual" style="min-height:28px; display:flex; align-items:center;">
+                                                    <span style="font-weight:900; font-size:1.25rem; font-style:italic; letter-spacing:1px; color:#cbd5e1;">TARJETA</span>
+                                                </div>
                                             </div>
                                             <div id="ccNumVisual" style="font-size:1.4rem; letter-spacing:2px; margin-bottom:24px; font-family:monospace; min-height:26px;">•••• •••• •••• ••••</div>
                                             <div style="display:flex; justify-content:space-between; font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; opacity:0.8; margin-bottom:4px;">
@@ -487,8 +550,8 @@ $distritosJson = json_encode(array_map(function($d) {
                                             </div>
                                         </div>
                                         <!-- Back -->
-                                        <div class="cc-back" style="backface-visibility:hidden; position:absolute; top:0; left:0; width:100%; height:100%; background:#1e3a8a; border-radius:16px; color:#fff; box-shadow:0 8px 24px rgba(30,58,138,0.4); transform:rotateY(180deg); box-sizing:border-box; padding-top:24px;">
-                                            <div style="background:#111; height:40px; width:100%; margin-bottom:16px;"></div>
+                                        <div class="cc-back" id="ccBackCard" style="backface-visibility:hidden; position:absolute; top:0; left:0; width:100%; height:100%; background:#1e293b; border-radius:16px; color:#fff; box-shadow:0 8px 24px rgba(0,0,0,0.22); transform:rotateY(180deg); box-sizing:border-box; padding-top:24px; transition:background 0.35s ease;">
+                                            <div style="background:#09090b; height:40px; width:100%; margin-bottom:16px;"></div>
                                             <div style="padding:0 24px;">
                                                 <div style="text-align:right; font-size:0.8rem; margin-bottom:4px; opacity:0.8;">CVV</div>
                                                 <div style="background:#fff; color:#111; padding:8px 12px; border-radius:4px; text-align:right; font-family:monospace; font-size:1.1rem; min-height:18px;" id="ccCvvVisual">•••</div>
@@ -497,24 +560,48 @@ $distritosJson = json_encode(array_map(function($d) {
                                     </div>
                                 </div>
 
-                                <!-- Formulario Tarjeta -->
+                                <!-- Fila de Logos de Marcas Aceptadas (Solo Visa, Amex y Mastercard) -->
+                                <div style="display:flex; align-items:center; gap:10px; margin-bottom:18px; flex-wrap:wrap;">
+                                    <span style="font-size:0.85rem; color:#475569; font-weight:600;">Tarjetas aceptadas:</span>
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <!-- Visa -->
+                                        <div id="badgeCardVisa" class="cc-brand-badge" title="Visa" style="background:#fff; border:1.5px solid #cbd5e1; border-radius:6px; padding:4px 8px; display:inline-flex; align-items:center; justify-content:center; height:32px; min-width:52px; transition:all 0.25s ease;">
+                                            <span style="font-family:'Arial Black', sans-serif; font-weight:900; font-size:14px; font-style:italic; letter-spacing:0.5px; color:#1434cb;">VISA</span>
+                                        </div>
+                                        <!-- American Express -->
+                                        <div id="badgeCardAmex" class="cc-brand-badge" title="American Express" style="background:#fff; border:1.5px solid #cbd5e1; border-radius:6px; padding:3px 6px; display:inline-flex; align-items:center; justify-content:center; height:32px; min-width:52px; transition:all 0.25s ease;">
+                                            <span style="font-family:'Arial Black', sans-serif; font-size:7.5px; font-weight:900; color:#016FD0; line-height:1.05; text-align:center; text-transform:uppercase;">AMERICAN<br>EXPRESS</span>
+                                        </div>
+                                        <!-- Mastercard -->
+                                        <div id="badgeCardMastercard" class="cc-brand-badge" title="Mastercard" style="background:#fff; border:1.5px solid #cbd5e1; border-radius:6px; padding:4px 8px; display:inline-flex; align-items:center; justify-content:center; height:32px; min-width:52px; transition:all 0.25s ease;">
+                                            <svg viewBox="0 0 36 22" width="30" height="18"><circle cx="12" cy="11" r="8" fill="#EB001B"/><circle cx="22" cy="11" r="8" fill="#F79E1B" fill-opacity="0.88"/></svg>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Formulario Tarjeta con Detección en Tiempo Real -->
                                 <div class="co-form-group" style="margin-bottom:16px;">
-                                    <label style="font-weight:600; font-size:0.9rem;">Número de tarjeta <span class="co-required">*</span></label>
-                                    <input type="text" name="cc_numero" id="cc_numero" placeholder="1234 5678 9012 3456" maxlength="19" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; margin-top:6px;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                        <label style="font-weight:600; font-size:0.9rem; margin:0;">Número de tarjeta <span class="co-required">*</span></label>
+                                        <span id="ccBadgeMarca" style="font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:6px; background:#e2e8f0; color:#475569; display:inline-flex; align-items:center; gap:4px;">
+                                            💳 Tarjeta
+                                        </span>
+                                    </div>
+                                    <input type="text" name="cc_numero" id="cc_numero" placeholder="1234 5678 9012 3456" maxlength="19" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; box-sizing:border-box;">
                                 </div>
                                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
                                     <div class="co-form-group">
                                         <label style="font-weight:600; font-size:0.9rem;">Vencimiento <span class="co-required">*</span></label>
-                                        <input type="text" name="cc_vencimiento" id="cc_vencimiento" placeholder="MM/AA" maxlength="5" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; margin-top:6px;">
+                                        <input type="text" name="cc_vencimiento" id="cc_vencimiento" placeholder="MM/AA" maxlength="5" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; box-sizing:border-box;">
                                     </div>
                                     <div class="co-form-group">
                                         <label style="font-weight:600; font-size:0.9rem;">CVV <span class="co-required">*</span></label>
-                                        <input type="text" name="cc_cvv" id="cc_cvv" placeholder="•••" maxlength="3" oninput="this.value = this.value.replace(/[^0-9]/g, '');" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; margin-top:6px;">
+                                        <input type="password" name="cc_cvv" id="cc_cvv" placeholder="•••" maxlength="4" oninput="this.value = this.value.replace(/[^0-9]/g, '');" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; box-sizing:border-box;">
                                     </div>
                                 </div>
                                 <div class="co-form-group">
                                     <label style="font-weight:600; font-size:0.9rem;">Nombre en la tarjeta <span class="co-required">*</span></label>
-                                    <input type="text" name="cc_nombre" id="cc_nombre" placeholder="JUAN PÉREZ" oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '');" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; margin-top:6px; text-transform:uppercase;">
+                                    <input type="text" name="cc_nombre" id="cc_nombre" placeholder="JUAN PÉREZ" oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '');" style="width:100%; padding:12px; border:1px solid #cbd5e1; border-radius:8px; font-size:1rem; box-sizing:border-box; text-transform:uppercase;">
                                 </div>
                             </div>
                         <?php endif; ?>
@@ -587,7 +674,6 @@ $distritosJson = json_encode(array_map(function($d) {
                     <!-- Bloque Entrega -->
                     <div class="co-confirm-block">
                         <div class="co-confirm-block-header">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
                             <h3>Modalidad de entrega</h3>
                             <button type="button" class="co-edit-link" onclick="goToStep(1)">Editar</button>
                         </div>
@@ -601,7 +687,6 @@ $distritosJson = json_encode(array_map(function($d) {
                     <!-- Bloque Pago -->
                     <div class="co-confirm-block">
                         <div class="co-confirm-block-header">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
                             <h3>M&eacute;todo de pago</h3>
                             <button type="button" class="co-edit-link" onclick="goToStep(2)">Editar</button>
                         </div>
@@ -685,7 +770,6 @@ $distritosJson = json_encode(array_map(function($d) {
                 <h2 id="tituloConfirmarPedido">¿Confirmas tu pedido?</h2>
                 <p>Se enviará la orden con los productos y datos que revisaste.</p>
             </div>
-            <button type="button" class="co-modal-close" data-close-modal="modalConfirmarPedido" aria-label="Cerrar">&times;</button>
         </div>
         <div class="co-modal-body">
             <div class="co-confirm-totals" style="margin:0;">
@@ -895,8 +979,8 @@ function populateConfirmation() {
     }
 
     if (mEl) mEl.innerHTML = tipo === 'delivery'
-        ? '<strong>&#128666; Delivery a domicilio</strong> <span style="margin-left:8px;font-size:0.8rem;background:#f1f5f9;padding:3px 8px;border-radius:6px;color:#334155;">&#9200; ' + hTexto + '</span>'
-        : '<strong>&#127968; Recojo en tienda</strong> <span style="margin-left:8px;font-size:0.8rem;background:#f1f5f9;padding:3px 8px;border-radius:6px;color:#334155;">&#9200; ' + hTexto + '</span>';
+        ? '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><strong style="font-size:0.98rem;color:#0f172a;">Delivery a domicilio</strong> <span style="font-size:0.8rem;background:#f1f5f9;padding:3px 10px;border-radius:6px;color:#475569;font-weight:600;border:1px solid #e2e8f0;">' + hTexto + '</span></div>'
+        : '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><strong style="font-size:0.98rem;color:#0f172a;">Recojo en tienda</strong> <span style="font-size:0.8rem;background:#f1f5f9;padding:3px 10px;border-radius:6px;color:#475569;font-weight:600;border:1px solid #e2e8f0;">' + hTexto + '</span></div>';
 
     if (dEl) {
         if (tipo === 'delivery') {
@@ -916,7 +1000,7 @@ function populateConfirmation() {
     }
 
     var obs = document.getElementById('checkoutObservacion');
-    if (iEl) iEl.textContent = obs && obs.value.trim() ? '&#128172; ' + obs.value.trim() : '';
+    if (iEl) iEl.textContent = obs && obs.value.trim() ? 'Indicaciones: ' + obs.value.trim() : '';
 
     var pagoEl = document.getElementById('confirmMetodoPago');
     var activePayment = document.querySelector('[data-payment-option].active');
@@ -1031,6 +1115,45 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Alternar paneles de pago en tiempo real (Efectivo, Yape, Tarjeta)
+    function cambiarPanelPago(opt) {
+        if (!opt) return;
+        var secEf = document.getElementById('seccionEfectivo');
+        var secYp = document.getElementById('seccionYapePlin');
+        var secTj = document.getElementById('seccionTarjeta');
+
+        if (secEf) secEf.style.display = 'none';
+        if (secYp) secYp.style.display = 'none';
+        if (secTj) secTj.style.display = 'none';
+
+        document.querySelectorAll('.co-dynamic-panel').forEach(function(p) {
+            p.style.display = 'none';
+        });
+
+        var nombre = (opt.dataset.nombreMetodo || '').toLowerCase();
+        if (nombre.indexOf('efectivo') !== -1 || nombre.indexOf('recibir') !== -1) {
+            if (secEf) secEf.style.display = 'block';
+        } else if (nombre.indexOf('yape') !== -1 || nombre.indexOf('plin') !== -1 || nombre.indexOf('billetera') !== -1) {
+            if (secYp) secYp.style.display = 'block';
+        } else if (nombre.indexOf('tarjeta') !== -1 || nombre.indexOf('débito') !== -1 || nombre.indexOf('debito') !== -1 || nombre.indexOf('crédito') !== -1 || nombre.indexOf('credito') !== -1 || nombre.indexOf('card') !== -1) {
+            if (secTj) secTj.style.display = 'block';
+        }
+    }
+
+    document.querySelectorAll('[data-payment-option]').forEach(function(opt) {
+        opt.addEventListener('click', function() {
+            document.querySelectorAll('[data-payment-option]').forEach(function(item) {
+                item.classList.remove('active');
+                var r = item.querySelector('input[type="radio"]');
+                if (r) r.checked = false;
+            });
+            this.classList.add('active');
+            var r = this.querySelector('input[type="radio"]');
+            if (r) r.checked = true;
+            cambiarPanelPago(this);
+        });
+    });
+
     // Navegación entre pasos
     function goNext1() {
         var tipo = document.getElementById('checkoutTipoEntrega');
@@ -1075,7 +1198,15 @@ document.addEventListener('DOMContentLoaded', function() {
     function goNext2() {
         const metodoOption = document.querySelector('[data-payment-option].active');
         const nombreMetodo = (metodoOption && metodoOption.dataset.nombreMetodo) ? metodoOption.dataset.nombreMetodo.toLowerCase() : '';
-        
+
+        function avisar(msg) {
+            if (typeof window.mostrarToast === 'function') {
+                window.mostrarToast(msg, 'error');
+            } else {
+                alert(msg);
+            }
+        }
+
         // Efectivo
         if (nombreMetodo.includes('efectivo') || nombreMetodo.includes('recibir')) {
             const totalTexto = document.getElementById('checkoutTotal2').textContent.replace('S/', '').trim();
@@ -1083,7 +1214,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const montoEf = document.getElementById('monto_efectivo');
             const val = parseFloat(montoEf ? montoEf.value : 0);
             if (isNaN(val) || val < total) {
-                alert('El monto ingresado es menor al total a pagar.');
+                avisar('El monto ingresado es menor al total a pagar.');
                 if (montoEf) montoEf.focus();
                 return;
             }
@@ -1093,20 +1224,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (nombreMetodo.includes('yape') || nombreMetodo.includes('plin')) {
             const celYP = document.getElementById('celular_yape_plin');
             const codYP = document.getElementById('codigo_yape_plin');
-            const voucher = document.getElementById('captura_voucher');
-            const celularLimpio = celYP.value.replace(/\D/g, '');
+            const celularLimpio = celYP ? celYP.value.replace(/\D/g, '') : '';
             if (!celYP || celularLimpio.length < 9 || !celularLimpio.startsWith('9')) {
-                alert('Ingresa un número de celular válido (9 dígitos). Debe empezar con 9.');
+                avisar('Ingresa un número de celular válido (9 dígitos). Debe empezar con 9.');
                 if (celYP) celYP.focus();
                 return;
             }
             if (!codYP || codYP.value.replace(/\D/g, '').length < 6) {
-                alert('Ingresa el código de aprobación (mín. 6 dígitos).');
+                avisar('Ingresa el código de aprobación de 6 dígitos.');
                 if (codYP) codYP.focus();
-                return;
-            }
-            if (!voucher || !voucher.files || voucher.files.length === 0) {
-                alert('Por favor sube la captura de pago.');
                 return;
             }
         }
@@ -1119,22 +1245,22 @@ document.addEventListener('DOMContentLoaded', function() {
             const ccName = document.getElementById('cc_nombre');
             
             if (!ccNum || ccNum.value.replace(/\D/g, '').length < 14) {
-                alert('Ingresa un número de tarjeta válido.');
+                avisar('Ingresa un número de tarjeta válido.');
                 if (ccNum) ccNum.focus();
                 return;
             }
             if (!ccExp || ccExp.value.replace(/\D/g, '').length < 4) {
-                alert('Ingresa una fecha de vencimiento válida (MM/AA).');
+                avisar('Ingresa una fecha de vencimiento válida (MM/AA).');
                 if (ccExp) ccExp.focus();
                 return;
             }
             if (!ccCvv || ccCvv.value.replace(/\D/g, '').length < 3) {
-                alert('Ingresa un CVV válido (3 dígitos).');
+                avisar('Ingresa un código de seguridad (CVV) válido.');
                 if (ccCvv) ccCvv.focus();
                 return;
             }
             if (!ccName || ccName.value.trim().length < 3) {
-                alert('Ingresa el nombre del titular de la tarjeta.');
+                avisar('Ingresa el nombre del titular de la tarjeta.');
                 if (ccName) ccName.focus();
                 return;
             }
@@ -1149,6 +1275,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (b3bs) b3bs.addEventListener('click', function() { goToStep(2); });
 });
 </script>
+
+<div id="checkoutToastContainer" class="co-toast-container" aria-live="polite"></div>
 <script src="Scripts/checkout.js?v=<?= time(); ?>"></script>
 
 </body>

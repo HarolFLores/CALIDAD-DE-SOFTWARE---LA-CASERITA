@@ -13,8 +13,9 @@ $pin_dev_helper = $_SESSION['pin_dev_helper'] ?? null;
     <title>Tienda La Caserita - Verificar Código PIN</title>
     <link rel="stylesheet" href="Styles/global.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="Styles/styles-login.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="Styles/styles-carrito.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="Styles/Vistas/Login/verificarPin.css?v=<?= time(); ?>">
-    <link rel="icon" type="image/png" href="Images/logo.png">
+    <link rel="icon" type="image/png" href="Images/logo_backup.png">
 </head>
 <body>
     <div class="container">
@@ -28,9 +29,7 @@ $pin_dev_helper = $_SESSION['pin_dev_helper'] ?? null;
 
         <div class="right-panel">
             <div class="login-card" style="position: relative;">
-                <a href="index.php" class="btn-close-universal" style="position: absolute; top: 16px; right: 16px; z-index: 50;" title="Volver a la tienda" aria-label="Cerrar">
-                    <span class="modal-close-glyph" aria-hidden="true">&times;</span>
-                </a>
+                <a href="index.php" class="btn-close-cart" style="position: absolute; top: 16px; right: 16px; z-index: 50; text-decoration: none;" title="Volver a la tienda" aria-label="Cerrar">&times;</a>
 
                 <div style="display: flex; justify-content: center; margin-bottom: 12px;">
                     <div style="width: 52px; height: 52px; border-radius: 50%; background: #ecfdf5; border: 1px solid #a7f3d0; display: flex; align-items: center; justify-content: center; color: #15803D;">

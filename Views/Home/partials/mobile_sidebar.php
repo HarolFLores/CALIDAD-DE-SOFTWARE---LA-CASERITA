@@ -4,7 +4,7 @@
  * Exactamente 7 opciones principales con acordeón multinivel,
  * chevrons amplios, listado de 3er orden neutral y resaltado activo.
  */
-require_once __DIR__ . '/navigation_data.php';
+require __DIR__ . '/navigation_data.php';
 
 $nombreUsuarioSidebar = $nombre ?? ($_SESSION['usuario_nombre'] ?? 'Invitado');
 $estaAutenticadoSidebar = isset($_SESSION['usuario_id']);

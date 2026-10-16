@@ -21,7 +21,7 @@ $isAjax = AjaxHelper::isAjax();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Caja Chica & Arqueo — ERP La Caserita</title>
-    <link rel="icon" type="image/png" href="Images/logo.png">
+    <link rel="icon" type="image/png" href="Images/logo_backup.png">
     <link rel="stylesheet" href="Styles/global.css?v=<?= time(); ?>">
     <link rel="stylesheet" href="Styles/styles-home.css?v=<?= time(); ?>">
     <link rel="stylesheet" href="Styles/styles-users-admin.css?v=<?= time(); ?>">
@@ -147,13 +147,13 @@ $isAjax = AjaxHelper::isAjax();
                     <table class="caja-table-custom" id="tablaMovimientosCaja">
                         <thead>
                             <tr>
-                                <th>Hora</th>
-                                <th>Tipo</th>
-                                <th>Categoría</th>
-                                <th>Motivo</th>
-                                <th>Comprobante</th>
-                                <th style="text-align: right;">Monto</th>
-                                <th>Registrado por</th>
+                                <th>HORA</th>
+                                <th>TIPO</th>
+                                <th>CATEGORÍA</th>
+                                <th>MOTIVO</th>
+                                <th>COMPROBANTE</th>
+                                <th style="text-align: right;">MONTO</th>
+                                <th>REGISTRADO POR</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -237,16 +237,16 @@ $isAjax = AjaxHelper::isAjax();
                 <table class="caja-table-custom" id="tablaHistorialCaja">
                     <thead>
                         <tr>
-                            <th>Caja ID</th>
-                            <th>Cajero</th>
-                            <th>Apertura</th>
-                            <th>Cierre</th>
-                            <th style="text-align: right;">Fondo Apertura</th>
-                            <th style="text-align: right;">Ventas Efectivo</th>
-                            <th style="text-align: right;">Esperado</th>
-                            <th style="text-align: right;">Real Contado</th>
-                            <th style="text-align: center;">Diferencia</th>
-                            <th style="text-align: center;">Estado</th>
+                            <th>CAJA ID</th>
+                            <th>CAJERO</th>
+                            <th>APERTURA</th>
+                            <th>CIERRE</th>
+                            <th style="text-align: right;">FONDO APERTURA</th>
+                            <th style="text-align: right;">VENTAS EFECTIVO</th>
+                            <th style="text-align: right;">ESPERADO</th>
+                            <th style="text-align: right;">REAL CONTADO</th>
+                            <th style="text-align: center;">DIFERENCIA</th>
+                            <th style="text-align: center;">ESTADO</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -305,8 +305,8 @@ $isAjax = AjaxHelper::isAjax();
                                         <?php endif; ?>
                                     </td>
                                     <td style="text-align: center; white-space: nowrap;">
-                                        <span style="color: <?= $hs['estado'] === 'abierta' ? '#15803d' : '#475569'; ?>; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px;">
-                                            <?= strtoupper($hs['estado']); ?>
+                                        <span class="status-pill <?= $hs['estado'] === 'abierta' ? 'activo' : 'inactivo'; ?>">
+                                            <?= $hs['estado'] === 'abierta' ? 'Abierta' : 'Cerrada'; ?>
                                         </span>
                                     </td>
                                 </tr>

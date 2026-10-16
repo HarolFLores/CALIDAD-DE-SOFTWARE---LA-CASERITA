@@ -11,6 +11,7 @@ $adminInicial = strtoupper(substr($adminNombre, 0, 1));
 ?>
 
 <script src="Scripts/normalizador-modales.js?v=<?= time(); ?>" defer></script>
+<script src="Scripts/table-kebab-menu.js?v=<?= time(); ?>" defer></script>
 
 <div class="admin-sidebar-overlay" id="adminSidebarOverlay"></div>
 
@@ -25,12 +26,11 @@ $adminInicial = strtoupper(substr($adminNombre, 0, 1));
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
     </div>
-
     <!-- Brand Desktop -->
-    <a href="index.php?action=home_admin" class="sidebar-brand hide-on-mobile" style="padding: 15px 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #e2e8f0; text-decoration: none; background: #ffffff; height: 66px; box-sizing: border-box; z-index: 10;">
-        <img src="Images/logo.png" alt="Logo" class="sidebar-brand-img" style="width: 36px; height: 36px; object-fit: contain; flex-shrink: 0;">
-        <div style="display: flex; flex-direction: column;">
-            <span style="color: #15803D; font-size: 1.25rem; font-weight: 800; line-height: 1.1; margin: 0; letter-spacing: -0.5px;">La Caserita</span>
+    <a href="index.php?action=dashboard_ganancias" class="sidebar-brand hide-on-mobile">
+        <img src="Images/logo_backup.png" alt="Logo" class="sidebar-brand-img">
+        <div class="sidebar-brand-text">
+            <span>La Caserita</span>
         </div>
     </a>
 
@@ -114,15 +114,24 @@ $adminInicial = strtoupper(substr($adminNombre, 0, 1));
         </ul>
 </nav>
 
-    <!-- Footer Sidebar -->
-    <div class="sidebar-footer" style="padding: 15px; border-top: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 8px;">
-        <a href="index.php?action=mi_perfil_admin" class="sidebar-link">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-            Mi Perfil (<?= $adminNombre ?>)
+    <!-- Footer Sidebar (Estilo Referencia: Avatar, Nombre, Rol y Salir) -->
+    <div class="sidebar-footer-user">
+        <a href="index.php?action=mi_perfil_admin" class="sidebar-user-info" title="Mi Perfil">
+            <div class="sidebar-user-avatar">
+                <?= $adminInicial; ?>
+            </div>
+            <div class="sidebar-user-meta">
+                <span class="sidebar-user-name"><?= htmlspecialchars($adminNombre ?: 'Admin'); ?></span>
+                <span class="sidebar-user-role"><?= htmlspecialchars(strtolower($_SESSION['usuario_rol'] ?? 'administrador')); ?></span>
+            </div>
         </a>
-        <a href="index.php?action=logout" onclick="window.location.href='index.php?action=logout'; return false;" class="sidebar-link" style="color: #dc2626; background: #fee2e2;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-            Cerrar Sesión
+        <a href="index.php?action=logout" onclick="window.location.href='index.php?action=logout'; return false;" class="sidebar-user-exit" title="Cerrar sesión">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"></path>
+                <polyline points="10 17 15 12 10 7"></polyline>
+                <line x1="15" y1="12" x2="3" y2="12"></line>
+            </svg>
+            <span>Salir</span>
         </a>
     </div>
 </aside>

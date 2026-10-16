@@ -36,7 +36,7 @@ $cantProveedoresConCompras = count($proveedoresDistintos);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Compras & Reposición - ERP La Caserita</title>
-    <link rel="icon" type="image/png" href="Images/logo.png">
+    <link rel="icon" type="image/png" href="Images/logo_backup.png">
     <link rel="stylesheet" href="Styles/global.css?v=<?= time(); ?>">
     <link rel="stylesheet" href="Styles/styles-home.css?v=<?= time(); ?>">
     <link rel="stylesheet" href="Styles/styles-users-admin.css?v=<?= time(); ?>">
@@ -72,15 +72,15 @@ $cantProveedoresConCompras = count($proveedoresDistintos);
 
 
 <main class="compras-view-wrapper">
-    <!-- Header Principal -->
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:20px;">
-        <div>
-            <h1 style="font-size:1.55rem; font-weight:800; color:#0f172a; margin:0 0 4px 0; display:flex; align-items:center; gap:10px;">
+    <!-- Header Principal en Recuadro Unificado -->
+    <div class="admin-header">
+        <div class="admin-header-titles">
+            <h1 style="display:flex; align-items:center; gap:10px;">
                 Compras y Reposición de Stock
             </h1>
-            <p style="color:#64748b; font-size:0.90rem; margin:0;">Registro de abastecimiento de mercadería a proveedores con impacto automático en Kardex, inventario y costos.</p>
+            <p>Registro de abastecimiento de mercadería a proveedores con impacto automático en Kardex, inventario y costos.</p>
         </div>
-        <div>
+        <div class="admin-header-actions">
             <button type="button" onclick="abrirModalCompra()" class="btn btn-primary" style="background:#15803d; color:#fff; border:none; padding:11px 20px; border-radius:12px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 14px rgba(21,128,61,0.25); font-size:0.94rem; transition:all 0.2s ease;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 <span>Registrar Nueva Compra</span>

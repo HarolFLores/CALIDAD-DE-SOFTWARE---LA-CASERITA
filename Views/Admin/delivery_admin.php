@@ -57,7 +57,7 @@ foreach ($envios as $env) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Logística & Despacho Delivery — ERP La Caserita</title>
-    <link rel="icon" type="image/png" href="Images/logo.png">
+    <link rel="icon" type="image/png" href="Images/logo_backup.png">
     <link rel="stylesheet" href="Styles/global.css?v=<?= time(); ?>">
     <link rel="stylesheet" href="Styles/styles-home.css?v=<?= time(); ?>">
     <link rel="stylesheet" href="Styles/styles-users-admin.css?v=<?= time(); ?>">
@@ -105,7 +105,8 @@ foreach ($envios as $env) {
 
 <!-- Modal Confirmación Reutilizable (Imagen 3 / Ventas) -->
 <div class="deliv-modal-overlay" id="delivConfirmModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.60); z-index: 999999; backdrop-filter: blur(3px); align-items: center; justify-content: center; padding: 16px;">
-    <div style="background: #ffffff; border-radius: 18px; width: min(440px, 94vw); padding: 28px 24px; text-align: center; box-shadow: 0 24px 60px rgba(0,0,0,0.25); margin: auto;">
+    <div style="background: #ffffff; border-radius: 18px; width: min(440px, 94vw); padding: 28px 24px; text-align: center; box-shadow: 0 24px 60px rgba(0,0,0,0.25); margin: auto; position: relative;">
+        <button type="button" class="btn-close-universal" onclick="window.cerrarDelivConfirmacion(true)" aria-label="Cerrar modal" style="position: absolute; top: 14px; right: 14px;">&times;</button>
         <div id="delivConfirmIconBox" style="width: 56px; height: 56px; border-radius: 50%; background: #dcfce7; color: #15803d; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
         </div>
@@ -127,13 +128,11 @@ foreach ($envios as $env) {
 <main class="main-content container-admin" style="padding-top: 25px; padding-bottom: 50px;">
     
 
-    <!-- HEADER DE SECCIÓN -->
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 22px;">
-        <div>
-            <h1 style="font-size: 1.55rem; font-weight: 800; color: #0f172a; margin: 0 0 6px 0; letter-spacing: -0.02em;">Logística y Despacho</h1>
-            <p style="color: #64748b; font-size: 0.88rem; margin: 0;">
-                Supervisa los pedidos con despacho a domicilio, asigna motorizados y actualiza el estado de las entregas en tiempo real.
-            </p>
+    <!-- HEADER DE SECCIÓN EN RECUADRO UNIFICADO -->
+    <div class="admin-header">
+        <div class="admin-header-titles">
+            <h1>Logística y Despacho</h1>
+            <p>Supervisa los pedidos con despacho a domicilio, asigna motorizados y actualiza el estado de las entregas en tiempo real.</p>
         </div>
     </div>
 
@@ -201,7 +200,7 @@ foreach ($envios as $env) {
                         <th style="text-align: right;">TOTAL A COBRAR</th>
                         <th>REPARTIDOR ASIGNADO</th>
                         <th style="text-align: center;">ESTADO DESPACHO</th>
-                        <th style="text-align: right;">ACCIONES</th>
+                        <th style="width: 48px; text-align: center;"></th>
                     </tr>
                 </thead>
                 <tbody id="tbodyDeliv">
@@ -218,7 +217,10 @@ foreach ($envios as $env) {
 <!-- Modal Asignar Repartidor -->
 <div id="modalAsignar" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99999; justify-content: center; align-items: center; padding: 20px;">
     <div style="background: #ffffff; border-radius: 16px; width: 100%; max-width: 440px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15);">
-        <h3 style="margin: 0 0 10px; font-size: 1.2rem; font-weight: 800; color: #0f172a;">Asignar Repartidor al Envío</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: #0f172a;">Asignar Repartidor al Envío</h3>
+            <button type="button" class="btn-close-universal" onclick="window.cerrarModalAsignar()" aria-label="Cerrar modal">&times;</button>
+        </div>
         <p style="margin: 0 0 16px; font-size: 0.85rem; color: #64748b;">Seleccione el conductor o motorizado responsable del despacho.</p>
         <form id="formAsignarRepartidor" action="index.php?action=asignar_repartidor" method="POST" onsubmit="window.enviarAsignarAjax(event)">
             <input type="hidden" name="id_envio" id="idEnvioAsignar">
@@ -244,7 +246,10 @@ foreach ($envios as $env) {
 <!-- Modal Actualizar Estado Delivery & Recojo -->
 <div id="modalEstado" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99999; justify-content: center; align-items: center; padding: 20px;">
     <div style="background: #ffffff; border-radius: 16px; width: 100%; max-width: 460px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15);">
-        <h3 id="delivModalEstadoTitulo" style="margin: 0 0 10px; font-size: 1.2rem; font-weight: 800; color: #0f172a;">Actualizar Estado</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <h3 id="delivModalEstadoTitulo" style="margin: 0; font-size: 1.2rem; font-weight: 800; color: #0f172a;">Actualizar Estado</h3>
+            <button type="button" class="btn-close-universal" onclick="window.cerrarModalEstado()" aria-label="Cerrar modal">&times;</button>
+        </div>
         <p id="delivModalEstadoSubtitulo" style="margin: 0 0 16px; font-size: 0.85rem; color: #64748b;">Cambie el estado del pedido y registre cobro en caso aplique.</p>
         <form id="formActualizarEstado" action="index.php?action=actualizar_estado_delivery" method="POST" onsubmit="window.enviarEstadoAjax(event)">
             <input type="hidden" name="id_envio" id="idEnvioEstado">
@@ -290,7 +295,7 @@ foreach ($envios as $env) {
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                 <span>Detalle del Pedido</span>
             </h3>
-            <button type="button" onclick="window.cerrarModalDetalleDeliv()" style="width: 32px; height: 32px; border: none; border-radius: 50%; background: #f1f5f9; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700;" title="Cerrar">&times;</button>
+            <button type="button" class="btn-close-universal" onclick="window.cerrarModalDetalleDeliv()" aria-label="Cerrar modal">&times;</button>
         </div>
         
         <div id="delivModalBody" style="padding: 20px 22px; overflow-y: auto; flex: 1;">
@@ -588,23 +593,31 @@ foreach ($envios as $env) {
                             `)}
                         </td>
                         <td style="text-align:center;">
-                            <span class="badge-deliv ${estClass}">
+                            <span class="status-pill ${estClass}">
                                 ${est}
                             </span>
                         </td>
                         <td style="text-align:right; white-space:nowrap;">
-                            <div style="display:inline-flex; gap:6px; justify-content: flex-end;">
-                                <button type="button" class="btn-action-icon detalle" title="Previsualizar Detalle del Pedido" onclick="window.abrirDetallePedidoDeliv(${env.id_pedido}, ${env.id_envio})">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            <div class="table-kebab-container">
+                                <button type="button" class="table-kebab-btn" aria-label="Acciones de delivery" title="Opciones">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
                                 </button>
-                                ${!isRec ? `
-                                <button type="button" class="btn-action-icon repartidor" title="Asignar Repartidor" onclick="window.abrirModalAsignar(${env.id_envio})">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg>
-                                </button>
-                                ` : ''}
-                                <button type="button" class="btn-action-icon estado" title="Cambiar Estado" onclick='window.abrirModalEstado(${JSON.stringify(env)})'>
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                                </button>
+                                <div class="table-kebab-menu">
+                                    <button type="button" class="table-kebab-item" onclick="window.abrirDetallePedidoDeliv(${env.id_pedido}, ${env.id_envio})">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                        Ver detalle
+                                    </button>
+                                    ${!isRec ? `
+                                    <button type="button" class="table-kebab-item" onclick="window.abrirModalAsignar(${env.id_envio})">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg>
+                                        Asignar repartidor
+                                    </button>
+                                    ` : ''}
+                                    <button type="button" class="table-kebab-item" onclick='window.abrirModalEstado(${JSON.stringify(env)})'>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                                        Cambiar estado
+                                    </button>
+                                </div>
                             </div>
                         </td>
                     </tr>

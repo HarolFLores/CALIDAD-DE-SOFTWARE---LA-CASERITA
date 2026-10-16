@@ -12,7 +12,7 @@
     <!-- Librería local ultra-rápida y compatible con escaneo 1D y 2D sin depender de internet externo -->
     <script src="Scripts/html5-qrcode.min.js"></script>
     <link rel="stylesheet" href="Styles/Vistas/Cajero/escaner_movil.css?v=<?= time(); ?>">
-    <link rel="icon" type="image/png" href="Images/logo.png">
+    <link rel="icon" type="image/png" href="Images/logo_backup.png">
 </head>
 <body>
 

@@ -1543,6 +1543,42 @@ img {
     border-top: 1px solid var(--co-border);
 }
 
+/* Quitar líneas divisorias y botones proporcionales e iguales en el modal de confirmación final */
+#modalConfirmarPedido .co-modal-head {
+    border-bottom: none;
+    padding-bottom: 6px;
+}
+
+#modalConfirmarPedido .co-modal-body {
+    padding: 10px 24px 18px;
+}
+
+#modalConfirmarPedido .co-modal-foot {
+    border-top: none;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 0 24px 24px;
+}
+
+#modalConfirmarPedido .co-modal-foot .co-btn-secondary,
+#modalConfirmarPedido .co-modal-foot .co-btn-submit {
+    flex: 1 1 50%;
+    min-width: 0;
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 700;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin: 0;
+    box-sizing: border-box;
+}
+
 /* ===== ADDRESS LIST (modal) ===== */
 .co-address-list {
     display: flex;
@@ -1697,16 +1733,193 @@ img {
     margin-top: 2px;
 }
 
-/* ===== TOAST ===== */
+/* ===== TOAST (Modern Floating Alert) ===== */
 .co-toast-container {
     position: fixed;
-    bottom: 24px;
-    right: 24px;
-    z-index: 3000;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    align-items: center;
+    gap: 12px;
+    width: min(500px, calc(100% - 32px));
     pointer-events: none;
+}
+
+.co-toast-card {
+    pointer-events: all;
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 20px;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 12px 36px rgba(15, 23, 42, 0.16), 0 2px 6px rgba(15, 23, 42, 0.08);
+    border: 1px solid #e2e8f0;
+    animation: coToastSlideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
+}
+
+.co-toast-card.error {
+    border-left: 5px solid #dc2626;
+}
+
+.co-toast-card.success {
+    border-left: 5px solid #16a34a;
+}
+
+.co-toast-card.info {
+    border-left: 5px solid #2563eb;
+}
+
+.co-toast-icon-wrap {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.co-toast-card.error .co-toast-icon-wrap {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.co-toast-card.success .co-toast-icon-wrap {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+
+.co-toast-card.info .co-toast-icon-wrap {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.co-toast-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.co-toast-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 3px;
+    line-height: 1.25;
+}
+
+.co-toast-message {
+    font-size: 0.84rem;
+    font-weight: 500;
+    color: #475569;
+    line-height: 1.45;
+    word-break: break-word;
+}
+
+.co-toast-close {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 1.2rem;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: color 0.2s, background 0.2s;
+}
+
+.co-toast-close:hover {
+    color: #0f172a;
+    background: #f1f5f9;
+}
+
+@keyframes coToastSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ===== CLOSE BUTTON (Consistent with Carrito) ===== */
+.btn-close-cart {
+    width: clamp(36px, 8vw, 44px);
+    height: clamp(36px, 8vw, 44px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: clamp(1.4rem, 4vw, 1.8rem);
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-close-cart:hover {
+    background: #f0fdf4;
+    color: #15803d;
+    border-color: #15803d;
+    transform: rotate(90deg);
+}
+
+/* ===== PAYMENT METHOD SUMMARY BADGES & MODAL STYLES ===== */
+.co-payment-config-status {
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.co-badge-status-empty {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.co-badge-status-ok {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: #15803d;
+    background: #dcfce7;
+    padding: 3px 10px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.co-btn-open-modal {
+    background: transparent;
+    border: 1px solid #cbd5e1;
+    color: #1e293b;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.co-btn-open-modal:hover {
+    background: #0f172a;
+    color: #ffffff;
+    border-color: #0f172a;
 }
 
 /* ===== RESPONSIVE ===== */

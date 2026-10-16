@@ -6,6 +6,7 @@
  * grupo_momento   (id_grupo 1..15)
  * categoria       (id_categoria 1..36)
  */
+global $menuMultinivel;
 $menuMultinivel = [
     [
         'titulo'     => 'Frescos y Proteínas',

@@ -4,7 +4,7 @@
  * Exactamente 7 pestañas principales (Inicio, 5 categorías maestras, Ofertas)
  * Con submenús de 2do orden y flyouts de 3er orden, sin botón de WhatsApp.
  */
-require_once __DIR__ . '/navigation_data.php';
+require __DIR__ . '/navigation_data.php';
 
 $esAdmin = (isset($_SESSION['usuario_rol']) && $_SESSION['usuario_rol'] === 'admin');
 $rutaInicio = $esAdmin ? 'index.php?action=home_admin' : 'index.php?action=home_usuario';
