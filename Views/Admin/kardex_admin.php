@@ -37,7 +37,7 @@ $idProdFiltro = isset($_GET['id_producto']) ? (int)$_GET['id_producto'] : 0;
                         <span class="brand-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
                         </span>
-                        <span class="brand-title">Kardex Valorizado & Trazabilidad de Stock</span>
+                        <span class="brand-title">Kardex valorizado</span>
                     </div>
                 </div>
                 <div class="admin-topbar-actions">
@@ -77,67 +77,81 @@ $idProdFiltro = isset($_GET['id_producto']) ? (int)$_GET['id_producto'] : 0;
 
         <div class="kardex-stat-card-square" onclick="window.location.href='index.php?action=compras_admin'" title="Ir a Compras & Reposición">
             <span class="kardex-stat-title">VALORIZACIÓN COSTO</span>
-            <span class="kardex-stat-val" style="color:#0284c7;">S/ <?= number_format($valorizacion['valor_costo_total'] ?? 0, 2); ?></span>
+            <span class="kardex-stat-val">S/ <?= number_format($valorizacion['valor_costo_total'] ?? 0, 2); ?></span>
             <span class="kardex-stat-sub">Capital invertido</span>
         </div>
 
         <div class="kardex-stat-card-square" onclick="window.location.href='index.php?action=ventas_admin'" title="Ir a Ventas & Facturas">
             <span class="kardex-stat-title">VALORIZACIÓN COMERCIAL</span>
-            <span class="kardex-stat-val" style="color:#7c3aed;">S/ <?= number_format($valorizacion['valor_venta_total'] ?? 0, 2); ?></span>
+            <span class="kardex-stat-val">S/ <?= number_format($valorizacion['valor_venta_total'] ?? 0, 2); ?></span>
             <span class="kardex-stat-sub">Precio en venta</span>
         </div>
 
         <div class="kardex-stat-card-square" onclick="window.location.href='index.php?action=dashboard_ganancias'" title="Ir a Dashboard Financiero">
             <span class="kardex-stat-title">UTILIDAD PROYECTADA</span>
-            <span class="kardex-stat-val" style="color:#15803d;">S/ <?= number_format($valorizacion['ganancia_potencial'] ?? 0, 2); ?></span>
+            <span class="kardex-stat-val">S/ <?= number_format($valorizacion['ganancia_potencial'] ?? 0, 2); ?></span>
             <span class="kardex-stat-sub">Margen esperado</span>
         </div>
 
         <div class="kardex-stat-card-square" onclick="window.location.href='index.php?action=compras_admin'" title="Ir a Compras & Reposición (Entradas)">
             <span class="kardex-stat-title">ENTRADAS / COMPRAS</span>
-            <span class="kardex-stat-val" style="color:#15803d;" id="statTotalEntradas">-</span>
+            <span class="kardex-stat-val" id="statTotalEntradas">-</span>
             <span class="kardex-stat-sub">Ingresos registrados</span>
         </div>
 
         <div class="kardex-stat-card-square" onclick="window.location.href='index.php?action=ventas_admin'" title="Ir a Ventas & Facturas (Salidas)">
             <span class="kardex-stat-title">SALIDAS / VENTAS</span>
-            <span class="kardex-stat-val" style="color:#dc2626;" id="statTotalSalidas">-</span>
+            <span class="kardex-stat-val" id="statTotalSalidas">-</span>
             <span class="kardex-stat-sub">Ventas y mermas</span>
         </div>
     </div>
 
-    <!-- 2. Barra de Búsqueda Instantánea & Filtros (Organizada & Responsiva) -->
+    <!-- 2. Filtros del Kardex (Ordenar/Ajustar arriba · Búsqueda/Fechas abajo) -->
     <div class="kardex-controls-bar">
-        <div class="kardex-controls-main">
-            <!-- Buscador en tiempo real -->
+        <!-- Fila superior: título + ordenamiento + exportación + ajuste manual -->
+        <div class="kardex-controls-top">
+            <h2 class="kardex-controls-title">
+                <span class="kardex-title-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-6 9 6v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="3 9 21 9"></polyline><line x1="9" y1="13" x2="15" y2="13"></line></svg>
+                </span>
+                <span>Movimientos de Inventario</span>
+            </h2>
+
+            <div class="kardex-top-actions">
+                <div class="kardex-order-group">
+                    <span class="kardex-control-label">Ordenar:</span>
+                    <select id="kardexOrdenSelect" class="kardex-select-order">
+                        <option value="reciente">Más recientes primero</option>
+                        <option value="antiguo">Más antiguos primero</option>
+                        <option value="tipo_ALL">Todos los movimientos</option>
+                        <option value="tipo_ENTRADA">Entradas (+)</option>
+                        <option value="tipo_SALIDA">Salidas (-)</option>
+                        <option value="tipo_AJUSTE">Ajustes</option>
+                        <option value="cant_desc">Mayor cantidad (±)</option>
+                        <option value="cant_asc">Menor cantidad (±)</option>
+                    </select>
+                </div>
+
+                <button type="button" onclick="window.exportarKardexCSV()" class="kardex-btn-export" title="Exportar los movimientos filtrados a Excel / CSV">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span>Exportar Excel / CSV</span>
+                </button>
+
+                <button type="button" onclick="window.abrirModalAjuste()" class="kardex-btn-ajuste">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <span>Ajustar Stock Manual</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Fila inferior: búsqueda instantánea + rango de fechas -->
+        <div class="kardex-controls-bottom">
             <div class="kardex-search-box">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 <input type="text" id="kardexLiveSearch" class="kardex-search-input" placeholder="Buscar por producto, SKU, motivo, responsable o tipo..." autocomplete="off">
                 <button type="button" id="kardexClearSearch" class="kardex-clear-search" title="Limpiar búsqueda">&times;</button>
             </div>
 
-            <!-- Selector de Ordenamiento y Tipo integrado junto al buscador -->
-            <div class="kardex-order-group">
-                <span class="kardex-control-label">Ordenar:</span>
-                <select id="kardexOrdenSelect" class="kardex-select-order">
-                    <option value="reciente">Más recientes primero</option>
-                    <option value="antiguo">Más antiguos primero</option>
-                    <option value="tipo_ALL">Todos los movimientos</option>
-                    <option value="tipo_ENTRADA">Entradas (+)</option>
-                    <option value="tipo_SALIDA">Salidas (-)</option>
-                    <option value="tipo_AJUSTE">Ajustes</option>
-                    <option value="cant_desc">Mayor cantidad (±)</option>
-                    <option value="cant_asc">Menor cantidad (±)</option>
-                </select>
-            </div>
-
-            <button type="button" onclick="window.abrirModalAjuste()" class="btn btn-primary" style="background:#15803D; color:#fff; border:none; padding:8px 16px; border-radius:10px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:8px; box-shadow:0 3px 10px rgba(21,128,61,0.22); font-size:0.88rem; transition:all 0.2s ease; white-space:nowrap; margin-left:auto;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                <span>+ Ajustar Stock Manual</span>
-        </div>
-
-        <!-- Filtro por Rango de Fechas -->
-        <div class="kardex-filters-row">
             <div class="kardex-date-group">
                 <span class="kardex-control-label">Desde:</span>
                 <input type="date" id="kardexFechaDesde" class="kardex-date-input" value="<?= htmlspecialchars($_GET['fecha_desde'] ?? ''); ?>">
@@ -165,7 +179,7 @@ $idProdFiltro = isset($_GET['id_producto']) ? (int)$_GET['id_producto'] : 0;
                 <thead>
                     <tr>
                         <th style="width: 120px; white-space: nowrap;">FECHA / HORA</th>
-                        <th style="min-width: 160px;">PRODUCTO</th>
+                        <th style="width: 30%; min-width: 200px;">PRODUCTO</th>
                         <th style="width: 85px; text-align: center; white-space: nowrap;">TIPO</th>
                         <th style="min-width: 140px; max-width: 220px;">MOTIVO / REFERENCIA</th>
                         <th style="width: 60px; text-align: center; white-space: nowrap;">CANT.</th>
@@ -206,8 +220,13 @@ $idProdFiltro = isset($_GET['id_producto']) ? (int)$_GET['id_producto'] : 0;
                                     <?= $fechaFormato; ?>
                                 </td>
                                 <td>
-                                    <strong style="color:#0f172a; font-size:0.88rem; line-height:1.25; display:block;"><?= htmlspecialchars($m['producto_nombre']); ?></strong>
-                                    <div style="font-size:0.75rem; color:#64748b; font-weight:600;">SKU: <?= htmlspecialchars($m['codigo'] ?? '-'); ?></div>
+                                    <div class="kardex-prod-cell">
+                                        <img class="kardex-prod-thumb" src="<?= htmlspecialchars($m['imagen'] ?: 'Images/logo.png'); ?>" alt="" loading="lazy" onerror="this.onerror=null;this.src='Images/logo.png';">
+                                        <div class="kardex-prod-info">
+                                            <strong class="kardex-prod-name"><?= htmlspecialchars($m['producto_nombre']); ?></strong>
+                                            <div class="kardex-prod-sku">SKU: <?= htmlspecialchars($m['codigo'] ?? '-'); ?></div>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td style="text-align:center; white-space:nowrap;">
                                     <span class="kardex-badge <?= $badgeClass; ?>"><?= $tipo; ?></span>
@@ -316,7 +335,7 @@ $idProdFiltro = isset($_GET['id_producto']) ? (int)$_GET['id_producto'] : 0;
                         <span>Salida (-)</span>
                     </div>
                     <div class="kardex-type-option" id="optTipoAjuste" onclick="window.seleccionarTipoOperacion('ajuste')">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" fill="#e0f2fe"></circle><path d="M8 10h8M8 14h8"></path></svg>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" fill="#dcfce7"></circle><path d="M8 10h8M8 14h8"></path></svg>
                         <span>Ajuste Real (=)</span>
                     </div>
                 </div>
@@ -347,7 +366,6 @@ $idProdFiltro = isset($_GET['id_producto']) ? (int)$_GET['id_producto'] : 0;
             </div>
 
             <div style="display:flex; justify-content:flex-end; gap:10px;">
-                <button type="button" onclick="window.cerrarModalAjuste()" style="padding:10px 18px; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:8px; font-weight:700; cursor:pointer; color:#475569;">Cancelar</button>
                 <button type="submit" id="btnGuardarAjusteModal" style="padding:10px 22px; background:#15803D; color:#fff; border:none; border-radius:8px; font-weight:800; cursor:pointer; box-shadow:0 4px 12px rgba(21,128,61,0.25);">Guardar Movimiento</button>
             </div>
         </form>

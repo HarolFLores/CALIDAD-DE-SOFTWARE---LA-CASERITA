@@ -253,12 +253,12 @@
 }
 
 /* Evitar tono amarillo por autocompletado del navegador */
-.auth-input:-webkit-autofill,
-.auth-input:-webkit-autofill:hover,
-.auth-input:-webkit-autofill:focus,
-.auth-input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
-    -webkit-text-fill-color: #1e293b !important;
+html body .auth-input:-webkit-autofill,
+html body .auth-input:-webkit-autofill:hover,
+html body .auth-input:-webkit-autofill:focus,
+html body .auth-input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
+    -webkit-text-fill-color: #1e293b;
     transition: background-color 5000s ease-in-out 0s;
 }
 

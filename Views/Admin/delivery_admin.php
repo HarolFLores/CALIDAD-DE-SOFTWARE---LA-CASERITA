@@ -65,6 +65,7 @@ foreach ($envios as $env) {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="Scripts/admin-spa.js?v=<?= time(); ?>" defer></script>
 <link rel="stylesheet" href="Styles/Vistas/Admin/delivery_admin.css?v=<?= filemtime(__DIR__ . '/../../Styles/Vistas/Admin/delivery_admin.css'); ?>">
+<link rel="stylesheet" href="Styles/Vistas/Admin/bandeja_pedidos.css?v=<?= filemtime(__DIR__ . '/../../Styles/Vistas/Admin/bandeja_pedidos.css'); ?>">
 </head>
 <body>
     <div class="admin-layout">
@@ -77,7 +78,7 @@ foreach ($envios as $env) {
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
                     </button>
                     <div class="admin-topbar-brand">
-                        <span class="brand-title">Logística & Despacho Delivery</span>
+                        <span class="brand-title">Logística y despacho</span>
                     </div>
                 </div>
                 <div class="admin-topbar-actions">
@@ -115,9 +116,6 @@ foreach ($envios as $env) {
             Mensaje de confirmación.
         </p>
         <div style="display: flex; gap: 12px; justify-content: center;">
-            <button type="button" onclick="window.cerrarDelivConfirmacion(true)" style="padding: 10px 20px; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; font-weight: 700; font-size: 0.88rem; cursor: pointer;">
-                Cancelar
-            </button>
             <button type="button" id="btnDelivConfirmarProceder" style="padding: 10px 22px; border-radius: 8px; border: none; background: #15803d; color: #ffffff; font-weight: 700; font-size: 0.88rem; cursor: pointer; box-shadow: 0 2px 8px rgba(21,128,61,0.25);">
                 Sí, Confirmar
             </button>
@@ -125,10 +123,27 @@ foreach ($envios as $env) {
     </div>
 </div>
 
-<main class="main-content container-admin" style="padding-top: 25px; padding-bottom: 50px;">
-    
+<main class="main-content container-admin admin-fullwidth" style="padding-top: 25px; padding-bottom: 50px;">
 
+    <!-- Selector de vista: Bandeja de Pedidos (HU33) / Despachos y Entregas -->
+    <div class="dlv-view-switch" id="dlvViewSwitch">
+        <button type="button" class="dlv-view-btn active" data-view="bandeja" onclick="window.dlvSetView('bandeja')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H4z"></path><path d="M4 12h4l2 3h4l2-3h4"></path></svg>
+            Bandeja de Pedidos
+        </button>
+        <button type="button" class="dlv-view-btn" data-view="despachos" onclick="window.dlvSetView('despachos')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="17" r="2"></circle><circle cx="17" cy="17" r="2"></circle><path d="M5 17h-2v-4l2-5h9l4 5h1v4h-2"></path></svg>
+            Despachos y Entregas
+        </button>
+    </div>
 
+    <!-- VISTA 1: BANDEJA DE PEDIDOS PENDIENTES (HU33) -->
+    <div id="dlvViewBandeja">
+        <?php include __DIR__ . '/partials/bandeja_pedidos_section.php'; ?>
+    </div>
+
+    <!-- VISTA 2: DESPACHOS Y ENTREGAS -->
+    <div id="dlvViewDespachos" class="is-hidden">
 
     <!-- TARJETAS CUADRADAS COMPACTAS (IMAGEN 2) -->
     <div class="deliv-stats-grid">
@@ -209,6 +224,8 @@ foreach ($envios as $env) {
         <!-- Paginación estilo Imagen 3 (< 1 2 3 ... >) -->
         <div class="deliv-pagination-bar" id="paginacionDelivBar"></div>
     </div>
+
+    </div><!-- /#dlvViewDespachos -->
 </main>
 
 <!-- Modal Asignar Repartidor -->
@@ -233,7 +250,6 @@ foreach ($envios as $env) {
                 </select>
             </div>
             <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                <button type="button" onclick="window.cerrarModalAsignar()" style="padding: 9px 18px; background: #f1f5f9; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; color: #475569;">Cancelar</button>
                 <button type="submit" id="btnSubmitAsignar" style="padding: 9px 20px; background: #15803d; color: #ffffff; border: none; border-radius: 8px; font-weight: 800; cursor: pointer;">Guardar Asignación</button>
             </div>
         </form>
@@ -277,30 +293,100 @@ foreach ($envios as $env) {
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                <button type="button" onclick="window.cerrarModalEstado()" style="padding: 9px 18px; background: #f1f5f9; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; color: #475569;">Cancelar</button>
                 <button type="submit" id="btnSubmitEstado" style="padding: 9px 20px; background: #15803d; color: #ffffff; border: none; border-radius: 8px; font-weight: 800; cursor: pointer;">Guardar Estado</button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Modal Previsualizar Detalle del Pedido en Delivery -->
+<!-- Modal Boleta / Comprobante del Pedido (Logística y Despacho) -->
 <div id="modalDetalleDeliv" class="deliv-modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.60); z-index: 99999; backdrop-filter: blur(3px); align-items: center; justify-content: center; padding: 16px;">
-    <div style="background: #ffffff; border-radius: 18px; width: min(650px, 95vw); max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 28px 80px rgba(15, 23, 42, 0.28); overflow: hidden; margin: auto;">
-        <div style="padding: 18px 22px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between;">
-            <h3 id="delivModalTitulo" style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                <span>Detalle del Pedido</span>
+    <div style="background: #ffffff; border-radius: 18px; width: min(440px, 95vw); max-height: 94vh; display: flex; flex-direction: column; box-shadow: 0 28px 80px rgba(15, 23, 42, 0.28); overflow: hidden; margin: auto;">
+        <div class="deliv-ticket-no-print" style="padding: 14px 18px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between;">
+            <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                Comprobante de Venta
             </h3>
             <button type="button" class="btn-close-universal" onclick="window.cerrarModalDetalleDeliv()" aria-label="Cerrar modal">&times;</button>
         </div>
-        
-        <div id="delivModalBody" style="padding: 20px 22px; overflow-y: auto; flex: 1;">
-            <p style="text-align: center; color: #94a3b8; padding: 30px 0;">Cargando detalle...</p>
+
+        <div style="padding: 12px; background: #f8fafc; overflow-y: auto; flex: 1;">
+            <div id="delivTicketImprimible" style="background: #ffffff; padding: 18px 16px; font-family: 'Courier New', Courier, monospace; font-size: 11.5px; color: #000; line-height: 1.35; border: 1px solid #e2e8f0; border-radius: 8px; width: 100%; max-width: 330px; margin: 0 auto; box-shadow: 0 2px 10px rgba(0,0,0,0.06); box-sizing: border-box;">
+                <div style="text-align: center; margin-bottom: 8px;">
+                    <strong style="font-size: 15px; display: block; font-weight: 900; letter-spacing: 0.5px;">TIENDA "LA CASERITA"</strong>
+                    <div style="font-size: 11px; font-weight: 700; margin-top: 2px;">R.U.C. 20512345678</div>
+                    <div style="font-size: 10px; color: #333; margin-top: 1px;">Av. Las Flores 123 - San Juan, Lima</div>
+                    <div style="font-size: 10px; color: #333;">Teléfono: (01) 456-7890</div>
+                    <div style="margin: 6px 0; border-bottom: 1px dashed #000;"></div>
+                    <div style="font-weight: 800; font-size: 12.5px;">BOLETA DE VENTA ELECTRÓNICA</div>
+                    <div style="font-weight: 900; font-size: 13.5px; margin-top: 1px;" id="lblDelivTicketCodigo">B001-000000</div>
+                    <div style="font-size: 10px; color: #555;" id="lblDelivTicketNumInt">PED-00000</div>
+                </div>
+
+                <div style="margin-bottom: 8px; font-size: 10.5px; line-height: 1.4;">
+                    <div><strong>Fecha:</strong> <span id="lblDelivTicketFecha">--</span></div>
+                    <div><strong>Cliente:</strong> <span id="lblDelivTicketCliente">CLIENTE GENERAL</span></div>
+                    <div id="rowDelivTicketCorreo" style="display: none; word-break: break-all;"><strong>Correo:</strong> <span id="lblDelivTicketCorreo">--</span></div>
+                    <div><strong>Entrega:</strong> <span id="lblDelivTicketEntrega">Recojo en tienda</span></div>
+                    <div id="rowDelivTicketDireccion" style="display: none; word-break: break-word;"><strong>Dirección:</strong> <span id="lblDelivTicketDireccion">--</span></div>
+                    <div><strong>Forma Pago:</strong> <span id="lblDelivTicketMetodo">EFECTIVO</span></div>
+                    <div><strong>Estado:</strong> <span id="lblDelivTicketEstado">PENDIENTE</span></div>
+                </div>
+
+                <div style="border-bottom: 1px dashed #000; margin: 6px 0;"></div>
+
+                <table style="width: 100%; border-collapse: collapse; font-size: 10.5px;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid #000; text-align: left;">
+                            <th style="padding-bottom: 3px; width: 34px;">CANT</th>
+                            <th style="padding-bottom: 3px;">DESCRIPCIÓN</th>
+                            <th style="padding-bottom: 3px; text-align: right; width: 50px;">P.U</th>
+                            <th style="padding-bottom: 3px; text-align: right; width: 55px;">TOTAL</th>
+                        </tr>
+                    </thead>
+                    <tbody id="delivTicketTbodyItems"></tbody>
+                </table>
+
+                <div style="border-bottom: 1px dashed #000; margin: 8px 0;"></div>
+
+                <div style="font-size: 11px; text-align: right; line-height: 1.45;">
+                    <div>SUBTOTAL: <strong id="lblDelivTicketSubtotal">S/ 0.00</strong></div>
+                    <div>I.G.V. (18%): <strong id="lblDelivTicketIgv">S/ 0.00</strong></div>
+                    <div style="font-size: 13.5px; margin-top: 4px; font-weight: 900; border-top: 1px dashed #000; padding-top: 3px;">TOTAL A PAGAR: <span id="lblDelivTicketTotal">S/ 0.00</span></div>
+                </div>
+
+                <div id="rowDelivTicketEfectivo" style="display: none; font-size: 10.5px; margin-top: 6px; border-top: 1px dashed #000; padding-top: 4px; text-align: right;">
+                    <div>RECIBIDO: <span id="lblDelivTicketRecibido">S/ 0.00</span></div>
+                    <div>VUELTO: <span id="lblDelivTicketVuelto">S/ 0.00</span></div>
+                </div>
+
+                <div id="rowDelivTicketObs" style="display: none; font-size: 10px; margin-top: 6px; border-top: 1px dashed #000; padding-top: 4px; color: #475569;">
+                    <strong>Observación:</strong> <span id="lblDelivTicketObs">--</span>
+                </div>
+
+                <div style="border-bottom: 1px dashed #000; margin: 10px 0;"></div>
+
+                <div style="text-align: center; font-size: 10px; line-height: 1.35;">
+                    <p style="margin: 2px 0; font-weight: 700;">¡GRACIAS POR SU PREFERENCIA!</p>
+                    <p style="margin: 2px 0; font-size: 9px; color: #444;">Representación impresa de la Boleta de Venta Electrónica.</p>
+                    <p style="margin: 2px 0; font-size: 8.5px; color: #666;">Conserve este comprobante para cualquier reclamo.</p>
+                    <div style="margin-top: 7px; letter-spacing: 2px; font-size: 16px; font-family: monospace;">||| | ||||| || |||| |||||</div>
+                    <div style="font-size: 8.5px; color: #777; margin-top: 2px;">Aut. SUNAT - La Caserita</div>
+                </div>
+            </div>
         </div>
 
-        <div id="delivModalFooter" style="padding: 14px 22px; border-top: 1px solid #f1f5f9; background: #fafbfc; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;">
-            <div id="delivModalFooterAcciones" style="display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;"></div>
+        <div class="deliv-ticket-no-print" style="padding: 12px 18px; border-top: 1px solid #f1f5f9; background: #fafbfc; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; gap: 10px;">
+                <button type="button" id="btnDelivTicketImprimir" style="flex: 1; padding: 11px; background: #15803d; color: #fff; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.90rem; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 6px rgba(21,128,61,0.25);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                    IMPRIMIR
+                </button>
+                <button type="button" id="btnDelivTicketDescargarPdf" style="flex: 1; padding: 11px; background: #15803d; color: #fff; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.90rem; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 6px rgba(21,128,61,0.25);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                    DESCARGAR PDF
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -313,6 +399,19 @@ foreach ($envios as $env) {
     const ITEMS_PER_PAGE = 5;
     let accionDelivConfirmacion = null;
     let accionDelivCancelar = null;
+
+    // Selector de vista: Bandeja de Pedidos (HU33) / Despachos y Entregas
+    window.dlvSetView = function(vista) {
+        const esBandeja = vista !== 'despachos';
+        const bandeja = document.getElementById('dlvViewBandeja');
+        const despachos = document.getElementById('dlvViewDespachos');
+        if (!bandeja || !despachos) return;
+        bandeja.classList.toggle('is-hidden', !esBandeja);
+        despachos.classList.toggle('is-hidden', esBandeja);
+        document.querySelectorAll('#dlvViewSwitch .dlv-view-btn').forEach(function(btn) {
+            btn.classList.toggle('active', btn.getAttribute('data-view') === (esBandeja ? 'bandeja' : 'despachos'));
+        });
+    };
 
     // Modal Confirmación (Imagen 3 / Ventas)
     window.abrirDelivConfirmacion = function(titulo, mensaje, accion, esPeligro = false, onCancel = null) {
@@ -681,44 +780,130 @@ foreach ($envios as $env) {
         if (modal) modal.style.display = 'none';
     };
 
+    function escDelivTicket(s) {
+        const el = document.createElement('div');
+        el.textContent = String(s == null ? '' : s);
+        return el.innerHTML;
+    }
+
+    function fechaDelivTicketFmt(f) {
+        if (!f) return '--';
+        const d = new Date(String(f).replace(' ', 'T'));
+        if (isNaN(d.getTime())) return escDelivTicket(f);
+        const dd = String(d.getDate()).padStart(2, '0');
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const yy = d.getFullYear();
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mi = String(d.getMinutes()).padStart(2, '0');
+        return dd + '/' + mm + '/' + yy + ' ' + hh + ':' + mi;
+    }
+
+    let ultimoTicketDelivData = null;
+
+    function popularTicketDeliv(data, env) {
+        env = env || {};
+        ultimoTicketDelivData = data;
+        const p = data.pedido || {};
+        const prods = data.detalle || [];
+
+        const setTxt = function(id, val) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = val;
+        };
+
+        const numPadded = String(p.id_pedido || 0).padStart(5, '0');
+        const codigoDoc = p.codigo_pedido ? escDelivTicket(p.codigo_pedido) : ('B001-' + String(p.id_pedido || 0).padStart(6, '0'));
+        const clienteNombre = ((p.usuario_nombre || '') + ' ' + (p.usuario_apellido || '')).trim() || (p.cliente_nombre || env.nombre_destinatario || 'Cliente General');
+        const isDelivery = (p.tipo_entrega === 'delivery' || env.tipo_entrega_norm === 'delivery');
+        const total = parseFloat(p.total || env.pedido_total || 0);
+        const subtotal = parseFloat((total / 1.18).toFixed(2));
+        const igv = parseFloat((total - subtotal).toFixed(2));
+        const montoRec = parseFloat(p.monto_recibido || 0);
+        const vueltoPed = parseFloat(p.vuelto || 0);
+
+        setTxt('lblDelivTicketCodigo', codigoDoc);
+        setTxt('lblDelivTicketNumInt', 'N° Pedido: #' + numPadded);
+        setTxt('lblDelivTicketFecha', fechaDelivTicketFmt(p.fecha));
+        setTxt('lblDelivTicketCliente', clienteNombre.toUpperCase());
+
+        const rowCorreo = document.getElementById('rowDelivTicketCorreo');
+        if (rowCorreo) {
+            if (p.usuario_correo) {
+                rowCorreo.style.display = 'block';
+                setTxt('lblDelivTicketCorreo', p.usuario_correo);
+            } else {
+                rowCorreo.style.display = 'none';
+            }
+        }
+
+        setTxt('lblDelivTicketEntrega', isDelivery ? 'DELIVERY A DOMICILIO' : 'RECOJO EN TIENDA');
+
+        const rowDirec = document.getElementById('rowDelivTicketDireccion');
+        const dirDest = p.direccion_envio || env.direccion_destino || '';
+        if (rowDirec) {
+            if (isDelivery && dirDest) {
+                rowDirec.style.display = 'block';
+                setTxt('lblDelivTicketDireccion', dirDest + (env.referencia ? (' (Ref: ' + env.referencia + ')') : ''));
+            } else {
+                rowDirec.style.display = 'none';
+            }
+        }
+
+        setTxt('lblDelivTicketMetodo', (p.metodo_pago || env.metodo_pago || 'EFECTIVO').toUpperCase());
+        setTxt('lblDelivTicketEstado', (env.estado_delivery || p.estado || 'PENDIENTE').toUpperCase());
+
+        const tbody = document.getElementById('delivTicketTbodyItems');
+        if (tbody) {
+            let rows = '';
+            if (prods.length === 0) {
+                rows = '<tr><td colspan="4" style="text-align:center; padding:8px 0; color:#64748b;">(Sin productos registrados)</td></tr>';
+            } else {
+                prods.forEach(function(item) {
+                    rows += '<tr>'
+                        + '<td style="padding:3px 0; vertical-align:top;">' + (item.cantidad || 1) + '</td>'
+                        + '<td style="padding:3px 4px; vertical-align:top;">' + escDelivTicket(item.titulo || 'Producto') + '</td>'
+                        + '<td style="padding:3px 0; vertical-align:top; text-align:right;">' + parseFloat(item.precio_unitario || 0).toFixed(2) + '</td>'
+                        + '<td style="padding:3px 0; vertical-align:top; text-align:right; font-weight:bold;">' + parseFloat(item.subtotal || 0).toFixed(2) + '</td>'
+                        + '</tr>';
+                });
+            }
+            tbody.innerHTML = rows;
+        }
+
+        setTxt('lblDelivTicketSubtotal', 'S/ ' + subtotal.toFixed(2));
+        setTxt('lblDelivTicketIgv', 'S/ ' + igv.toFixed(2));
+        setTxt('lblDelivTicketTotal', 'S/ ' + total.toFixed(2));
+
+        const rowEfectivo = document.getElementById('rowDelivTicketEfectivo');
+        if (rowEfectivo) {
+            if (montoRec > 0) {
+                rowEfectivo.style.display = 'block';
+                setTxt('lblDelivTicketRecibido', 'S/ ' + montoRec.toFixed(2));
+                setTxt('lblDelivTicketVuelto', 'S/ ' + vueltoPed.toFixed(2));
+            } else {
+                rowEfectivo.style.display = 'none';
+            }
+        }
+
+        const rowObs = document.getElementById('rowDelivTicketObs');
+        if (rowObs) {
+            const obs = p.observacion || env.notas_entrega || '';
+            if (obs) {
+                rowObs.style.display = 'block';
+                setTxt('lblDelivTicketObs', obs);
+            } else {
+                rowObs.style.display = 'none';
+            }
+        }
+    }
+
     window.abrirDetallePedidoDeliv = function(idPedido, idEnvio) {
         const modal = document.getElementById('modalDetalleDeliv');
-        const titEl = document.getElementById('delivModalTitulo');
-        const bodyEl = document.getElementById('delivModalBody');
-        const footAct = document.getElementById('delivModalFooterAcciones');
-        if (!modal || !bodyEl) return;
+        if (!modal) return;
 
         const env = listaEnvios.find(e => parseInt(e.id_envio) === parseInt(idEnvio)) || {};
-        const nroPed = env.codigo_pedido || ('#' + String(idPedido).padStart(5, '0'));
-
-        if (titEl) {
-            titEl.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg> <span>Detalle del Pedido ${nroPed}</span>`;
-        }
-
-        bodyEl.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 30px 0;">Cargando detalle del pedido...</p>';
-        
-        if (footAct) {
-            footAct.innerHTML = `
-                <button type="button" id="btnDelivModalAsignar" style="display:inline-flex; align-items:center; gap:6px; padding:8px 14px; background:#2563eb; color:#fff; border:none; border-radius:8px; font-weight:700; font-size:0.85rem; cursor:pointer;">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg>
-                    <span>Asignar Repartidor</span>
-                </button>
-                <button type="button" id="btnDelivModalEstado" style="display:inline-flex; align-items:center; gap:6px; padding:8px 14px; background:#15803d; color:#fff; border:none; border-radius:8px; font-weight:700; font-size:0.85rem; cursor:pointer;">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                    <span>Cambiar Estado</span>
-                </button>
-            `;
-            document.getElementById('btnDelivModalAsignar')?.addEventListener('click', function() {
-                window.cerrarModalDetalleDeliv();
-                window.abrirModalAsignar(idEnvio);
-            });
-            document.getElementById('btnDelivModalEstado')?.addEventListener('click', function() {
-                window.cerrarModalDetalleDeliv();
-                window.abrirModalEstado(env);
-            });
-        }
-
         modal.style.display = 'flex';
+        popularTicketDeliv({ pedido: { id_pedido: idPedido }, detalle: [] }, env);
 
         fetch('index.php?action=detalle_pedido_admin&id=' + idPedido, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
@@ -726,77 +911,60 @@ foreach ($envios as $env) {
         .then(r => r.json())
         .then(res => {
             if (!res || !res.success || !res.data) {
-                bodyEl.innerHTML = '<p style="color:#dc2626; text-align:center; padding:30px;">Error al cargar el detalle del pedido.</p>';
+                if (window.mostrarDelivToast) window.mostrarDelivToast('Error', 'No se pudo cargar la boleta del pedido.', true);
+                window.cerrarModalDetalleDeliv();
                 return;
             }
-
-            const p = res.data.pedido;
-            const d = res.data.detalle || [];
-            const cliente = ((p.usuario_nombre || '') + ' ' + (p.usuario_apellido || '')).trim() || (p.cliente_nombre || env.nombre_destinatario || 'Cliente');
-            const cel = env.celular_contacto || 'Sin celular';
-            const repAsignado = env.repartidor_nombre ? (env.repartidor_nombre + ' ' + (env.repartidor_apellido || '')) : 'Sin asignar';
-            const est = env.estado_delivery || p.estado || 'Pendiente';
-            const estClass = est.toLowerCase().replace(' ', '_');
-
-            function esc(s) {
-                const el = document.createElement('div');
-                el.textContent = String(s || '');
-                return el.innerHTML;
-            }
-
-            let info = '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:10px; margin-bottom:14px;">';
-            info += `<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px 12px;"><small style="display:block; color:#94a3b8; font-size:.70rem; font-weight:800; text-transform:uppercase;">Destinatario</small><strong style="font-size:.88rem; color:#0f172a;">${esc(cliente)}</strong></div>`;
-            info += `<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px 12px;"><small style="display:block; color:#94a3b8; font-size:.70rem; font-weight:800; text-transform:uppercase;">Celular</small><strong style="font-size:.88rem; color:#15803d;">${esc(cel)}</strong></div>`;
-            info += `<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px 12px;"><small style="display:block; color:#94a3b8; font-size:.70rem; font-weight:800; text-transform:uppercase;">Repartidor</small><strong style="font-size:.88rem; color:#1d4ed8;">${esc(repAsignado)}</strong></div>`;
-            info += `<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px 12px;"><small style="display:block; color:#94a3b8; font-size:.70rem; font-weight:800; text-transform:uppercase;">Estado Envío</small><span class="badge-deliv ${estClass}" style="margin-top:2px;">${esc(est)}</span></div>`;
-            info += `<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px 12px;"><small style="display:block; color:#94a3b8; font-size:.70rem; font-weight:800; text-transform:uppercase;">Pago</small><strong style="font-size:.88rem; color:#0f172a;">${esc(p.metodo_pago || env.metodo_pago || '—')}</strong></div>`;
-            info += `<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px 12px;"><small style="display:block; color:#94a3b8; font-size:.70rem; font-weight:800; text-transform:uppercase;">Total Pedido</small><strong style="font-size:.95rem; color:#15803d;">S/ ${parseFloat(p.total || env.pedido_total || 0).toFixed(2)}</strong></div>`;
-            info += '</div>';
-
-            const dirDest = env.direccion_destino || p.direccion_envio;
-            if (dirDest) {
-                info += `<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px 14px; margin-bottom:12px;">
-                    <small style="display:block; color:#94a3b8; font-size:.70rem; font-weight:800; text-transform:uppercase; margin-bottom:2px;">Dirección de Entrega</small>
-                    <span style="font-size:.88rem; color:#0f172a; font-weight:600;">${esc(dirDest)}</span>
-                    ${env.referencia ? `<div style="font-size:.78rem; color:#64748b; margin-top:2px;">Ref: ${esc(env.referencia)}</div>` : ''}
-                </div>`;
-            }
-
-            if (p.observacion || env.notas_entrega) {
-                info += `<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px 14px; margin-bottom:14px;">
-                    <small style="display:block; color:#94a3b8; font-size:.70rem; font-weight:800; text-transform:uppercase; margin-bottom:2px;">Notas / Observación</small>
-                    <span style="font-size:.85rem; color:#475569;">${esc(p.observacion || env.notas_entrega)}</span>
-                </div>`;
-            }
-
-            let prodsHtml = `<h4 style="margin:0 0 10px; font-size:.82rem; color:#475569; text-transform:uppercase; letter-spacing:.05em; font-weight:800;">Productos a Entregar (${d.length})</h4><div style="background:#fff; border:1px solid #f1f5f9; border-radius:10px; padding:0 12px;">`;
-            if (d.length === 0) {
-                prodsHtml += '<p style="color:#94a3b8; text-align:center; padding:18px;">Sin productos registrados en este pedido.</p>';
-            } else {
-                d.forEach(item => {
-                    const imgSrc = item.imagen ? esc(item.imagen) : 'Images/icono.png';
-                    prodsHtml += `
-                        <div class="deliv-product-row">
-                            <img src="${imgSrc}" alt="${esc(item.titulo)}" onerror="this.src='Images/icono.png'">
-                            <div>
-                                <strong style="color:#0f172a; font-size:.88rem; display:block;">${esc(item.titulo)}</strong>
-                                <span style="font-size:.78rem; color:#64748b;">${item.cantidad} ${esc(item.unidad_medida || 'und.')} × S/ ${parseFloat(item.precio_unitario).toFixed(2)}</span>
-                            </div>
-                            <div style="text-align:right; font-weight:800; color:#15803d; font-size:.90rem;">
-                                S/ ${parseFloat(item.subtotal).toFixed(2)}
-                            </div>
-                        </div>
-                    `;
-                });
-            }
-            prodsHtml += '</div>';
-
-            bodyEl.innerHTML = info + prodsHtml;
+            popularTicketDeliv(res.data, env);
         })
         .catch(() => {
-            bodyEl.innerHTML = '<p style="color:#dc2626; text-align:center; padding:30px;">Error de conexión al cargar detalle.</p>';
+            if (window.mostrarDelivToast) window.mostrarDelivToast('Error', 'Error de conexión al cargar la boleta.', true);
+            window.cerrarModalDetalleDeliv();
         });
     };
+
+    window.asegurarHtml2PdfDeliv = function(callback) {
+        if (typeof window.html2pdf !== 'undefined') { callback(); return; }
+        const exist = document.querySelector('script[src*="html2pdf"]');
+        if (exist) { exist.addEventListener('load', function() { callback(); }); return; }
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+        s.onload = function() { callback(); };
+        s.onerror = function() {
+            if (window.mostrarDelivToast) window.mostrarDelivToast('Error', 'No se pudo cargar la librería para exportar PDF.', true);
+        };
+        document.head.appendChild(s);
+    };
+
+    function descargarTicketDelivPdf() {
+        const ticketEl = document.getElementById('delivTicketImprimible');
+        if (!ticketEl) return;
+        const idPed = (ultimoTicketDelivData && ultimoTicketDelivData.pedido) ? ultimoTicketDelivData.pedido.id_pedido : 0;
+        const filename = 'Comprobante-Pedido-' + String(idPed).padStart(5, '0') + '.pdf';
+        if (window.mostrarDelivToast) window.mostrarDelivToast('Generando PDF', 'Descargando comprobante...', false);
+        window.asegurarHtml2PdfDeliv(function() {
+            const rect = ticketEl.getBoundingClientRect();
+            let altoMm = Math.ceil((rect.height * 25.4) / 96) + 12;
+            if (altoMm < 140) altoMm = 140;
+            const opt = {
+                margin: [4, 4, 4, 4],
+                filename: filename,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, logging: false, scrollX: 0, scrollY: 0 },
+                jsPDF: { unit: 'mm', format: [80, altoMm], orientation: 'portrait' }
+            };
+            window.html2pdf().set(opt).from(ticketEl).save().then(function() {
+                if (window.mostrarDelivToast) window.mostrarDelivToast('Descargado', 'Comprobante descargado con éxito.', false);
+            }).catch(function() {
+                if (window.mostrarDelivToast) window.mostrarDelivToast('Error', 'No se pudo generar el archivo PDF.', true);
+            });
+        });
+    }
+
+    const btnDelivTicketImprimir = document.getElementById('btnDelivTicketImprimir');
+    if (btnDelivTicketImprimir) btnDelivTicketImprimir.addEventListener('click', function() { window.print(); });
+    const btnDelivTicketDescargarPdf = document.getElementById('btnDelivTicketDescargarPdf');
+    if (btnDelivTicketDescargarPdf) btnDelivTicketDescargarPdf.addEventListener('click', descargarTicketDelivPdf);
 
     const modalDetalleDelivEl = document.getElementById('modalDetalleDeliv');
     if (modalDetalleDelivEl) {

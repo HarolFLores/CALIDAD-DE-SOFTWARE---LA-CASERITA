@@ -87,50 +87,18 @@ class InventarioModel {
     }
 
     public function reponerStock($id_producto, $id_usuario, $cantidad, $costo_unitario, $proveedor, $observacion) {
-        try {
-            $this->conn->beginTransaction();
-
-            $queryRepo = "INSERT INTO reposicion (id_producto, id_usuario, cantidad, costo_unitario, proveedor, observacion, fecha)
-                VALUES (:id_producto, :id_usuario, :cantidad, :costo_unitario, :proveedor, :observacion, NOW())";
-
-            $stmtRepo = $this->conn->prepare($queryRepo);
-            $stmtRepo->bindParam(':id_producto', $id_producto, PDO::PARAM_INT);
-            $stmtRepo->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
-            $stmtRepo->bindParam(':cantidad', $cantidad);
-            $stmtRepo->bindParam(':costo_unitario', $costo_unitario);
-            $stmtRepo->bindParam(':proveedor', $proveedor);
-            $stmtRepo->bindParam(':observacion', $observacion);
-            $stmtRepo->execute();
-
-            $queryInv = "UPDATE inventario
-                         SET stock_actual = stock_actual + :cantidad,
-                             ultima_act = NOW()
-                         WHERE id_producto = :id_producto";
-
-            $stmtInv = $this->conn->prepare($queryInv);
-            $stmtInv->bindParam(':cantidad', $cantidad);
-            $stmtInv->bindParam(':id_producto', $id_producto, PDO::PARAM_INT);
-            $stmtInv->execute();
-
-            $queryProd = "UPDATE producto SET stock = stock + :cantidad";
-            if ((float)$costo_unitario > 0) {
-                $queryProd .= ", precio_costo = :costo_unitario";
-            }
-            $queryProd .= " WHERE id_producto = :id_producto";
-
-            $stmtProd = $this->conn->prepare($queryProd);
-            $stmtProd->bindParam(':cantidad', $cantidad);
-            if ((float)$costo_unitario > 0) $stmtProd->bindParam(':costo_unitario', $costo_unitario);
-            $stmtProd->bindParam(':id_producto', $id_producto, PDO::PARAM_INT);
-            $stmtProd->execute();
-
-            $this->conn->commit();
-            return true;
-
-        } catch (Exception $e) {
-            $this->conn->rollBack();
-            return false;
-        }
+        require_once __DIR__ . '/entradaMercanciaModel.php';
+        $servicio = new EntradaMercanciaModel();
+        $res = $servicio->registrarEntradaMercancia([
+            'id_producto' => $id_producto,
+            'id_usuario' => $id_usuario,
+            'cantidad' => $cantidad,
+            'costo_unitario' => $costo_unitario,
+            'proveedor' => $proveedor,
+            'observacion' => $observacion,
+            'tipo' => 'reposicion'
+        ]);
+        return !empty($res['ok']);
     }
 
     public function getHistorialReposicion() {

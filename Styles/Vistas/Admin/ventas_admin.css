@@ -1,8 +1,10 @@
-.ventas-admin-content {
+    .ventas-admin-content {
         width: 100%;
-        max-width: 1440px;
-        padding: 24px clamp(16px, 2vw, 28px) 50px;
+        max-width: none;
+        min-height: 100vh;
+        padding: 28px;
         box-sizing: border-box;
+        background: #f8fafc;
     }
     .stats-grid-square {
         display: grid;
@@ -67,52 +69,54 @@
         margin-bottom: 30px;
     }
     .va-panel-header {
-        padding: 14px 18px;
+        padding: 12px 16px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         border-bottom: 1px solid #f1f5f9;
         flex-wrap: wrap;
-        gap: 12px;
+        gap: 10px;
     }
     .va-panel-header h2 {
         margin: 0;
-        font-size: 1.10rem;
+        font-size: 1rem;
         font-weight: 800;
         color: #0f172a;
+        white-space: nowrap;
     }
     .va-filters-wrap {
         display: flex;
-        flex: 1 1 760px;
+        flex: 1 1 auto;
+        min-width: 0;
         justify-content: flex-end;
-        gap: 10px;
-        flex-wrap: wrap;
+        gap: 8px;
+        flex-wrap: nowrap;
         align-items: center;
     }
     .va-search-box {
         position: relative;
-        flex: 1 1 260px;
-        min-width: 220px;
-        max-width: 360px;
+        flex: 1 1 150px;
+        min-width: 110px;
+        max-width: 300px;
     }
     .va-search-box svg {
         position: absolute;
-        left: 12px;
+        left: 10px;
         top: 50%;
         transform: translateY(-50%);
-        width: 15px;
-        height: 15px;
+        width: 14px;
+        height: 14px;
         stroke: #94a3b8;
         fill: none;
         pointer-events: none;
     }
     .va-search-box input {
         width: 100%;
-        min-height: 40px;
-        padding: 7px 12px 7px 34px;
+        min-height: 36px;
+        padding: 6px 10px 6px 30px;
         border: 1px solid #cbd5e1;
         border-radius: 8px;
-        font-size: 0.85rem;
+        font-size: 0.78rem;
         outline: none;
         box-sizing: border-box;
         transition: border-color 0.2s;
@@ -122,11 +126,11 @@
         box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
     }
     .va-filter-select, .va-filter-date {
-        min-height: 42px;
-        padding: 8px 14px;
+        min-height: 36px;
+        padding: 6px 10px;
         border: 1px solid #cbd5e1;
-        border-radius: 9px;
-        font-size: 0.85rem;
+        border-radius: 8px;
+        font-size: 0.78rem;
         color: #334155;
         font-weight: 600;
         outline: none;
@@ -139,10 +143,10 @@
         appearance: none;
         -webkit-appearance: none;
         -moz-appearance: none;
-        padding-right: 34px;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+        padding-right: 26px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
         background-repeat: no-repeat;
-        background-position: right 12px center;
+        background-position: right 9px center;
     }
     .va-filter-select:hover, .va-filter-date:hover {
         border-color: #94a3b8;
@@ -208,13 +212,13 @@
 
     /* Botón Limpiar Filtros idéntico a Imagen 1 */
     .btn-limpiar-filtros {
-        min-height: 40px;
-        padding: 8px 16px;
+        min-height: 36px;
+        padding: 6px 12px;
         border: 1px solid #cbd5e1;
         border-radius: 8px;
         background: #ffffff;
         color: #475569;
-        font-size: 0.85rem;
+        font-size: 0.78rem;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.2s ease;
@@ -230,14 +234,14 @@
     }
 
     /* Diseño limpio de Estados con punto de color idéntico a Imagen 2 */
-    .status-pill {
+    html body .status-pill {
         display: inline-flex;
         align-items: center;
         gap: 7px;
         padding: 0;
         border: none;
         border-radius: 0;
-        background: transparent !important;
+        background: transparent;
         color: #0f172a;
         font-size: 0.84rem;
         font-weight: 700;
@@ -552,6 +556,13 @@
         .stats-grid-square {
             grid-template-columns: repeat(4, minmax(0, 1fr));
         }
+        .va-filters-wrap {
+            flex-wrap: wrap;
+        }
+        .va-search-box {
+            flex: 1 1 100%;
+            max-width: none;
+        }
     }
 
     @media (max-width: 768px) {
@@ -571,6 +582,7 @@
         }
         .va-search-box {
             width: 100%;
+            max-width: none;
         }
         .top-notification-toast {
             top: 12px;
@@ -583,37 +595,43 @@
         }
     }
 
+    @media (max-width: 480px) {
+        .stats-grid-square {
+            grid-template-columns: 1fr;
+        }
+    }
+
     /* Impresión directa del ticket térmico en Admin */
     @media print {
-        body * { visibility: hidden !important; }
-        #modalTicketVentaAdmin, #modalTicketVentaAdmin * { visibility: visible !important; }
-        #modalTicketVentaAdmin {
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 100% !important;
-            height: auto !important;
-            background: #fff !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            display: block !important;
-            opacity: 1 !important;
-            pointer-events: all !important;
+        html body * { visibility: hidden; }
+        html body #modalTicketVentaAdmin, html body #modalTicketVentaAdmin * { visibility: visible; }
+        html body #modalTicketVentaAdmin {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: auto;
+            background: #fff;
+            padding: 0;
+            margin: 0;
+            display: block;
+            opacity: 1;
+            pointer-events: all;
         }
-        #modalTicketVentaAdmin > div {
-            box-shadow: none !important;
-            padding: 0 !important;
-            max-width: 80mm !important;
-            width: 80mm !important;
-            margin: 0 !important;
+        html body #modalTicketVentaAdmin > div {
+            box-shadow: none;
+            padding: 0;
+            max-width: 80mm;
+            width: 80mm;
+            margin: 0;
         }
-        #ticketTermicoImprimibleAdmin {
-            border: none !important;
-            box-shadow: none !important;
-            padding: 0 !important;
-            width: 80mm !important;
+        html body #ticketTermicoImprimibleAdmin {
+            border: none;
+            box-shadow: none;
+            padding: 0;
+            width: 80mm;
         }
-        .ticket-no-print {
-            display: none !important;
+        html body .ticket-no-print {
+            display: none;
         }
     }

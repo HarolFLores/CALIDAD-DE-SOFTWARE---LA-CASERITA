@@ -28,7 +28,7 @@
                 height: 48px;
                 font-size: 1.3rem;
             }
-            .pin-inputs-container {
-                gap: 6px !important;
+            html body .pin-inputs-container {
+                gap: 6px;
             }
         }

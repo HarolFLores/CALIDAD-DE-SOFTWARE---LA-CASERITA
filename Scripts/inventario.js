@@ -172,6 +172,10 @@ window.abrirModalEditarProducto = function(item) {
     }
     if (!item) return;
 
+    if (typeof window.initSubcatCombo === 'function') {
+        window.initSubcatCombo('editSubcatInput', 'editSubcatDropdown', 'editSubcatId', 'editSubcatGrupo');
+    }
+
     const setVal = (id, val) => {
         const el = document.getElementById(id);
         if (el) el.value = (val !== null && val !== undefined) ? val : '';
@@ -185,7 +189,9 @@ window.abrirModalEditarProducto = function(item) {
     setVal('editProdStockMinimo', parseFloat(item.stock_minimo || 5));
     setVal('editProdUbicacion', item.ubicacion || '');
     setVal('editProdDescripcion', item.descripcion || '');
-    setVal('editProdCategoria', item.id_categoria || '');
+    if (typeof window.setSubcatCombo === 'function') {
+        window.setSubcatCombo('editSubcatInput', 'editSubcatDropdown', 'editSubcatId', 'editSubcatGrupo', item.id_categoria || '');
+    }
     setVal('editProdImagenActual', item.imagen || '');
     setVal('editProdImagenUrl', item.imagen || '');
 

@@ -364,7 +364,7 @@
             if (inputNuevo) { inputNuevo.required = true; inputNuevo.focus(); }
             if (btnSubmit) {
                 btnSubmit.textContent = 'Guardar Ajuste Físico';
-                btnSubmit.style.background = '#0284c7';
+                btnSubmit.style.background = '#15803d';
             }
         }
 
@@ -498,10 +498,61 @@
         } else {
             const nuevo = parseInt(inputNuevo?.value || 0);
             stockResultante = isNaN(nuevo) ? stockActual : nuevo;
-            spanResultante.style.color = '#0284c7';
+            spanResultante.style.color = '#15803d';
         }
 
         spanResultante.textContent = stockResultante + ' unds';
+    };
+
+    // Exportar los movimientos actualmente filtrados a Excel / CSV
+    window.exportarKardexCSV = function() {
+        const rows = (filteredRows && filteredRows.length) ? filteredRows : allRows;
+        if (!rows || !rows.length) {
+            alert('No hay movimientos para exportar.');
+            return;
+        }
+
+        const headers = ['Fecha / Hora', 'Producto', 'SKU', 'Tipo', 'Motivo / Referencia', 'Cantidad', 'Costo Unitario', 'Precio Venta', 'Stock Anterior', 'Stock Actual', 'Responsable'];
+        const esc = function(v) {
+            return '"' + String(v == null ? '' : v).replace(/\s+/g, ' ').replace(/"/g, '""').trim() + '"';
+        };
+
+        const lines = [headers.map(esc).join(';')];
+        rows.forEach(function(r) {
+            const tds = r.querySelectorAll('td');
+            const cell = function(i) {
+                return tds[i] ? tds[i].textContent.replace(/\s+/g, ' ').trim() : '';
+            };
+            const nameEl = r.querySelector('.kardex-prod-name');
+            const skuEl = r.querySelector('.kardex-prod-sku');
+            const prodName = nameEl ? nameEl.textContent.trim() : cell(1);
+            const sku = skuEl ? skuEl.textContent.replace(/^\s*SKU:\s*/i, '').trim() : '';
+
+            lines.push([
+                cell(0),
+                prodName,
+                sku,
+                r.getAttribute('data-tipo') || '',
+                cell(3),
+                cell(4),
+                cell(5).replace(/^S\/\s*/, ''),
+                cell(6).replace(/^S\/\s*/, ''),
+                cell(7),
+                cell(8),
+                cell(9)
+            ].map(esc).join(';'));
+        });
+
+        const csv = '\uFEFF' + lines.join('\r\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'kardex_' + new Date().toISOString().slice(0, 10) + '.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
     };
 
     if (document.readyState === 'loading') {

@@ -89,7 +89,7 @@ class controllerProducto{
             }
         }
 
-        $ok = $this->model->createProduct($id_categoria, $id_grupo, $titulo, $descripcion, $precio, $unidad_medida, $stock, $imagen_1, $es_sugerencia, $stock_minimo, $ubicacion, $codigo, $precio_anterior, $imagen_2, $imagen_3, $imagen_4, $codigo_barras);
+        $ok = $this->model->createProduct($id_categoria, $id_grupo, $titulo, $descripcion, $precio, $unidad_medida, $stock, $imagen_1, $es_sugerencia, $stock_minimo, $ubicacion, $codigo, $precio_anterior, $imagen_2, $imagen_3, $imagen_4, $codigo_barras, (int)($_SESSION['usuario_id'] ?? 0));
 
         if ($ok) {
             if (AjaxHelper::isAjax()) AjaxHelper::jsonResponse(true, 'Producto registrado correctamente.');

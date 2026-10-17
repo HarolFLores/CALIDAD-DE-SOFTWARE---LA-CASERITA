@@ -128,6 +128,7 @@ $rutasAdmin = [
     'delivery_admin',
     'asignar_repartidor',
     'actualizar_estado_delivery',
+    'bandeja_asignar',
     'verificacion_pagos',
     'aprobar_verificacion_pago',
     'rechazar_verificacion_pago',
@@ -571,6 +572,9 @@ switch($action) {
         break;
     case 'actualizar_estado_delivery':
         $adminERP->actualizarEstadoDelivery();
+        break;
+    case 'bandeja_asignar':
+        $adminERP->bandejaAsignar();
         break;
     case 'verificacion_pagos':
         $adminERP->verificacionPagos();

@@ -551,6 +551,7 @@ CREATE TABLE `pedido` (
   `cliente_dni` varchar(15) DEFAULT '00000000',
   `cliente_nombre` varchar(150) DEFAULT 'Público General',
   `id_cajero` int(11) DEFAULT NULL,
+  `id_empaque` int(11) DEFAULT NULL,
   `id_sesion_caja` int(11) DEFAULT NULL,
   `id_metodo` int(11) DEFAULT NULL,
   `id_direccion` int(11) DEFAULT NULL,

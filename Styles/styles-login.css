@@ -302,9 +302,9 @@ input::placeholder {
     transform: translateY(0);
 }
 
-input.error {
-    border-color: #C62828 !important;
-    background-color: #fef2f2 !important;
+html body input.error {
+    border-color: #C62828;
+    background-color: #fef2f2;
     animation: shake 0.4s ease;
 }
 
@@ -338,15 +338,15 @@ input.error {
     }
 }
 
-input.error {
-    border-color: #C62828 !important;
-    background-color: #fef2f2 !important;
+html body input.error {
+    border-color: #C62828;
+    background-color: #fef2f2;
     animation: shake 0.4s ease, pulse-border 1.5s ease infinite;
 }
 
-input.success {
-    border-color: #10b981 !important;
-    background-color: #ecfdf5 !important;
+html body input.success {
+    border-color: #10b981;
+    background-color: #ecfdf5;
 }
 
 .auth-global-error {

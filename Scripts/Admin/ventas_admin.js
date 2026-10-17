@@ -9,6 +9,7 @@
     var filtFecha      = document.getElementById('vaFiltroFecha');
     var statCards      = document.querySelectorAll('.stat-card-square[data-filtro-estado]');
     var rows           = Array.from(document.querySelectorAll('#vaTabla tbody tr.va-row'));
+    var tablaBody      = document.querySelector('#vaTabla tbody');
     var paginationList = document.getElementById('vaPaginationList');
 
     var currentPage = 1;
@@ -88,6 +89,8 @@
             }
         });
 
+        toggleEmptyState(total === 0);
+
         // Controles de paginación (Imagen 3)
         if (!paginationList) return;
         paginationList.innerHTML = '';
@@ -134,6 +137,27 @@
             if (currentPage < totalPages) { currentPage++; renderPaginacion(); }
         };
         paginationList.appendChild(nextBtn);
+    }
+
+    // Estado vacío: mensaje cuando los filtros no arrojan ningún pedido
+    function toggleEmptyState(show) {
+        if (!tablaBody) return;
+        var existing = document.getElementById('vaEmptyRow');
+        if (show) {
+            if (!existing) {
+                var tr = document.createElement('tr');
+                tr.id = 'vaEmptyRow';
+                tr.innerHTML = '<td colspan="10" style="text-align:center; padding:50px 20px; color:#94a3b8;">' +
+                    '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:10px; opacity:0.5;"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>' +
+                    '<p style="margin:0; font-size:0.95rem;">No hay pedidos que coincidan con los filtros aplicados.</p>' +
+                    '</td>';
+                tablaBody.appendChild(tr);
+            } else {
+                existing.style.display = '';
+            }
+        } else if (existing) {
+            existing.remove();
+        }
     }
 
     // Selección interactiva de tarjetas
@@ -393,6 +417,7 @@
         confirmOverlay.style.display = 'none';
         confirmOverlay.classList.remove('active');
     }
+    window.cerrarConfirmacionVentas = cerrarModalConfirmacion;
 
     function ejecutarGuardadoEstado() {
         if (!pedidoAGuardarId || !estadoAGuardar) return;

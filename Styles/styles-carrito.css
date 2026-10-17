@@ -96,8 +96,8 @@ body.cart-open {
     background: #f1f5f9;
 }
 
-.cart-confirm-accept {
-    border-color: #dc2626 !important;
+html body .cart-confirm-accept {
+    border-color: #dc2626;
     background: #dc2626;
     color: #ffffff;
 }

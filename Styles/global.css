@@ -667,18 +667,18 @@ img {
     transition: all 0.2s ease;
 }
 
-.notif-item-row.notif-unread {
-    background-color: #f0fdf4 !important;
-    border-left: 3.5px solid #15803d !important;
+html body .notif-item-row.notif-unread {
+    background-color: #f0fdf4;
+    border-left: 3.5px solid #15803d;
 }
 
-.notif-item-row.notif-read {
-    background-color: #ffffff !important;
-    border-left: 3.5px solid transparent !important;
+html body .notif-item-row.notif-read {
+    background-color: #ffffff;
+    border-left: 3.5px solid transparent;
 }
 
-.notif-item-row:hover {
-    background-color: #f1f5f9 !important;
+html body .notif-item-row:hover {
+    background-color: #f1f5f9;
 }
 
 .notif-footer {

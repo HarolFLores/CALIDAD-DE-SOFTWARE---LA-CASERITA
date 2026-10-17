@@ -806,4 +806,72 @@ class PedidoModel{
         $stmt = $this->conn->prepare($sql);
         return $stmt->execute([':status' => $status, ':id' => $idPedido]);
     }
+
+    /**
+     * Bandeja de Pedidos Pendientes (HU33): pedidos activos ordenados FIFO,
+     * con datos de pago, empaque y reparto para priorizar el despacho.
+     */
+    public function getPedidosBandeja(): array
+    {
+        $sql = "SELECT
+                    p.id_pedido,
+                    p.codigo_pedido,
+                    p.canal,
+                    p.estado,
+                    p.tipo_entrega,
+                    p.total,
+                    p.fecha,
+                    p.id_cajero,
+                    p.id_empaque,
+                    mp.nombre   AS metodo_pago,
+                    u.nombre    AS cliente_nombre,
+                    u.apellido  AS cliente_apellido,
+                    u.correo    AS cliente_correo,
+                    u.telefono  AS cliente_telefono,
+                    emp.nombre  AS empaque_nombre,
+                    emp.apellido AS empaque_apellido,
+                    ed.id_envio,
+                    ed.id_repartidor,
+                    ed.estado_delivery,
+                    rep.nombre  AS repartidor_nombre,
+                    rep.apellido AS repartidor_apellido,
+                    TIMESTAMPDIFF(MINUTE, p.fecha, NOW()) AS minutos_espera,
+                    (SELECT pv.estado_verificacion
+                        FROM pago_verificacion pv
+                        WHERE pv.id_pedido = p.id_pedido
+                        ORDER BY pv.id_verificacion DESC
+                        LIMIT 1) AS pago_estado
+                FROM pedido p
+                LEFT JOIN metodo_pago mp       ON mp.id_metodo = p.id_metodo
+                LEFT JOIN usuario u            ON u.id_usuario = p.id_usuario
+                LEFT JOIN usuario emp          ON emp.id_usuario = p.id_empaque
+                LEFT JOIN envio_delivery ed    ON ed.id_pedido = p.id_pedido
+                LEFT JOIN usuario rep          ON rep.id_usuario = ed.id_repartidor
+                WHERE p.estado NOT IN ('Entregado', 'Cancelado')
+                ORDER BY p.fecha ASC, p.id_pedido ASC";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Asignación (individual o masiva) de pedidos al personal de empaque.
+     * Devuelve la cantidad de pedidos actualizados.
+     */
+    public function asignarEmpaque(array $ids, int $idEmpaque): int
+    {
+        $ids = array_values(array_filter(array_map('intval', $ids)));
+        if (empty($ids) || $idEmpaque <= 0) {
+            return 0;
+        }
+        $marcadores = implode(',', array_fill(0, count($ids), '?'));
+        $sql = "UPDATE pedido
+                   SET id_empaque = ?
+                 WHERE id_pedido IN ($marcadores)
+                   AND estado NOT IN ('Entregado', 'Cancelado')";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute(array_merge([$idEmpaque], $ids));
+        return $stmt->rowCount();
+    }
 }

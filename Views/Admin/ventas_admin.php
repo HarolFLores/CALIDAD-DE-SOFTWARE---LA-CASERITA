@@ -104,7 +104,7 @@
                         <span class="brand-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                         </span>
-                        <span class="brand-title">Ventas & Pedidos</span>
+                        <span class="brand-title">Ventas</span>
                     </div>
                 </div>
                 <div class="admin-topbar-actions">
@@ -161,15 +161,15 @@
                 <div class="va-filters-wrap">
                     <div class="va-search-box">
                         <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                        <input type="text" id="vaSearch" placeholder="Buscar por N° pedido o cliente...">
+                        <input type="text" id="vaSearch" placeholder="Buscar pedido o cliente...">
                     </div>
                     <select id="vaFiltroCanal" class="va-filter-select" aria-label="Filtrar por canal de venta">
-                        <option value="">Todos los canales</option>
+                        <option value="">Canales</option>
                         <option value="WEB">Venta Web</option>
                         <option value="POS">Venta POS</option>
                     </select>
                     <select id="vaFiltroEstado" class="va-filter-select" aria-label="Filtrar por estado">
-                        <option value="">Todos los estados</option>
+                        <option value="">Estados</option>
                         <option value="pendiente">Pendiente</option>
                         <option value="en_preparacion">En Preparación</option>
                         <option value="en_camino">En Camino</option>
@@ -178,7 +178,7 @@
                         <option value="cancelado">Cancelado</option>
                     </select>
                     <select id="vaFiltroEntrega" class="va-filter-select" aria-label="Filtrar por tipo de entrega">
-                        <option value="">Todos los envíos</option>
+                        <option value="">Envíos</option>
                         <option value="delivery">Delivery</option>
                         <option value="recojo">Recojo en tienda</option>
                     </select>
@@ -341,7 +341,7 @@
     <!-- Modal Confirmación para Guardar Cambio -->
     <div class="va-modal-overlay" id="vaConfirmModalOverlay" style="z-index: 99999; backdrop-filter: blur(3px);">
         <div style="background: #ffffff; border-radius: 18px; width: min(440px, 94vw); padding: 28px 24px; text-align: center; box-shadow: 0 24px 60px rgba(0,0,0,0.25); position: relative;">
-            <button type="button" class="btn-close-universal" id="vaBtnConfirmarCerrarX" onclick="document.getElementById('vaBtnConfirmarCancelar')?.click()" aria-label="Cerrar modal" style="position: absolute; top: 14px; right: 14px;">&times;</button>
+            <button type="button" class="btn-close-universal" id="vaBtnConfirmarCerrarX" onclick="window.cerrarConfirmacionVentas()" aria-label="Cerrar modal" style="position: absolute; top: 14px; right: 14px;">&times;</button>
             <div style="width: 56px; height: 56px; border-radius: 50%; background: #dcfce7; color: #15803d; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
             </div>
@@ -350,9 +350,6 @@
                 El pedido pasará al nuevo estado seleccionado.
             </p>
             <div style="display: flex; gap: 12px; justify-content: center;">
-                <button type="button" id="vaBtnConfirmarCancelar" style="padding: 10px 20px; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; font-weight: 700; font-size: 0.88rem; cursor: pointer;">
-                    Cancelar
-                </button>
                 <button type="button" id="vaBtnConfirmarProceder" style="padding: 10px 22px; border-radius: 8px; border: none; background: #15803d; color: #ffffff; font-weight: 700; font-size: 0.88rem; cursor: pointer; box-shadow: 0 2px 8px rgba(21,128,61,0.25);">
                     Sí, Guardar Cambio
                 </button>
@@ -445,14 +442,11 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
                         IMPRIMIR
                     </button>
-                    <button type="button" id="btnAdminTicketDescargarPdf" style="flex: 1; padding: 11px; background: #0284c7; color: #fff; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.90rem; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 6px rgba(2,132,199,0.25);">
+                    <button type="button" id="btnAdminTicketDescargarPdf" style="flex: 1; padding: 11px; background: #15803d; color: #fff; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 0.90rem; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 6px rgba(21,128,61,0.25);">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                         DESCARGAR PDF
                     </button>
                 </div>
-                <button type="button" id="btnAdminTicketCerrarPie" style="padding: 8px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.85rem;">
-                    Cerrar
-                </button>
             </div>
         </div>
     </div>

@@ -44,7 +44,7 @@ $isAjax = AjaxHelper::isAjax();
                         <span class="brand-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
                         </span>
-                        <span class="brand-title">Control de Caja Chica & Arqueo</span>
+                        <span class="brand-title">Caja</span>
                     </div>
                 </div>
                 <div class="admin-topbar-actions">
@@ -340,7 +340,6 @@ $isAjax = AjaxHelper::isAjax();
                     <small style="color: #64748b; font-size: 0.80rem; margin-top: 4px; display: block;">Monto físico dejado en gaveta para dar cambio / vueltos.</small>
                 </div>
                 <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                    <button type="button" onclick="window.cerrarModalApertura()" style="padding: 10px 18px; background: #f1f5f9; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; color: #475569;">Cancelar</button>
                     <button type="submit" class="btn-caja-header btn-caja-green">Abrir Turno</button>
                 </div>
             </form>
@@ -390,7 +389,6 @@ $isAjax = AjaxHelper::isAjax();
                         <input type="text" name="comprobante" placeholder="Ej: B001-1234 o Recibo N° 55" style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.92rem; box-sizing: border-box;">
                     </div>
                     <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                        <button type="button" onclick="window.cerrarModalMovimiento()" style="padding: 10px 18px; background: #f1f5f9; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; color: #475569;">Cancelar</button>
                         <button type="submit" class="btn-caja-header btn-caja-green">Guardar Movimiento</button>
                     </div>
                 </form>
@@ -422,7 +420,6 @@ $isAjax = AjaxHelper::isAjax();
                     <div id="boxDiferenciaArqueo" style="display: none; padding: 12px; border-radius: 8px; margin-bottom: 18px; font-weight: 700; font-size: 0.92rem; text-align: center;">
                     </div>
                     <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                        <button type="button" onclick="window.cerrarModalCierre()" style="padding: 10px 18px; background: #f1f5f9; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; color: #475569;">Cancelar</button>
                         <button type="submit" class="btn-caja-header btn-caja-red">Confirmar Cierre de Turno</button>
                     </div>
                 </form>

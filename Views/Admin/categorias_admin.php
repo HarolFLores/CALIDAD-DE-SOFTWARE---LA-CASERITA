@@ -73,7 +73,7 @@ if (!empty($categorias_bd)) {
 </button>
 <div class="admin-topbar-brand">
 <span class="brand-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span>
-<span class="brand-title">Gestion de Categorias y Subcategorias</span>
+<span class="brand-title">Categorías</span>
 </div>
 </div>
 <div class="admin-topbar-actions"><?php include __DIR__ . '/partials/admin_topbar_actions.php'; ?></div>
@@ -183,7 +183,7 @@ if (!empty($categorias_bd)) {
 
 <!-- TAB 1: MACROCATEGORIAS (NIVEL 1) -->
 <div id="tabViewMacrocategorias" style="display:none;background:#fff;border-radius:14px;border:1px solid #e2e8f0;box-shadow:0 4px 12px rgba(0,0,0,.03);overflow:hidden;margin-bottom:30px;">
-<div style="padding:18px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f1f5f9;flex-wrap:wrap;gap:14px;">
+<div class="cat-panel-head">
 <div><h3 style="margin:0;font-size:1.15rem;font-weight:800;color:#0f172a;">Listado de Macrocategorias (Nivel 1)</h3><p style="margin:3px 0 0;font-size:.82rem;color:#64748b;">Las familias maestras de la barra de navegacion superior.</p></div>
 <input type="text" id="filtroMom" onkeyup="window.filtrarTabla('tablaMom','filtroMom',1)" placeholder="Buscar macrocategoria..." style="padding:8px 14px;border:1px solid #cbd5e1;border-radius:8px;font-size:.88rem;min-width:240px;">
 </div>
@@ -216,14 +216,21 @@ if (!empty($categorias_bd)) {
 
 <!-- TAB 2: CATEGORIAS (NIVEL 2) -->
 <div id="tabViewCategorias" style="display:none;background:#fff;border-radius:14px;border:1px solid #e2e8f0;box-shadow:0 4px 12px rgba(0,0,0,.03);overflow:hidden;margin-bottom:30px;">
-<div style="padding:18px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f1f5f9;flex-wrap:wrap;gap:14px;">
-<div><h3 style="margin:0;font-size:1.15rem;font-weight:800;color:#0f172a;">Listado de Categorias (Nivel 2)</h3><p style="margin:3px 0 0;font-size:.82rem;color:#64748b;">Categorias que agrupan los productos bajo cada macrocategoria.</p></div>
-<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+<div class="cat-panel-head">
+<div class="cat-panel-heading"><div><h3 style="margin:0;font-size:1.15rem;font-weight:800;color:#0f172a;">Listado de Categorias (Nivel 2)</h3><p style="margin:3px 0 0;font-size:.82rem;color:#64748b;">Categorias que agrupan los productos bajo cada macrocategoria.</p></div><div class="cat-heading-actions"><button type="button" id="btnNuevoGrupo" class="cat-primary-action" onclick="window.abrirModalGrupo()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg><span>Nueva Categoría</span></button></div></div>
+<div class="cat-panel-actions">
     <input type="text" id="filtroGrupos" onkeyup="window.filtrarTabla('tablaGrupos','filtroGrupos',2)" placeholder="Buscar categoria..." style="padding:8px 14px;border:1px solid #cbd5e1;border-radius:8px;font-size:.88rem;min-width:220px;">
-    <button type="button" id="btnNuevoGrupo" onclick="window.abrirModalGrupo()" style="background:#15803d;color:#fff;border:none;font-weight:700;padding:8px 14px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:0.85rem;box-shadow:0 2px 6px rgba(21,128,61,.2);transition:all .2s ease;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        <span>Nueva Categoría</span>
-    </button>
+    <div class="cat-filter-wrap">
+        <button type="button" class="cat-filter-action" id="btnFiltroGrupos" onclick="window.toggleFiltroCategorias('tablaGrupos')" title="Filtrar por estado" aria-haspopup="true" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+            <span>Filtrar</span>
+        </button>
+        <div class="cat-filter-menu" id="filtroMenuGrupos" role="menu">
+            <button type="button" class="cat-filter-option is-active" data-filtro="all" onclick="window.setFiltroEstadoCategoria('tablaGrupos','all')">Todos</button>
+            <button type="button" class="cat-filter-option" data-filtro="activas" onclick="window.setFiltroEstadoCategoria('tablaGrupos','activas')">Solo activas</button>
+            <button type="button" class="cat-filter-option" data-filtro="inactivas" onclick="window.setFiltroEstadoCategoria('tablaGrupos','inactivas')">Solo inactivas</button>
+        </div>
+    </div>
 </div>
 </div>
 <div style="overflow-x:auto;">
@@ -263,16 +270,28 @@ if (!empty($categorias_bd)) {
     <?php endif; ?>
 </td>
 <td style="padding:14px 18px;text-align:right;white-space:nowrap;">
-<button type="button" class="cat-action-btn cat-btn-edit" aria-label="Editar categoria" title="Editar categoria" onclick='window.editarGrupo(<?= json_encode($g,JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP); ?>)'>
-<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></button>
-
-<?php if ($esActivo): ?>
-<button type="button" class="cat-action-btn cat-btn-inactivar" aria-label="Inactivar categoria" title="Inactivar categoria" onclick='window.confirmarCambioEstadoCategoria("grupo", <?= (int)$g['id_grupo']; ?>, 0, <?= json_encode($g['nombre'], JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP); ?>)'>
-<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg></button>
-<?php else: ?>
-<button type="button" class="cat-action-btn cat-btn-activar" aria-label="Activar categoria" title="Activar categoria" onclick='window.confirmarCambioEstadoCategoria("grupo", <?= (int)$g['id_grupo']; ?>, 1, <?= json_encode($g['nombre'], JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP); ?>)'>
-<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg></button>
-<?php endif; ?>
+<div class="table-kebab-container">
+    <button type="button" class="table-kebab-btn" aria-label="Acciones de categoria" title="Opciones">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+    </button>
+    <div class="table-kebab-menu">
+        <button type="button" class="table-kebab-item" onclick='window.editarGrupo(<?= json_encode($g,JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP); ?>)'>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+            Editar
+        </button>
+        <?php if ($esActivo): ?>
+        <button type="button" class="table-kebab-item" onclick='window.confirmarCambioEstadoCategoria("grupo", <?= (int)$g['id_grupo']; ?>, 0, <?= json_encode($g['nombre'], JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP); ?>)'>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+            Desactivar
+        </button>
+        <?php else: ?>
+        <button type="button" class="table-kebab-item" onclick='window.confirmarCambioEstadoCategoria("grupo", <?= (int)$g['id_grupo']; ?>, 1, <?= json_encode($g['nombre'], JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP); ?>)'>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg>
+            Activar
+        </button>
+        <?php endif; ?>
+    </div>
+</div>
 </td>
 </tr>
 <?php endforeach; ?>
@@ -289,18 +308,21 @@ if (!empty($categorias_bd)) {
 
 <!-- TAB 3: SUBCATEGORIAS (NIVEL 3) -->
 <div id="tabViewSubcategorias" style="background:#fff;border-radius:14px;border:1px solid #e2e8f0;box-shadow:0 4px 12px rgba(0,0,0,.03);overflow:hidden;margin-bottom:30px;">
-<div style="padding:18px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f1f5f9;flex-wrap:wrap;gap:14px;">
-<div><h3 style="margin:0;font-size:1.15rem;font-weight:800;color:#0f172a;">Listado de Subcategorias (Nivel 3)</h3><p style="margin:3px 0 0;font-size:.82rem;color:#64748b;">Subcategorias de productos asociadas a una Categoria y Macrocategoria.</p></div>
-<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+<div class="cat-panel-head">
+<div class="cat-panel-heading"><div><h3 style="margin:0;font-size:1.15rem;font-weight:800;color:#0f172a;">Listado de Subcategorias (Nivel 3)</h3><p style="margin:3px 0 0;font-size:.82rem;color:#64748b;">Subcategorias de productos asociadas a una Categoria y Macrocategoria.</p></div><div class="cat-heading-actions"><button type="button" id="btnNuevaCategoria" class="cat-primary-action" onclick="window.abrirModalCategoria()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg><span>Nueva Subcategoría</span></button><button type="button" class="cat-primary-action" onclick="window.abrirModalGrupo()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg><span>Nueva Categoría</span></button><button type="button" class="cat-export-action" onclick="window.exportarSubcategoriasPDF()" title="Exportar el listado completo de subcategorías a PDF"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><polyline points="9 15 12 18 15 15"></polyline></svg><span>Exportar PDF</span></button></div></div>
+<div class="cat-panel-actions">
     <input type="text" id="filtroCategorias" onkeyup="window.filtrarTabla('tablaCategorias','filtroCategorias',2)" placeholder="Buscar subcategoria..." style="padding:8px 14px;border:1px solid #cbd5e1;border-radius:8px;font-size:.88rem;min-width:220px;">
-    <button type="button" id="btnNuevaCategoria" onclick="window.abrirModalCategoria()" style="background:#0284c7;color:#fff;border:none;font-weight:700;padding:8px 14px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:0.85rem;box-shadow:0 2px 6px rgba(2,132,199,.2);transition:all .2s ease;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        <span>Nueva Subcategoría</span>
-    </button>
-    <button type="button" onclick="window.abrirModalGrupo()" style="background:#15803d;color:#fff;border:none;font-weight:700;padding:8px 14px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:0.85rem;box-shadow:0 2px 6px rgba(21,128,61,.2);transition:all .2s ease;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        <span>Nueva Categoría</span>
-    </button>
+    <div class="cat-filter-wrap">
+        <button type="button" class="cat-filter-action" id="btnFiltroCategorias" onclick="window.toggleFiltroCategorias('tablaCategorias')" title="Filtrar por estado" aria-haspopup="true" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+            <span>Filtrar</span>
+        </button>
+        <div class="cat-filter-menu" id="filtroMenuCategorias" role="menu">
+            <button type="button" class="cat-filter-option is-active" data-filtro="all" onclick="window.setFiltroEstadoCategoria('tablaCategorias','all')">Todos</button>
+            <button type="button" class="cat-filter-option" data-filtro="activas" onclick="window.setFiltroEstadoCategoria('tablaCategorias','activas')">Solo activas</button>
+            <button type="button" class="cat-filter-option" data-filtro="inactivas" onclick="window.setFiltroEstadoCategoria('tablaCategorias','inactivas')">Solo inactivas</button>
+        </div>
+    </div>
 </div>
 </div>
 <div style="overflow-x:auto;">
@@ -428,7 +450,6 @@ if (!empty($categorias_bd)) {
 </div>
 </div>
 <div style="display:flex;justify-content:flex-end;gap:10px;">
-<button type="button" onclick="window.cerrarModalId('modalGrupoAdmin')" style="padding:10px 18px;border-radius:8px;border:1px solid #cbd5e1;background:#f8fafc;font-weight:700;cursor:pointer;color:#475569;">Cancelar</button>
 <button type="submit" id="btnGuardarGrp" style="padding:10px 22px;border-radius:8px;border:none;background:#15803d;color:#fff;font-weight:700;cursor:pointer;">Guardar Categoria</button>
 </div>
 </form>
@@ -497,8 +518,7 @@ if (!empty($categorias_bd)) {
 </div>
 </div>
 <div style="display:flex;justify-content:flex-end;gap:10px;">
-<button type="button" onclick="window.cerrarModalId('modalCategoriaAdmin')" style="padding:10px 18px;border-radius:8px;border:1px solid #cbd5e1;background:#f8fafc;font-weight:700;cursor:pointer;color:#475569;">Cancelar</button>
-<button type="submit" id="btnGuardarCat" style="padding:10px 22px;border-radius:8px;border:none;background:#0284c7;color:#fff;font-weight:700;cursor:pointer;">Guardar Subcategoria</button>
+<button type="submit" id="btnGuardarCat" style="padding:10px 22px;border-radius:8px;border:none;background:#15803d;color:#fff;font-weight:700;cursor:pointer;">Guardar Subcategoria</button>
 </div>
 </form>
 </div>
@@ -511,12 +531,26 @@ if (!empty($categorias_bd)) {
         <h3 id="tituloEstadoCategoria" style="margin:0 0 8px;font-size:1.2rem;font-weight:800;color:#0f172a;">Confirmar cambio</h3>
         <p id="textoEstadoCategoria" style="margin:0 0 22px;color:#64748b;font-size:.92rem;"></p>
         <div style="display:flex;justify-content:center;gap:10px;">
-            <button type="button" onclick="window.cerrarModalId('modalConfirmarEstadoCategoria')" style="padding:10px 18px;border:1px solid #cbd5e1;border-radius:8px;background:#f8fafc;color:#475569;font-weight:700;cursor:pointer;">Cancelar</button>
             <a id="btnConfirmarEstadoCategoria" href="#" style="padding:10px 20px;border-radius:8px;color:#fff;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;">Confirmar</a>
         </div>
     </div>
 </div>
 
+<script>
+    window.__subcategoriasData = <?php
+        $subcatsExport = array_map(function($c) {
+            return [
+                'id' => (int)($c['id_categoria'] ?? 0),
+                'nombre' => $c['nombre'] ?? '',
+                'macro' => $c['momento_nombre'] ?? '',
+                'categoria' => $c['grupo_nombre'] ?? '',
+                'descripcion' => $c['descripcion'] ?? '',
+                'activo' => (isset($c['activo']) ? ((int)$c['activo'] === 1) : true)
+            ];
+        }, $categorias_bd);
+        echo json_encode($subcatsExport, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
+    ?>;
+</script>
 <script src="Scripts/Admin/categorias_admin.js?v=<?= time(); ?>"></script>
 <?php if (!AjaxHelper::isAjax()): ?>
             </div>

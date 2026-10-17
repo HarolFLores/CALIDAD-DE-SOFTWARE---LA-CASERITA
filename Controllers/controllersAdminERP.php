@@ -9,6 +9,7 @@ require_once __DIR__ . '/../Models/deliveryModel.php';
 require_once __DIR__ . '/../Models/verificacionPagoModel.php';
 require_once __DIR__ . '/../Models/productModel.php';
 require_once __DIR__ . '/../Models/categoryModel.php';
+require_once __DIR__ . '/../Models/pedidoModel.php';
 
 class ControllerAdminERP {
     private $reportesModel;
@@ -19,6 +20,7 @@ class ControllerAdminERP {
     private $verificacionModel;
     private $productoModel;
     private $categoriaModel;
+    private $pedidoModel;
 
     public function __construct() {
         if (session_status() === PHP_SESSION_NONE) {
@@ -32,6 +34,7 @@ class ControllerAdminERP {
         $this->verificacionModel = new VerificacionPagoModel();
         $this->productoModel = new ProductoModel();
         $this->categoriaModel = new CategoryModel();
+        $this->pedidoModel = new PedidoModel();
     }
 
     private function verificarAdmin() {
@@ -230,6 +233,11 @@ class ControllerAdminERP {
             $cantidad = (int)($_POST['cantidad'] ?? 0);
             $costoUnit = (float)($_POST['costo_unitario'] ?? ($_POST['precio_unitario'] ?? 0));
             $precioSugerido = !empty($_POST['precio_venta_sugerido']) ? (float)$_POST['precio_venta_sugerido'] : (!empty($_POST['precio_venta']) ? (float)$_POST['precio_venta'] : null);
+            $actualizarOferta = isset($_POST['actualizar_oferta']) && $_POST['actualizar_oferta'] == '1';
+            $precioAnterior = null;
+            if ($actualizarOferta && isset($_POST['en_oferta']) && $_POST['en_oferta'] == '1' && !empty($_POST['precio_anterior'])) {
+                $precioAnterior = (float)$_POST['precio_anterior'];
+            }
             $comprobante = trim($_POST['nro_comprobante'] ?? ($_POST['numero_comprobante'] ?? ''));
             $lote = trim($_POST['lote'] ?? '');
             $vencimiento = !empty($_POST['fecha_vencimiento']) ? trim($_POST['fecha_vencimiento']) : null;
@@ -265,7 +273,9 @@ class ControllerAdminERP {
                 $observacion,
                 $descontarDeCaja,
                 $idSesion,
-                $datosNuevoProd
+                $datosNuevoProd,
+                $precioAnterior,
+                $actualizarOferta
             );
 
             if ($res['ok']) {
@@ -376,6 +386,11 @@ class ControllerAdminERP {
         $envios = $this->deliveryModel->listarEnvios($filtroEstado);
         $repartidores = $this->deliveryModel->listarRepartidores();
 
+        // HU33: Bandeja de Pedidos Pendientes (dentro de Logística y Despacho)
+        $bandejaPedidos = $this->pedidoModel->getPedidosBandeja();
+        $bandejaEmpaque = $this->deliveryModel->listarPersonalEmpaque();
+        $bandejaRepartidores = $this->deliveryModel->listarRepartidoresActivos();
+
         include __DIR__ . '/../Views/Admin/delivery_admin.php';
     }
 
@@ -427,6 +442,67 @@ class ControllerAdminERP {
                 $_SESSION['flash_error'] = 'Datos insuficientes para actualizar el pedido/envío';
             }
         }
+        header('Location: index.php?action=delivery_admin');
+        exit();
+    }
+
+    // =========================================================================
+    // 5b. BANDEJA DE PEDIDOS PENDIENTES - ASIGNACIÓN (HU33)
+    // =========================================================================
+    public function bandejaAsignar() {
+        $this->verificarAdmin();
+        $esAjax = AjaxHelper::isAjax() || !empty($_POST['is_ajax']) || (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            if ($esAjax) AjaxHelper::jsonError('Método no permitido.', 405);
+            header('Location: index.php?action=delivery_admin');
+            exit();
+        }
+
+        $ids = $_POST['ids'] ?? [];
+        if (is_string($ids)) {
+            $ids = explode(',', $ids);
+        }
+        $ids = array_values(array_filter(array_map('intval', (array)$ids)));
+        $tipo = trim($_POST['tipo'] ?? '');
+        $idUsuario = (int)($_POST['id_usuario'] ?? 0);
+
+        if (empty($ids)) {
+            if ($esAjax) AjaxHelper::jsonError('Seleccione al menos un pedido.', 422);
+            $_SESSION['flash_error'] = 'Seleccione al menos un pedido.';
+            header('Location: index.php?action=delivery_admin');
+            exit();
+        }
+
+        if ($tipo === 'empaque') {
+            if ($idUsuario <= 0) {
+                if ($esAjax) AjaxHelper::jsonError('Seleccione el personal de empaque.', 422);
+                $_SESSION['flash_error'] = 'Seleccione el personal de empaque.';
+                header('Location: index.php?action=delivery_admin');
+                exit();
+            }
+            $afectados = $this->pedidoModel->asignarEmpaque($ids, $idUsuario);
+            $mensaje = $afectados . ' pedido(s) asignado(s) a empaque.';
+        } elseif ($tipo === 'reparto') {
+            if ($idUsuario <= 0) {
+                if ($esAjax) AjaxHelper::jsonError('Seleccione el motorizado.', 422);
+                $_SESSION['flash_error'] = 'Seleccione el motorizado.';
+                header('Location: index.php?action=delivery_admin');
+                exit();
+            }
+            $afectados = $this->deliveryModel->asignarRepartidorPedidos($ids, $idUsuario);
+            $mensaje = $afectados . ' pedido(s) asignado(s) a reparto.';
+        } else {
+            if ($esAjax) AjaxHelper::jsonError('Tipo de asignación inválido.', 422);
+            $_SESSION['flash_error'] = 'Tipo de asignación inválido.';
+            header('Location: index.php?action=delivery_admin');
+            exit();
+        }
+
+        if ($esAjax) {
+            AjaxHelper::jsonResponse(true, $mensaje, ['afectados' => $afectados]);
+        }
+        $_SESSION['flash_success'] = $mensaje;
         header('Location: index.php?action=delivery_admin');
         exit();
     }
@@ -555,6 +631,7 @@ class ControllerAdminERP {
         $this->verificarAdmin();
 
         $isFormSubmit = isset($_POST['guardar_form_carrusel']);
+        $isAjaxRequest = strtolower($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'xmlhttprequest';
         $file = __DIR__ . '/../Config/carrusel.json';
         $currentSlides = file_exists($file) ? json_decode(file_get_contents($file), true) : [];
 
@@ -602,7 +679,19 @@ class ControllerAdminERP {
                 mkdir(dirname($file), 0777, true);
             }
             file_put_contents($file, json_encode($slides, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-            $_SESSION['flash_success'] = '¡Banners del carrusel actualizados exitosamente!';
+            if (!$isAjaxRequest) {
+                $_SESSION['flash_success'] = '¡Banners del carrusel actualizados exitosamente!';
+            }
+            if ($isAjaxRequest) {
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode([
+                    'ok' => true,
+                    'mensaje' => 'Carrusel actualizado con éxito',
+                    'total' => count($slides)
+                ]);
+                exit();
+            }
+
             header('Location: index.php?action=carrusel_admin');
             exit();
         }
