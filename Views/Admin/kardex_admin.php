@@ -51,20 +51,6 @@ $idProdFiltro = isset($_GET['id_producto']) ? (int)$_GET['id_producto'] : 0;
 
 
 <main class="kardex-view-wrapper">
-    <!-- Header Principal en Recuadro Unificado -->
-    <div class="admin-header">
-        <div class="admin-header-titles">
-            <h1>Kardex Valorizado & Trazabilidad</h1>
-            <p>Registro contable cronológico de compras (entradas), ventas mostrador/web (salidas) y ajustes físicos.</p>
-        </div>
-        <div class="admin-header-actions">
-            <button type="button" onclick="window.abrirModalAjuste()" class="btn btn-primary" style="background:#15803D; color:#fff; border:none; padding:10px 18px; border-radius:10px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 12px rgba(21,128,61,0.22); transition:all 0.2s ease;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                <span>Ajustar Stock Manual</span>
-            </button>
-        </div>
-    </div>
-
     <!-- Banner de Notificación Flash -->
     <?php if ($flash_success || $flash_error): 
         $esError = !empty($flash_error);
@@ -144,6 +130,10 @@ $idProdFiltro = isset($_GET['id_producto']) ? (int)$_GET['id_producto'] : 0;
                     <option value="cant_asc">Menor cantidad (±)</option>
                 </select>
             </div>
+
+            <button type="button" onclick="window.abrirModalAjuste()" class="btn btn-primary" style="background:#15803D; color:#fff; border:none; padding:8px 16px; border-radius:10px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:8px; box-shadow:0 3px 10px rgba(21,128,61,0.22); font-size:0.88rem; transition:all 0.2s ease; white-space:nowrap; margin-left:auto;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>+ Ajustar Stock Manual</span>
         </div>
 
         <!-- Filtro por Rango de Fechas -->

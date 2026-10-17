@@ -644,6 +644,7 @@ body {
   width: 36px;
   height: 36px;
   object-fit: contain;
+  filter: none;
   flex-shrink: 0;
 }
 
@@ -710,13 +711,13 @@ body {
 }
 
 .admin-sidebar .sidebar-link:hover {
-  background: #f0fdf4;
+  background: #f8fafc;
   color: #15803d;
 }
 
 .admin-sidebar .sidebar-link.active {
-  background: #dcfce7;
-  color: #15803d;
+  background: transparent;
+  color: #166534;
   font-weight: 700;
   box-shadow: none;
 }
@@ -851,13 +852,26 @@ body {
 }
 
 .admin-topbar {
-  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 66px;
+  min-height: 66px;
+  padding: 0 18px 0 0;
+  box-sizing: border-box;
+  background: #15803d;
+  border-bottom: 1px solid #166534;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.08);
 }
-
 
 .admin-topbar-left {
   display: flex;
   align-items: center;
+  align-self: stretch;
   gap: 12px;
 }
 
@@ -883,19 +897,26 @@ body {
 }
 
 .admin-topbar-brand {
+  position: relative;
   display: flex;
   align-items: center;
+  align-self: stretch;
   gap: 8px;
+  min-width: 280px;
+  padding: 0 28px;
+  box-sizing: border-box;
   text-decoration: none;
   color: #ffffff;
   font-weight: 800;
-  font-size: 1.15rem;
+  font-size: 1.12rem;
+  letter-spacing: -0.015em;
 }
 
 .admin-topbar-brand .brand-title {
-  background: #15803D;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #ffffff;
+  background: none;
+  -webkit-background-clip: initial;
+  -webkit-text-fill-color: currentColor;
 }
 
 .admin-topbar-brand .brand-icon {
@@ -1166,7 +1187,7 @@ body {
   }
 
   .sidebar-link.active {
-    background: rgba(20, 184, 166, 0.2) !important;
+    background: transparent !important;
     color: #5eead4 !important;
     border-left: 3px solid #14b8a6 !important;
   }
@@ -1185,6 +1206,18 @@ body {
     box-shadow: 0 4px 15px rgba(10, 79, 92, 0.35) !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
     padding: 10px 16px !important;
+  }
+
+  .admin-topbar-left {
+    min-width: 0;
+    gap: 8px;
+  }
+
+  .admin-topbar-brand {
+    min-width: 0;
+    padding: 0 4px;
+    font-size: 1rem;
+    white-space: nowrap;
   }
 
   
@@ -1228,10 +1261,10 @@ body {
   }
 
   .sidebar-link.active {
-    background: #14b8a6;
+    background: transparent;
     color: #ffffff;
     border-left: none;
-    box-shadow: 0 2px 8px rgba(20, 184, 166, 0.4);
+    box-shadow: none;
   }
 
   .sidebar-link:hover {
@@ -1338,9 +1371,9 @@ body {
 
   .admin-sidebar .sidebar-link.active {
     border: 0;
-    background: #10b981;
-    color: #ffffff;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.28);
+    background: transparent;
+    color: #bbf7d0;
+    box-shadow: none;
   }
 
   .admin-sidebar .sidebar-link:hover {
@@ -1361,7 +1394,7 @@ body {
   
   .admin-main {
     margin-left: 0 !important;
-    padding-top: 105px;
+    padding-top: 0 !important;
     max-width: 100vw !important;
   }
 
@@ -2994,28 +3027,31 @@ body {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-/* Ultra-Aesthetic Status Pill Badges with Micro-Dot Indicator */
+/* Estados uniformes para todas las tablas administrativas */
 .status-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 4px 12px;
-  border-radius: 9999px;
-  font-size: 0.74rem;
-  font-weight: 600;
+  padding: 2px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #0f172a;
+  font-size: 0.84rem;
+  font-weight: 700;
   line-height: 1.25;
   white-space: nowrap;
-  letter-spacing: 0.01em;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  letter-spacing: 0;
+  box-shadow: none;
 }
 
 .status-pill::before {
   content: "";
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: currentColor;
+  background: #64748b;
   flex-shrink: 0;
 }
 
@@ -3024,41 +3060,94 @@ body {
 .status-pill.aprobado,
 .status-pill.entregado,
 .status-pill.completado,
-.status-pill-success,
-.badge-status-activo {
-  background: #ecfdf5;
-  color: #059669;
-  border: 1px solid #a7f3d0;
+.status-pill-success {
+  background: transparent;
+  color: #0f172a;
+  border: 0;
+}
+
+.status-pill.activo::before,
+.status-pill.disponible::before,
+.status-pill.aprobado::before,
+.status-pill.entregado::before,
+.status-pill.completado::before,
+.status-pill.abierta::before,
+.status-pill.procesada::before,
+.status-pill-success::before {
+  background: #22c55e;
 }
 
 .status-pill.inactivo,
 .status-pill.stock-bajo,
 .status-pill.rechazado,
 .status-pill.cancelado,
-.status-pill-danger,
-.badge-status-inactivo {
-  background: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
+.status-pill.fallido,
+.status-pill-danger {
+  background: transparent;
+  color: #0f172a;
+  border: 0;
+}
+
+.status-pill.inactivo::before,
+.status-pill.stock-bajo::before,
+.status-pill.rechazado::before,
+.status-pill.cancelado::before,
+.status-pill.fallido::before,
+.status-pill.cerrada::before,
+.status-pill.stock_bajo::before,
+.status-pill-danger::before {
+  background: #ef4444;
 }
 
 .status-pill.pendiente,
 .status-pill.por-verificar,
-.status-pill.en-ruta,
-.status-pill.en-camino,
-.status-pill.en-preparacion,
+.status-pill.por_verificar,
 .status-pill-warning {
-  background: #fffbeb;
-  color: #d97706;
-  border: 1px solid #fde68a;
+  background: transparent;
+  color: #0f172a;
+  border: 0;
+}
+
+.status-pill.pendiente::before,
+.status-pill.por-verificar::before,
+.status-pill.por_verificar::before,
+.status-pill-warning::before {
+  background: #f59e0b;
+}
+
+.status-pill.en-preparacion::before,
+.status-pill.en_preparacion::before,
+.status-pill.procesando::before,
+.status-pill.asignado::before {
+  background: #3b82f6;
+}
+
+.status-pill.en-camino::before,
+.status-pill.en_camino::before,
+.status-pill.en-ruta::before,
+.status-pill.en_ruta::before {
+  background: #a855f7;
+}
+
+.status-pill.listo-recojo::before,
+.status-pill.listo_recojo::before,
+.status-pill.listo-para-recojo::before,
+.status-pill.listo_para_recojo::before {
+  background: #06b6d4;
 }
 
 .status-pill.info,
 .status-pill.recojo,
 .status-pill.delivery {
-  background: #eff6ff;
-  color: #2563eb;
-  border: 1px solid #bfdbfe;
+  background: transparent;
+  color: #0f172a;
+  border: 0;
+}
+
+.status-pill.info::before,
+.status-pill.recojo::before,
+.status-pill.delivery::before {
+  background: #3b82f6;
 }
 
 /* Kebab Actions Dropdown Component (Refined Aesthetic Style) */
@@ -3186,3 +3275,26 @@ body {
 
 
 
+
+/* Botón Limpiar Filtros estándar */
+.btn-limpiar-filtros {
+  min-height: 40px;
+  padding: 8px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #475569;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-limpiar-filtros:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #94a3b8;
+}

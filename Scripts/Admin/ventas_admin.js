@@ -2,7 +2,9 @@
     'use strict';
 
     var searchInput    = document.getElementById('vaSearch');
+    var filtCanal      = document.getElementById('vaFiltroCanal');
     var filtEstado     = document.getElementById('vaFiltroEstado');
+    var btnLimpiar     = document.getElementById('vaBtnLimpiar');
     var filtEntrega    = document.getElementById('vaFiltroEntrega');
     var filtFecha      = document.getElementById('vaFiltroFecha');
     var statCards      = document.querySelectorAll('.stat-card-square[data-filtro-estado]');
@@ -41,12 +43,14 @@
         if (resetPage !== false) currentPage = 1;
 
         var q = (searchInput ? searchInput.value : '').toLowerCase().trim();
+        var can = (filtCanal ? filtCanal.value : '').toUpperCase();
         var est = (filtEstado ? filtEstado.value : '').toLowerCase();
         var ent = (filtEntrega ? filtEntrega.value : '').toLowerCase();
         var fec = filtFecha ? filtFecha.value : '';
 
         currentFilteredRows = rows.filter(function(row) {
             var rowSearch  = (row.getAttribute('data-search') || '').toLowerCase();
+            var rowCanal   = (row.getAttribute('data-canal') || 'WEB').toUpperCase();
             var rowEstado  = normEstado(row.getAttribute('data-estado'));
             var rowEntrega = (row.getAttribute('data-entrega') || '').toLowerCase();
             var rowFecha   = row.getAttribute('data-fecha') || '';
@@ -56,7 +60,8 @@
             var matchEntrega = !ent || rowEntrega === ent;
             var matchFecha = !fec || rowFecha === fec;
 
-            return matchQ && matchEstado && matchEntrega && matchFecha;
+            var matchCanal = !can || rowCanal === can;
+            return matchQ && matchEstado && matchEntrega && matchFecha && matchCanal;
         });
 
         renderPaginacion();
@@ -162,7 +167,21 @@
             searchInput.addEventListener(evt, function() { aplicarFiltros(true); });
         });
     }
+    if (filtCanal) filtCanal.addEventListener('change', function() { aplicarFiltros(true); });
     if (filtEntrega) filtEntrega.addEventListener('change', function() { aplicarFiltros(true); });
+    if (btnLimpiar) {
+        btnLimpiar.addEventListener('click', function() {
+            if (searchInput) searchInput.value = '';
+            if (filtCanal) filtCanal.value = '';
+            if (filtEstado) filtEstado.value = '';
+            if (filtEntrega) filtEntrega.value = '';
+            if (filtFecha) filtFecha.value = '';
+            statCards.forEach(function(c) { c.classList.remove('active-card'); });
+            var firstCard = document.querySelector('.stat-card-square[data-filtro-estado=""]');
+            if (firstCard) firstCard.classList.add('active-card');
+            aplicarFiltros(true);
+        });
+    }
     if (filtFecha) filtFecha.addEventListener('change', function() { aplicarFiltros(true); });
 
     // Modales y Detalles
@@ -401,11 +420,10 @@
                 rows.forEach(function(row) {
                     if (parseInt(row.getAttribute('data-id')) === parseInt(id)) {
                         row.setAttribute('data-estado', estCod);
-                        var badge = row.querySelector('.va-badge-pill');
+                        var badge = row.querySelector('.status-pill, .va-badge-pill');
                         if (badge) {
-                            //badge.style.background = estData.bg;
-                            //badge.style.color = estData.color;
-                            badge.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:' + estData.dot + ';flex-shrink:0;"></span><span>' + estData.label + '</span>';
+                            badge.className = 'status-pill ' + estCod;
+                            badge.textContent = estData.label;
                         }
                     }
                 });
@@ -493,7 +511,7 @@
         var btn = e.target.closest('.va-abrir-modal');
         if (btn) {
             var id = parseInt(btn.getAttribute('data-id'), 10);
-            if (id) abrirDetallePedido(id);
+            if (id) window.abrirBoletaPedido(id);
         }
     });
 
@@ -725,6 +743,44 @@
         .catch(function() {
             if (window.mostrarTopToast) {
                 window.mostrarTopToast('Error', 'Error de conexión al cargar comprobante.', false);
+            }
+        });
+    };
+
+    // Abrir modal del ticket (boleta/comprobante) desde "Ver detalle"
+    window.abrirBoletaPedido = function(idPedido) {
+        if (!idPedido) return;
+
+        if (modalTicketAdmin) {
+            modalTicketAdmin.classList.add('active');
+        }
+
+        if (currentPedidoData && currentPedidoData.pedido && parseInt(currentPedidoData.pedido.id_pedido, 10) === parseInt(idPedido, 10)) {
+            popularDatosTicketAdmin(currentPedidoData);
+            return;
+        }
+
+        fetch('index.php?action=detalle_pedido_admin&id=' + idPedido, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+            if (!res || !res.success || !res.data) {
+                cerrarModalTicketAdmin();
+                if (window.mostrarTopToast) {
+                    window.mostrarTopToast('Error', 'No se pudo cargar la boleta del pedido.', false);
+                }
+                return;
+            }
+            currentPedidoData = res.data;
+            currentPedidoModalId = idPedido;
+            window.currentPedidoModalId = idPedido;
+            popularDatosTicketAdmin(res.data);
+        })
+        .catch(function() {
+            cerrarModalTicketAdmin();
+            if (window.mostrarTopToast) {
+                window.mostrarTopToast('Error', 'Error de conexión al cargar la boleta.', false);
             }
         });
     };

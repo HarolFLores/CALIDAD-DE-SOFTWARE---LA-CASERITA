@@ -58,35 +58,9 @@ $isAjax = AjaxHelper::isAjax();
 
 
     <main class="main-content container-admin" style="padding-top: 15px; padding-bottom: 50px;">
-        
-        <!-- Header con Título y Acciones Funcionales -->
-        <div class="admin-header" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
-            <div class="admin-header-titles">
-                <h1 style="font-size: 1.6rem; font-weight: 800; color: #0f172a; margin: 0;">Arqueo de Caja Chica</h1>
-                <p style="margin: 4px 0 0; color: #64748b; font-size: 0.90rem;">Gestiona la apertura, movimientos diarios y cuadre de caja de los cajeros.</p>
-            </div>
-            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <?php if ($estaAbierta): ?>
-                    <button type="button" id="btnHeaderRegistrarMov" class="btn-caja-header btn-caja-outline" title="Registrar ingreso o gasto extra">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                        Movimiento (Ingreso / Gasto)
-                    </button>
-                    <button type="button" id="btnHeaderCerrarCaja" class="btn-caja-header btn-caja-red" title="Efectuar arqueo y cierre">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                        Cerrar Caja & Arqueo
-                    </button>
-                <?php else: ?>
-                    <button type="button" id="btnHeaderAperturarCaja" class="btn-caja-header btn-caja-green" title="Aperturar nuevo turno">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>
-                        Aperturar Turno de Caja
-                    </button>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <!-- Banner de Estado de Caja -->
+               <!-- Banner de Estado de Caja -->
         <?php if ($estaAbierta): ?>
-            <div class="caja-status-banner-modern is-open">
+            <div class="caja-status-banner-modern is-open" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
                 <div>
                     <span style="padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 800; display: inline-flex; align-items: center; gap: 6px;">
                         <span style="width: 6px; height: 6px; border-radius: 50%; background: #16a34a;"></span>
@@ -99,10 +73,22 @@ $isAjax = AjaxHelper::isAjax();
                         Aperturada el <?= date('d/m/Y h:i A', strtotime($sesionActiva['fecha_apertura'])); ?> con fondo inicial de <strong>S/ <?= number_format($sesionActiva['monto_apertura'], 2); ?></strong>
                     </p>
                 </div>
-                <div style="text-align: right;">
-                    <span style="font-size: 0.74rem; font-weight: 800; color: #64748b; letter-spacing: 0.05em; text-transform: uppercase;">Efectivo Físico Esperado en Gaveta</span>
-                    <div style="font-size: 2rem; font-weight: 900; color: #15803d; line-height: 1; margin-top: 4px;">
-                        S/ <?= number_format($resumen['efectivo_esperado'] ?? 0, 2); ?>
+                <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                    <div style="text-align: right;">
+                        <span style="font-size: 0.74rem; font-weight: 800; color: #64748b; letter-spacing: 0.05em; text-transform: uppercase;">Efectivo Físico Esperado</span>
+                        <div style="font-size: 1.85rem; font-weight: 900; color: #15803d; line-height: 1; margin-top: 4px;">
+                            S/ <?= number_format($resumen['efectivo_esperado'] ?? 0, 2); ?>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px; flex-direction: column;">
+                        <button type="button" id="btnHeaderRegistrarMov" class="btn-caja-header btn-caja-outline" title="Registrar ingreso o gasto extra" style="padding: 7px 12px; font-size: 0.82rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            Movimiento
+                        </button>
+                        <button type="button" id="btnHeaderCerrarCaja" class="btn-caja-header btn-caja-red" title="Efectuar arqueo y cierre" style="padding: 7px 12px; font-size: 0.82rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                            Cerrar Caja
+                        </button>
                     </div>
                 </div>
             </div>
@@ -209,7 +195,7 @@ $isAjax = AjaxHelper::isAjax();
 
         <?php else: ?>
             <!-- Banner Caja Cerrada -->
-            <div class="caja-status-banner-modern is-closed">
+            <div class="caja-status-banner-modern is-closed" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
                 <div>
                     <span style="padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 800; display: inline-flex; align-items: center; gap: 6px;">
                         <span style="width: 6px; height: 6px; border-radius: 50%; background: #ef4444;"></span>
@@ -221,6 +207,12 @@ $isAjax = AjaxHelper::isAjax();
                     <p style="margin: 0; font-size: 0.88rem; color: #64748b;">
                         Para empezar a registrar ventas en POS y gastos menores, apertura el turno con el fondo inicial.
                     </p>
+                </div>
+                <div>
+                    <button type="button" id="btnHeaderAperturarCaja" class="btn-caja-header btn-caja-green" title="Aperturar nuevo turno" style="padding: 10px 18px; border-radius: 8px; font-weight: 700;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>
+                        Aperturar Turno de Caja
+                    </button>
                 </div>
             </div>
         <?php endif; ?>

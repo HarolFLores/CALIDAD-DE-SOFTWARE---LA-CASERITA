@@ -36,12 +36,30 @@ if (!window.UniversalCameraScanner || !window.UniversalCameraScanner.isReal) {
 }
 
 const SPA = {
+    moduleTitles: {
+        dashboard_ganancias: 'Dashboard financiero',
+        ventas_admin: 'Ventas',
+        compras_admin: 'Compras y reposición',
+        verificacion_pagos: 'Auditoría de pagos',
+        delivery_admin: 'Logística y despacho',
+        inventario: 'Inventario',
+        productos_admin: 'Inventario',
+        categorias_admin: 'Categorías',
+        kardex_admin: 'Kardex valorizado',
+        proveedores_admin: 'Proveedores',
+        caja_admin: 'Caja',
+        carrusel_admin: 'Banners y carrusel',
+        usuarios_admin: 'Usuarios',
+        mi_perfil_admin: 'Mi perfil'
+    },
+
     init: function() {
         this.setupAjax();
         this.createToastContainer();
         this.createLoader();
         this.setupNavigation();
         this.preloadScannerLibraries();
+        this.updateModuleHeader(new URL(window.location.href).searchParams.get('action'));
 
         window.addEventListener('popstate', (e) => {
             if (e.state && e.state.url) {
@@ -56,6 +74,14 @@ const SPA = {
         setTimeout(function() {
             window.ensureCameraScanner();
         }, 100);
+    },
+
+    updateModuleHeader: function(action) {
+        const title = this.moduleTitles[action];
+        if (!title) return;
+
+        $('.admin-topbar .admin-topbar-brand .brand-title').text(title);
+        document.title = `${title} — ERP La Caserita`;
     },
 
     setupAjax: function() {
@@ -296,6 +322,7 @@ const SPA = {
                 if ($newBrand.length) {
                     $('.admin-topbar .admin-topbar-brand').html($newBrand.html());
                 }
+                SPA.updateModuleHeader(requestedAction);
 
                 // Update topbar actions seamlessly to prevent buttons leaking between views
                 const $newActions = $doc.find('.admin-topbar-actions');

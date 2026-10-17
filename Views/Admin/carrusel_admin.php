@@ -264,23 +264,7 @@ function resolverNombreDestino($url, $destinosList) {
 <main class="main-content container-admin" style="padding-top: 25px; padding-bottom: 50px;">
     
 
-    <!-- HEADER DE SECCIÓN EN RECUADRO UNIFICADO -->
-    <div class="admin-header">
-        <div class="admin-header-titles">
-            <h1>Banners Principales del Carrusel</h1>
-            <p>Configura los banners interactivos de la tienda. Puedes seleccionar directamente la macrocategoría o categoría sin buscar enlaces manuales.</p>
-        </div>
-        <div class="admin-header-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <button type="button" onclick="window.agregarNuevoBanner()" style="background: #15803d; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 0.88rem; color: #ffffff; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(21,128,61,0.25);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                <span>Agregar Banner</span>
-            </button>
-            <a href="index.php" target="_blank" style="background: #ffffff; border: 1px solid #cbd5e1; padding: 10px 16px; border-radius: 10px; font-weight: 700; font-size: 0.88rem; color: #334155; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                <span>Ver en Tienda</span>
-            </a>
-        </div>
-    </div>
+
 
     <!-- TARJETAS CUADRADAS COMPACTAS (IMAGEN 2) -->
     <div class="stats-grid-square">
@@ -300,6 +284,18 @@ function resolverNombreDestino($url, $destinosList) {
             <span class="stat-title">ESTADO EN TIENDA</span>
             <span class="stat-val" style="font-size: 1.05rem; color: #15803d;">Activo</span>
         </div>
+    </div>
+
+    <!-- ACCIONES PROPORCIONALES -->
+    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 22px; align-items: center;">
+        <button type="button" onclick="window.agregarNuevoBanner()" style="background: #15803d; border: none; padding: 9px 16px; border-radius: 8px; font-weight: 700; font-size: 0.88rem; color: #ffffff; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(21,128,61,0.25);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Agregar Banner</span>
+        </button>
+        <a href="index.php" target="_blank" style="background: #ffffff; border: 1px solid #cbd5e1; padding: 9px 15px; border-radius: 8px; font-weight: 700; font-size: 0.88rem; color: #334155; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+            <span>Ver en Tienda</span>
+        </a>
     </div>
 
     <!-- FORMULARIO OCULTO PARA PERSISTENCIA DE BANNERS -->

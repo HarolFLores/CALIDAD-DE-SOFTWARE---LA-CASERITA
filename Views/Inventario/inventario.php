@@ -104,18 +104,7 @@ require_once 'Core/ajaxHelper.php';
             }
         ?>
 
-        <div class="admin-header">
-            <div class="admin-header-titles">
-                <h1>Gestión de Inventario</h1>
-                <p>Controla el stock actual, niveles mínimos, ubicación y reposición de productos.</p>
-            </div>
-            <div class="admin-header-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button type="button" class="btn btn-primary" onclick="abrirModalCrearProducto()" style="background: #15803d; color: #ffffff; border: none; font-weight: 700; padding: 10px 20px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(21,128,61,0.25);">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    <span>Nuevo Producto</span>
-                </button>
-            </div>
-        </div>
+
 
         <?php if ($flash_success || $flash_error): ?>
             <script>
@@ -250,6 +239,11 @@ require_once 'Core/ajaxHelper.php';
                             <option value="stock_desc">Stock (Mayor a Menor)</option>
                         </select>
                     </div>
+
+                    <button type="button" class="btn btn-primary" onclick="abrirModalCrearProducto()" style="background: #15803d; color: #ffffff; border: none; font-weight: 700; padding: 9px 16px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem; box-shadow: 0 2px 8px rgba(21,128,61,0.25); white-space: nowrap;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        <span>Nuevo Producto</span>
+                    </button>
                 </div>
             </div>
 

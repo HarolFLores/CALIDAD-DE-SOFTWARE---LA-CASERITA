@@ -103,19 +103,6 @@
                 </script>
             <?php endif; ?>
 
-            <div class="admin-header">
-                <div class="admin-header-titles">
-                    <h1>Gestión de Usuarios</h1>
-                    <p>Administra clientes, cajeros POS y cuentas administrativas de la tienda</p>
-                </div>
-                <div class="admin-header-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button class="btn btn-primary" onclick="abrirModalUsuario('nuevo')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
-                        Crear Usuario
-                    </button>
-                </div>
-            </div>
-
             <!-- TARJETAS FUNCIONALES SIN ICONOS: TOTAL, ACTIVOS, INACTIVOS, ADMINS, CAJA POS, REPARTIDOR, CLIENTE -->
             <div class="stats-grid users-stats-grid">
                 <div class="stat-card active-stat-card" id="cardFilterTotal" onclick="filtrarUsuariosPor('todos')" title="Ver todos los usuarios">
@@ -163,10 +150,14 @@
             </div>
 
             <div class="panel">
-                <div class="panel-header">
+                <div class="panel-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
                     <h2>Lista de Usuarios</h2>
-                    <div class="panel-filters">
+                    <div class="panel-filters" style="display: flex; gap: 10px; align-items: center;">
                         <input type="text" id="searchUser" class="search-input" placeholder="Buscar por nombre o correo...">
+                        <button class="btn btn-primary" onclick="abrirModalUsuario('nuevo')" style="background: #15803d; color: #ffffff; border: none; font-weight: 700; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem; box-shadow: 0 2px 8px rgba(21,128,61,0.25); white-space: nowrap;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+                            <span>Crear Usuario</span>
+                        </button>
                     </div>
                 </div>
                 <div class="table-responsive">

@@ -162,26 +162,38 @@
         .deliv-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.88rem;
+            font-size: 0.86rem;
             text-align: left;
+            table-layout: fixed;
         }
         .deliv-table thead tr {
             background: #f8fafc;
             border-bottom: 1.5px solid #e2e8f0;
         }
         .deliv-table th {
-            padding: 12px 14px;
-            font-size: 0.72rem;
+            padding: 12px 12px;
+            font-size: 0.70rem;
             font-weight: 800;
             color: #475569;
             text-transform: uppercase;
             letter-spacing: 0.04em;
+            white-space: nowrap;
         }
         .deliv-table td {
-            padding: 14px;
+            padding: 13px 12px;
             border-bottom: 1px solid #f1f5f9;
             vertical-align: middle;
         }
+        .deliv-table td:nth-child(3) > div {
+            line-height: 1.35;
+        }
+        .deliv-table th:nth-child(1), .deliv-table td:nth-child(1) { width: 12%; }
+        .deliv-table th:nth-child(2), .deliv-table td:nth-child(2) { width: 15%; }
+        .deliv-table th:nth-child(3), .deliv-table td:nth-child(3) { width: 29%; }
+        .deliv-table th:nth-child(4), .deliv-table td:nth-child(4) { width: 12%; }
+        .deliv-table th:nth-child(5), .deliv-table td:nth-child(5) { width: 15%; }
+        .deliv-table th:nth-child(6), .deliv-table td:nth-child(6) { width: 12%; }
+        .deliv-table th:nth-child(7), .deliv-table td:nth-child(7) { width: 5%; min-width: 52px; text-align: right; }
         .deliv-table tbody tr:hover {
             background: #fcfcfc;
         }
@@ -203,10 +215,11 @@
             flex-shrink: 0;
         }
         .badge-deliv.pendiente::before { background: #f59e0b; } /* Naranja */
-        .badge-deliv.en_preparacion::before { background: #6366f1; } /* Indigo */
+        .badge-deliv.en_preparacion::before { background: #3b82f6; } /* Azul */
         .badge-deliv.listo_para_recojo::before, .badge-deliv.listo_recojo::before { background: #06b6d4; } /* Cyan */
         .badge-deliv.asignado::before  { background: #0ea5e9; } /* Celeste */
-        .badge-deliv.en_ruta::before   { background: #3b82f6; } /* Azul */
+        .badge-deliv.en_ruta::before,
+        .badge-deliv.en_camino::before { background: #a855f7; } /* Morado */
         .badge-deliv.entregado::before { background: #16a34a; } /* Verde */
         .badge-deliv.fallido::before   { background: #dc2626; }
         .badge-deliv.cancelado::before { background: #dc2626; }
@@ -297,3 +310,66 @@
             opacity: 0.4;
             cursor: not-allowed;
         }
+
+        /* Botón Limpiar Filtros idéntico a Imagen 1 */
+        .btn-limpiar-filtros {
+            min-height: 38px;
+            padding: 7px 15px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #475569;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-limpiar-filtros:hover {
+            background: #f8fafc;
+            color: #0f172a;
+            border-color: #94a3b8;
+        }
+
+        /* Diseño limpio de Estados con punto de color idéntico a Imagen 2 */
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 0;
+            border: none;
+            border-radius: 0;
+            background: transparent !important;
+            color: #0f172a;
+            font-size: 0.84rem;
+            font-weight: 700;
+            white-space: nowrap;
+            box-shadow: none;
+        }
+        .status-pill::before {
+            content: "";
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: inline-block;
+        }
+        .status-pill.pendiente::before { background: #f59e0b; }
+        .status-pill.en-preparacion::before,
+        .status-pill.en_preparacion::before,
+        .status-pill.confirmado::before { background: #3b82f6; }
+        .status-pill.asignado::before { background: #0ea5e9; }
+        .status-pill.en-camino::before,
+        .status-pill.en_camino::before,
+        .status-pill.en-ruta::before,
+        .status-pill.en_ruta::before { background: #a855f7; }
+        .status-pill.listo-recojo::before,
+        .status-pill.listo_recojo::before,
+        .status-pill.listo-para-recojo::before,
+        .status-pill.listo_para_recojo::before { background: #06b6d4; }
+        .status-pill.entregado::before { background: #16a34a; }
+        .status-pill.cancelado::before,
+        .status-pill.fallido::before { background: #ef4444; }
