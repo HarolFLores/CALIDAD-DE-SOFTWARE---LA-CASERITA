@@ -1,9 +1,46 @@
 /**
  * table-kebab-menu.js
- * Manejador global para el menú desplegable (kebab 3 puntos) en todas las tablas
+ * Manejador global para el menú desplegable (kebab 3 puntos) en todas las tablas.
+ * Usa posicionamiento fijo para evitar que el menú sea recortado por contenedores
+ * con overflow (tablas con scroll horizontal) en las últimas filas.
  */
 (function() {
     'use strict';
+
+    function positionKebabMenu(menu, btn) {
+        if (!menu || !btn) return;
+
+        // Medir primero sin transformaciones fijas para obtener el tamaño real
+        menu.style.position = 'fixed';
+        menu.style.right = 'auto';
+        menu.style.bottom = 'auto';
+        menu.style.left = '0px';
+        menu.style.top = '0px';
+
+        const btnRect = btn.getBoundingClientRect();
+        const menuRect = menu.getBoundingClientRect();
+        const menuW = menuRect.width;
+        const menuH = menuRect.height;
+        const vw = window.innerWidth || document.documentElement.clientWidth;
+        const vh = window.innerHeight || document.documentElement.clientHeight;
+        const gap = 6;
+
+        // Alinear el borde derecho del menú con el borde derecho del botón
+        let left = btnRect.right - menuW;
+        if (left < 8) left = 8;
+        if (left + menuW > vw - 8) left = vw - menuW - 8;
+        if (left < 8) left = 8;
+
+        // Abrir hacia abajo; si no cabe, abrir hacia arriba
+        let top = btnRect.bottom + gap;
+        if (top + menuH > vh - 8 && (btnRect.top - menuH - gap) >= 8) {
+            top = btnRect.top - menuH - gap;
+        }
+        if (top < 8) top = 8;
+
+        menu.style.top = Math.round(top) + 'px';
+        menu.style.left = Math.round(left) + 'px';
+    }
 
     function toggleKebab(btn, event) {
         if (event) {
@@ -25,21 +62,18 @@
         if (!isCurrentlyOpen) {
             btn.classList.add('active');
             menu.classList.add('open');
-
-            // Posicionamiento inteligente: si choca con el borde inferior de la pantalla, abrir hacia arriba
-            const rect = menu.getBoundingClientRect();
-            const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-            if (rect.bottom > viewportHeight - 15) {
-                menu.classList.add('drop-up');
-            } else {
-                menu.classList.remove('drop-up');
-            }
+            positionKebabMenu(menu, btn);
         }
     }
 
     function closeAllKebabs() {
         document.querySelectorAll('.table-kebab-menu.open').forEach(menu => {
             menu.classList.remove('open', 'drop-up');
+            menu.style.position = '';
+            menu.style.left = '';
+            menu.style.top = '';
+            menu.style.right = '';
+            menu.style.bottom = '';
         });
         document.querySelectorAll('.table-kebab-btn.active').forEach(btn => {
             btn.classList.remove('active');
@@ -74,10 +108,15 @@
         }
     });
 
-    // Cerrar al hacer scroll en contenedor con scroll
+    // Cerrar al hacer scroll en cualquier contenedor con scroll
     window.addEventListener('scroll', function() {
         closeAllKebabs();
     }, true);
+
+    // Reposicionar/cerrar al redimensionar la ventana
+    window.addEventListener('resize', function() {
+        closeAllKebabs();
+    });
 
     window.closeAllKebabs = closeAllKebabs;
 })();

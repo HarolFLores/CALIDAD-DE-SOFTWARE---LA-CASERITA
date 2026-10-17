@@ -75,116 +75,107 @@ window.previewImgModal = function(input, imgId, labelId) {
             calcDescuentoEdit();
         };
 
-        // Cascadas Selector 3 Niveles en Modal Nuevo (Habilitación progresiva N1 -> N2 -> N3)
-        window.onNuevoMomentoChange = function(momentoId) {
-            const selG = document.getElementById('nuevoGrupoSelect');
-            const selC = document.getElementById('nuevoCategoriaSelect');
-            if (!selG || !selC) return;
-            selG.value = '';
-            selC.value = '';
+        // Combobox de Subcategoría (N3) con búsqueda en vivo (filtra al teclear)
+        window.initSubcatCombo = function(inputId, dropdownId, idFieldId, grupoFieldId) {
+            const input = document.getElementById(inputId);
+            const dd = document.getElementById(dropdownId);
+            const idField = document.getElementById(idFieldId);
+            const grupoField = document.getElementById(grupoFieldId);
+            if (!input || !dd || !idField || !grupoField) return;
+            if (input.dataset.subcatReady === '1') return;
+            input.dataset.subcatReady = '1';
 
-            if (!momentoId) {
-                selG.disabled = true;
-                selC.disabled = true;
-                selG.options[0].textContent = '-- Seleccione N1 primero --';
-                selC.options[0].textContent = '-- Seleccione N2 primero --';
-                return;
-            }
+            const opciones = Array.from(dd.querySelectorAll('.subcat-option'));
+            const vacio = dd.querySelector('.subcat-empty');
 
-            selG.disabled = false;
-            selG.options[0].textContent = '-- Seleccionar Categoría (N2) --';
-            selC.disabled = true;
-            selC.options[0].textContent = '-- Seleccione N2 primero --';
+            const normaliza = function(txt) {
+                return String(txt || '').toLowerCase()
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+            };
 
-            Array.from(selG.options).forEach(opt => {
-                if (opt.value === '') {
-                    opt.style.display = '';
-                } else if (opt.dataset.momento == momentoId) {
-                    opt.style.display = '';
-                } else {
-                    opt.style.display = 'none';
-                }
+            const filtrar = function() {
+                const q = normaliza(input.value);
+                let visibles = 0;
+                opciones.forEach(function(opt) {
+                    const pathEl = opt.querySelector('.subcat-opt-path');
+                    const texto = normaliza((opt.dataset.nombre || '') + ' ' + (pathEl ? pathEl.textContent : ''));
+                    const coincide = !q || texto.indexOf(q) !== -1;
+                    opt.style.display = coincide ? '' : 'none';
+                    if (coincide) visibles++;
+                });
+                if (vacio) vacio.style.display = visibles === 0 ? 'block' : 'none';
+            };
+
+            const abrir = function() {
+                dd.classList.add('open');
+                input.setAttribute('aria-expanded', 'true');
+            };
+            const cerrar = function() {
+                dd.classList.remove('open');
+                input.setAttribute('aria-expanded', 'false');
+            };
+            const mostrarTodas = function() {
+                opciones.forEach(function(opt) { opt.style.display = ''; });
+                if (vacio) vacio.style.display = 'none';
+            };
+
+            input.addEventListener('focus', function() { mostrarTodas(); abrir(); });
+            input.addEventListener('click', function() { mostrarTodas(); abrir(); });
+            input.addEventListener('input', function() {
+                idField.value = '';
+                grupoField.value = '';
+                input.classList.remove('subcat-invalid');
+                input.setCustomValidity('Selecciona una subcategoría de la lista.');
+                filtrar();
+                abrir();
+            });
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') cerrar();
+            });
+
+            dd.addEventListener('mousedown', function(e) {
+                const opt = e.target.closest('.subcat-option');
+                if (!opt) return;
+                e.preventDefault();
+                idField.value = opt.dataset.id || '';
+                grupoField.value = opt.dataset.grupo || '';
+                input.value = opt.dataset.nombre || '';
+                input.classList.remove('subcat-invalid');
+                input.setCustomValidity('');
+                cerrar();
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!input.parentElement.contains(e.target)) cerrar();
             });
         };
 
-        window.onNuevoGrupoChange = function(grupoId) {
-            const selC = document.getElementById('nuevoCategoriaSelect');
-            if (!selC) return;
-            selC.value = '';
-
-            if (!grupoId) {
-                selC.disabled = true;
-                selC.options[0].textContent = '-- Seleccione N2 primero --';
-                return;
-            }
-
-            selC.disabled = false;
-            selC.options[0].textContent = '-- Seleccionar Subcategoría (N3) --';
-
-            Array.from(selC.options).forEach(opt => {
-                if (opt.value === '') {
-                    opt.style.display = '';
-                } else if (opt.dataset.grupo == grupoId) {
-                    opt.style.display = '';
-                } else {
-                    opt.style.display = 'none';
-                }
-            });
+        // Selecciona una subcategoría existente (usado al editar un producto)
+        window.setSubcatCombo = function(inputId, dropdownId, idFieldId, grupoFieldId, catId) {
+            const input = document.getElementById(inputId);
+            const dd = document.getElementById(dropdownId);
+            const idField = document.getElementById(idFieldId);
+            const grupoField = document.getElementById(grupoFieldId);
+            if (!input || !dd || !idField || !grupoField) return;
+            const opt = catId ? dd.querySelector('.subcat-option[data-id="' + catId + '"]') : null;
+            idField.value = catId || '';
+            grupoField.value = opt ? (opt.dataset.grupo || '') : '';
+            input.value = opt ? (opt.dataset.nombre || '') : '';
+            input.classList.remove('subcat-invalid');
+            input.setCustomValidity(opt ? '' : 'Selecciona una subcategoría de la lista.');
         };
 
-        // Cascadas Selector 3 Niveles en Modal Editar (Habilitación progresiva N1 -> N2 -> N3)
-        window.onEditMomentoChange = function(momentoId) {
-            const selG = document.getElementById('editProdGrupo');
-            const selC = document.getElementById('editProdCategoria');
-            if (!selG || !selC) return;
-
-            if (!momentoId) {
-                selG.disabled = true;
-                selC.disabled = true;
-                selG.options[0].textContent = '-- Seleccione N1 primero --';
-                selC.options[0].textContent = '-- Seleccione N2 primero --';
-                return;
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof window.initSubcatCombo === 'function') {
+                window.initSubcatCombo('nuevoSubcatInput', 'nuevoSubcatDropdown', 'nuevoSubcatId', 'nuevoSubcatGrupo');
+                window.initSubcatCombo('editSubcatInput', 'editSubcatDropdown', 'editSubcatId', 'editSubcatGrupo');
             }
-
-            selG.disabled = false;
-            selG.options[0].textContent = '-- Seleccionar Categoría (N2) --';
-
-            Array.from(selG.options).forEach(opt => {
-                if (opt.value === '') {
-                    opt.style.display = '';
-                } else if (opt.dataset.momento == momentoId) {
-                    opt.style.display = '';
-                } else {
-                    opt.style.display = 'none';
-                }
-            });
-        };
-
-        window.onEditGrupoChange = function(grupoId) {
-            const selC = document.getElementById('editProdCategoria');
-            if (!selC) return;
-
-            if (!grupoId) {
-                selC.disabled = true;
-                selC.options[0].textContent = '-- Seleccione N2 primero --';
-                return;
-            }
-
-            selC.disabled = false;
-            selC.options[0].textContent = '-- Seleccionar Subcategoría (N3) --';
-
-            Array.from(selC.options).forEach(opt => {
-                if (opt.value === '') {
-                    opt.style.display = '';
-                } else if (opt.dataset.grupo == grupoId) {
-                    opt.style.display = '';
-                } else {
-                    opt.style.display = 'none';
-                }
-            });
-        };
+        });
 
         window.abrirModalCrearProducto = function() {
+            if (typeof window.initSubcatCombo === 'function') {
+                window.initSubcatCombo('nuevoSubcatInput', 'nuevoSubcatDropdown', 'nuevoSubcatId', 'nuevoSubcatGrupo');
+            }
             window.abrirModal('modalNuevoProducto');
         };
 
@@ -276,6 +267,55 @@ window.previewImgModal = function(input, imgId, labelId) {
             window.abrirModal('modalReposicion');
         };
 
+        window.registrarCompraProducto = function(idProducto) {
+            if (!idProducto) return;
+            window.location.href = 'index.php?action=compras_admin&producto=' + encodeURIComponent(idProducto);
+        };
+
+        window.exportarInventarioCSV = function() {
+            const table = document.getElementById('inventarioTable');
+            if (!table) return;
+            const rows = Array.from(table.querySelectorAll('tbody tr[data-id]'));
+            if (!rows.length) {
+                alert('No hay productos para exportar.');
+                return;
+            }
+
+            const headers = ['Producto', 'SKU', 'Código de barras', 'Precio compra', 'Precio venta', 'Stock actual', 'Stock mínimo', 'Ubicación', 'Estado', 'Última actualización'];
+            const esc = function(v) {
+                return '"' + String(v == null ? '' : v).replace(/\s+/g, ' ').replace(/"/g, '""').trim() + '"';
+            };
+
+            const lines = [headers.map(esc).join(';')];
+            rows.forEach(function(r) {
+                const tds = r.querySelectorAll('td');
+                const cell = function(i) { return tds[i] ? tds[i].innerText.replace(/\s+/g, ' ').trim() : ''; };
+                lines.push([
+                    r.dataset.name || '',
+                    r.dataset.sku || '',
+                    r.dataset.barcode || '',
+                    cell(1).replace(/^S\/\s*/, ''),
+                    cell(2).replace(/^S\/\s*/, ''),
+                    r.dataset.stock || '',
+                    r.dataset.stockmin || '',
+                    cell(5),
+                    cell(6),
+                    cell(7)
+                ].map(esc).join(';'));
+            });
+
+            const csv = '\uFEFF' + lines.join('\r\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'inventario_' + new Date().toISOString().slice(0, 10) + '.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+        };
+
         window.abrirModalEditarProducto = function(item) {
             if (typeof item === 'string') {
                 try { item = JSON.parse(item); } catch (e) { return; }
@@ -306,9 +346,6 @@ window.previewImgModal = function(input, imgId, labelId) {
             setVal('editProdImagenActual4', item.imagen_4 || '');
             setVal('editProdImagenUrl4', item.imagen_4 || '');
 
-            const chkSug = document.getElementById('editProdEsSugerencia');
-            if (chkSug) chkSug.checked = (parseInt(item.es_sugerencia) === 1);
-
             const tieneOferta = item.precio_anterior && parseFloat(item.precio_anterior) > parseFloat(item.precio);
             const chkOferta = document.getElementById('editProdEnOferta');
             if (chkOferta) {
@@ -324,15 +361,7 @@ window.previewImgModal = function(input, imgId, labelId) {
             }
             calcDescuentoEdit();
 
-            const mId = item.id_momento || '';
-            const gId = item.id_grupo || '';
-            const cId = item.id_categoria || '';
-
-            setVal('editProdMomento', mId);
-            onEditMomentoChange(mId);
-            setVal('editProdGrupo', gId);
-            onEditGrupoChange(gId);
-            setVal('editProdCategoria', cId);
+            setSubcatCombo('editSubcatInput', 'editSubcatDropdown', 'editSubcatId', 'editSubcatGrupo', item.id_categoria || '');
 
             const preview = document.getElementById('editProdPreviewImg');
             if (preview) {
@@ -360,10 +389,36 @@ window.previewImgModal = function(input, imgId, labelId) {
         window.filterByStatCard = function(type, element) {
             window.activeStatFilter = type;
             window.activeCodeFilter = 'all';
-            document.querySelectorAll('.stats-grid-square .stat-card-square').forEach(c => c.classList.remove('active-card'));
-            document.querySelectorAll('.inventory-code-metric').forEach(c => { c.classList.remove('active'); c.setAttribute('aria-pressed', 'false'); });
+            const filterSelect = document.getElementById('selectFiltroInventario');
+            if (filterSelect) filterSelect.value = type;
+            if (!element) {
+                element = Array.from(document.querySelectorAll('.stats-grid-square .stat-card-square'))
+                    .find(card => (card.getAttribute('onclick') || '').includes("'" + type + "'"));
+            }
+            document.querySelectorAll('.stats-grid-square .stat-card-square').forEach(c => {
+                c.classList.remove('active-card');
+                if (c.hasAttribute('aria-pressed')) c.setAttribute('aria-pressed', 'false');
+            });
             if (element) {
                 element.classList.add('active-card');
+            }
+            if (typeof window.triggerTableUpdate === 'function') {
+                window.triggerTableUpdate();
+            }
+        };
+
+        window.filterByCodeMetric = function(type, element) {
+            window.activeStatFilter = 'all';
+            window.activeCodeFilter = (window.activeCodeFilter === type) ? 'all' : type;
+            const filterSelect = document.getElementById('selectFiltroInventario');
+            if (filterSelect) filterSelect.value = 'all';
+            document.querySelectorAll('.stats-grid-square .stat-card-square').forEach(c => {
+                c.classList.remove('active-card');
+                if (c.hasAttribute('aria-pressed')) c.setAttribute('aria-pressed', 'false');
+            });
+            if (element && window.activeCodeFilter !== 'all') {
+                element.classList.add('active-card');
+                element.setAttribute('aria-pressed', 'true');
             }
             if (typeof window.triggerTableUpdate === 'function') {
                 window.triggerTableUpdate();

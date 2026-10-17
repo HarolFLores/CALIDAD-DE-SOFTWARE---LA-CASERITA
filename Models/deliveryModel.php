@@ -83,6 +83,81 @@ class DeliveryModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * HU33 - Personal de empaque disponible (cajeros y administradores activos).
+     */
+    public function listarPersonalEmpaque() {
+        $sql = "SELECT id_usuario, nombre, apellido, correo
+                FROM usuario
+                WHERE rol IN ('cajero', 'admin') AND activo = 1
+                ORDER BY nombre ASC";
+        $stmt = $this->conn->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * HU33 - Repartidores (motorizados) activos para asignación de despacho.
+     */
+    public function listarRepartidoresActivos() {
+        $sql = "SELECT id_usuario, nombre, apellido, telefono, correo
+                FROM usuario
+                WHERE rol = 'repartidor' AND activo = 1
+                ORDER BY nombre ASC";
+        $stmt = $this->conn->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * HU33 - Asignación individual o masiva de pedidos a un motorizado.
+     * Crea el registro de envío si el pedido aún no lo tiene y marca el despacho.
+     * Devuelve la cantidad de pedidos asignados.
+     */
+    public function asignarRepartidorPedidos(array $ids, int $idRepartidor): int
+    {
+        $ids = array_values(array_filter(array_map('intval', $ids)));
+        if (empty($ids) || $idRepartidor <= 0) {
+            return 0;
+        }
+
+        $marcadores = implode(',', array_fill(0, count($ids), '?'));
+
+        // Crear registros de envío faltantes para los pedidos seleccionados
+        $stmtEx = $this->conn->prepare("SELECT id_pedido FROM envio_delivery WHERE id_pedido IN ($marcadores)");
+        $stmtEx->execute($ids);
+        $conEnvio = array_map('intval', $stmtEx->fetchAll(PDO::FETCH_COLUMN));
+        $faltantes = array_values(array_diff($ids, $conEnvio));
+
+        if (!empty($faltantes)) {
+            $marcFalt = implode(',', array_fill(0, count($faltantes), '?'));
+            $sqlInsert = "INSERT INTO envio_delivery
+                            (id_pedido, id_repartidor, nombre_destinatario, celular_contacto,
+                             direccion_destino, referencia, costo_delivery, estado_delivery)
+                          SELECT p.id_pedido, NULL,
+                                 COALESCE(NULLIF(TRIM(CONCAT(COALESCE(u.nombre,''), ' ', COALESCE(u.apellido,''))), ''), NULLIF(p.cliente_nombre,''), 'Cliente'),
+                                 COALESCE(NULLIF(u.telefono,''), '—'),
+                                 COALESCE(NULLIF(p.direccion_envio,''), 'Dirección de entrega no especificada'),
+                                 COALESCE(d.referencia, ''),
+                                 COALESCE(p.costo_envio, 0.00),
+                                 'Pendiente'
+                          FROM pedido p
+                          LEFT JOIN usuario u   ON u.id_usuario = p.id_usuario
+                          LEFT JOIN direccion d ON d.id_direccion = p.id_direccion
+                          WHERE p.id_pedido IN ($marcFalt)";
+            $stmtIns = $this->conn->prepare($sqlInsert);
+            $stmtIns->execute($faltantes);
+        }
+
+        $sql = "UPDATE envio_delivery
+                   SET id_repartidor = ?,
+                       estado_delivery = CASE WHEN estado_delivery = 'Pendiente' THEN 'Asignado' ELSE estado_delivery END,
+                       fecha_asignacion = COALESCE(fecha_asignacion, NOW())
+                 WHERE id_pedido IN ($marcadores)
+                   AND estado_delivery <> 'Entregado'";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute(array_merge([$idRepartidor], $ids));
+        return $stmt->rowCount();
+    }
+
     public function asignarRepartidor($idEnvio, $idRepartidor) {
         $sql = "UPDATE envio_delivery SET 
                     id_repartidor = :rep, 

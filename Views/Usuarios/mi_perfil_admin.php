@@ -40,7 +40,7 @@
                         <span class="brand-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                         </span>
-                        <span class="brand-title">Mi Perfil Admin</span>
+                        <span class="brand-title">Mi perfil</span>
                     </div>
                 </div>
                 <div class="admin-topbar-actions">
@@ -92,9 +92,9 @@
 
     
     <div class="panel admin-panel-card" style="margin-bottom: 28px;">
-        <div class="panel-header" style="border-bottom: 1px solid #f1f5f9; padding: 18px 20px 14px 20px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <div style="width: 36px; height: 36px; border-radius: 10px; background: #e0f2fe; color: #0369a1; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <div class="panel-header profile-section-header">
+            <div class="profile-section-heading">
+                <div class="profile-section-icon profile-section-icon-info">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 </div>
                 <div>
@@ -151,14 +151,15 @@
 
     
     <div class="panel admin-panel-card" style="margin-bottom: 40px;">
-        <div class="panel-header" style="border-bottom: 1px solid #f1f5f9; padding: 18px 20px 14px 20px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <div style="width: 36px; height: 36px; border-radius: 10px; background: #fef3c7; color: #d97706; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <div class="panel-header profile-section-header">
+            <div class="profile-section-heading">
+                <div class="profile-section-icon profile-section-icon-security">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                 </div>
-                <div>
-                    <h2 style="margin: 0; font-size: 1.1rem; color: #0f172a; font-weight: 800;">Seguridad y Contraseña</h2>
-                    <p style="margin: 2px 0 0; font-size: 0.84rem; color: #64748b;">Protege tu cuenta utilizando una clave segura de acceso.</p>
+                <div class="profile-section-copy">
+                    <span class="profile-section-eyebrow">SEGURIDAD</span>
+                    <h2>Cambiar contraseña</h2>
+                    <p>Protege tu cuenta utilizando una contraseña segura.</p>
                 </div>
             </div>
         </div>
@@ -167,10 +168,10 @@
             <div class="security-layout">
                 
                 
-                <form id="formCambiarPasswordAdmin" class="cuenta-form" action="index.php?action=cambiar_password_admin" method="POST" autocomplete="off">
+                <form id="formCambiarPasswordAdmin" class="cuenta-form security-form" action="index.php?action=cambiar_password_admin" method="POST" autocomplete="off">
                     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
 
-                    <div style="display: grid; grid-template-columns: 1fr; gap: 16px; width: 100%;">
+                    <div class="admin-password-fields">
                         
                         <div class="cuenta-form-group">
                             <label for="passwordActual" class="input-label-std">Contraseña actual</label>

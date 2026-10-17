@@ -329,8 +329,8 @@
     font-size: 0.78rem;
 }
 
-.fin-positive {
-    color: var(--fin-green) !important;
+html body .fin-positive {
+    color: var(--fin-green);
     font-weight: 800;
 }
 
@@ -369,9 +369,9 @@
     background: var(--payment-color);
 }
 
-.fin-empty {
-    padding: 28px 12px !important;
-    color: #94a3b8 !important;
+html body .fin-empty {
+    padding: 28px 12px;
+    color: #94a3b8;
     font-size: 0.8rem;
     text-align: center;
 }

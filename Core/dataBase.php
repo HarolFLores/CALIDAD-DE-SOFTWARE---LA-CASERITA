@@ -10,10 +10,10 @@ class DataBase {
     private $password = null;
 
     public function __construct() {
-        // Soporte por defecto para MySQL en XAMPP local
+        // Conexión por defecto (Wasmer DB en línea). Se puede sobreescribir con variables de entorno.
         $this->driver = getenv('DB_DRIVER') ?: 'mysql';
         $this->host = getenv('DB_HOST') ?: 'db.fr-roub1.bengt.wasmernet.com';
-        $this->port = getenv('DB_PORT') ?: '20184'; 
+        $this->port = getenv('DB_PORT') ?: '20184';
         $this->dbname = getenv('DB_NAME') ?: 'laCaserita';
         $this->user = getenv('DB_USER') ?: 'user_d64aabaa';
         $this->password = getenv('DB_PASS') !== false ? getenv('DB_PASS') : 'pw_Kf3xXuDELEUQKyZWmzxAFFRJbN6w22w9';

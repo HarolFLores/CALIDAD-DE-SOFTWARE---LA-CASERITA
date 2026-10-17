@@ -1,38 +1,72 @@
 [
     {
-        "imagen": "Images/123.webp",
+        "imagen": "Images\/123456.webp",
         "link": "#sugerenciasGrid",
         "enlace": "#sugerenciasGrid",
-        "boton": "Ver más"
+        "boton": "Ver más",
+        "tag": "",
+        "titulo": "",
+        "descripcion": "",
+        "bg": "transparent"
     },
     {
-        "imagen": "Images/1234.webp",
+        "imagen": "Images\/1234567.webp",
         "link": "#sugerenciasGrid",
         "enlace": "#sugerenciasGrid",
-        "boton": "Ver más"
+        "boton": "Ver más",
+        "tag": "",
+        "titulo": "",
+        "descripcion": "",
+        "bg": "transparent"
     },
     {
-        "imagen": "Images/12345.webp",
+        "imagen": "Images\/12345678.webp",
         "link": "#sugerenciasGrid",
         "enlace": "#sugerenciasGrid",
-        "boton": "Ver más"
+        "boton": "Ver más",
+        "tag": "",
+        "titulo": "",
+        "descripcion": "",
+        "bg": "transparent"
     },
     {
-        "imagen": "Images/123456.webp",
-        "link": "#sugerenciasGrid",
-        "enlace": "#sugerenciasGrid",
-        "boton": "Ver más"
+        "imagen": "Images\/123.webp",
+        "link": "#catalogo",
+        "enlace": "#catalogo",
+        "boton": "Ver más",
+        "tag": "",
+        "titulo": "",
+        "descripcion": "",
+        "bg": "transparent"
     },
     {
-        "imagen": "Images/1234567.webp",
-        "link": "#sugerenciasGrid",
-        "enlace": "#sugerenciasGrid",
-        "boton": "Ver más"
+        "imagen": "Images\/123.webp",
+        "link": "#catalogo",
+        "enlace": "#catalogo",
+        "boton": "Ver más",
+        "tag": "",
+        "titulo": "",
+        "descripcion": "",
+        "bg": "transparent"
     },
     {
-        "imagen": "Images/12345678.webp",
-        "link": "#sugerenciasGrid",
-        "enlace": "#sugerenciasGrid",
-        "boton": "Ver más"
+        "imagen": "Images\/123.webp",
+        "link": "#catalogo",
+        "enlace": "#catalogo",
+        "boton": "Ver más",
+        "tag": "",
+        "titulo": "",
+        "descripcion": "",
+        "bg": "transparent"
+    },
+    {
+        "imagen": "Images\/123.webp",
+        "link": "#catalogo",
+        "enlace": "#catalogo",
+        "boton": "Ver más",
+        "tag": "",
+        "titulo": "",
+        "descripcion": "",
+        "bg": "transparent"
     }
 ]

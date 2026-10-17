@@ -452,30 +452,30 @@ textarea {
 }
 
 /* Botón de Salir / Cerrar Sesión en Sidebar (Rojo Vino #C62828) */
-.cuenta-logout-sidebar-btn {
-    background: #c62828 !important;
-    border: none !important;
-    color: #ffffff !important;
+html body .cuenta-logout-sidebar-btn {
+    background: #c62828;
+    border: none;
+    color: #ffffff;
     box-shadow: 0 4px 12px rgba(198, 40, 40, 0.2);
-    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease !important;
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.cuenta-logout-sidebar-btn:hover {
-    background: #a81e1e !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 6px 18px rgba(198, 40, 40, 0.35) !important;
+html body .cuenta-logout-sidebar-btn:hover {
+    background: #a81e1e;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(198, 40, 40, 0.35);
 }
 
-.cuenta-logout-sidebar-btn svg {
-    stroke: #ffffff !important;
+html body .cuenta-logout-sidebar-btn svg {
+    stroke: #ffffff;
 }
 
-.cuenta-logout-sidebar-btn strong {
-    color: #ffffff !important;
+html body .cuenta-logout-sidebar-btn strong {
+    color: #ffffff;
 }
 
-.cuenta-logout-sidebar-btn small {
-    color: rgba(255, 255, 255, 0.85) !important;
+html body .cuenta-logout-sidebar-btn small {
+    color: rgba(255, 255, 255, 0.85);
 }
 
 .cuenta-content {
@@ -1777,13 +1777,13 @@ body.cuenta-modal-open {
         box-shadow: 0 4px 12px rgba(13, 95, 110, 0.28);
     }
 
-    .cuenta-menu-item.active svg {
-        color: #ffffff !important;
-        stroke: #ffffff !important;
+    html body .cuenta-menu-item.active svg {
+        color: #ffffff;
+        stroke: #ffffff;
     }
 
-    .cuenta-menu-item.active span strong {
-        color: #ffffff !important;
+    html body .cuenta-menu-item.active span strong {
+        color: #ffffff;
     }
 
     .security-layout {
@@ -2062,16 +2062,16 @@ body.cuenta-modal-open {
         transform: scale(0.99);
     }
 
-    .pedidos-table td {
+    html body .pedidos-table td {
         display: block;
         padding: 0;
-        border: none !important;
+        border: none;
         background: transparent;
         text-align: left;
     }
 
-    .pedidos-table td::before {
-        display: none !important;
+    html body .pedidos-table td::before {
+        display: none;
     }
 
     .pedidos-table td.pedido-id-cell {
@@ -2102,23 +2102,23 @@ body.cuenta-modal-open {
     }
 
 
-    .pedidos-table td.pedido-entrega-cell {
+    html body .pedidos-table td.pedido-entrega-cell {
         grid-area: entrega;
         padding-top: 6px;
         padding-bottom: 6px;
         margin-top: 4px;
         margin-bottom: 4px;
-        border-top: 1px dashed #e2e8f0 !important;
+        border-top: 1px dashed #e2e8f0;
     }
 
-    .pedidos-table td.pedido-pago-cell {
+    html body .pedidos-table td.pedido-pago-cell {
         grid-area: pago;
         justify-self: end;
         padding-top: 6px;
         padding-bottom: 6px;
         margin-top: 4px;
         margin-bottom: 4px;
-        border-top: 1px dashed #e2e8f0 !important;
+        border-top: 1px dashed #e2e8f0;
     }
 
     .badge-tipo-entrega {
@@ -2136,11 +2136,11 @@ body.cuenta-modal-open {
         font-weight: 600;
     }
 
-    .pedidos-table td.pedido-total-cell {
+    html body .pedidos-table td.pedido-total-cell {
         grid-area: total;
         align-self: center;
         padding-top: 4px;
-        border-top: 1px dashed #e2e8f0 !important;
+        border-top: 1px dashed #e2e8f0;
     }
 
     .pedido-total {
@@ -2149,21 +2149,21 @@ body.cuenta-modal-open {
         color: #0f172a;
     }
 
-    .pedidos-table td.pedido-acciones-cell {
+    html body .pedidos-table td.pedido-acciones-cell {
         grid-area: action;
         justify-self: end;
         padding-top: 4px;
-        border-top: 1px dashed #e2e8f0 !important;
+        border-top: 1px dashed #e2e8f0;
     }
 
-    .pedido-btn-detalle-texto,
-    .pedido-view-button {
+    html body .pedido-btn-detalle-texto,
+    html body .pedido-view-button {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         padding: 7px 15px;
         background: linear-gradient(135deg, #15803D, #176e76);
-        color: #ffffff !important;
+        color: #ffffff;
         border: none;
         border-radius: 10px;
         font-weight: 750;
@@ -2177,10 +2177,10 @@ body.cuenta-modal-open {
         grid-template-columns: 1fr;
     }
 
-    input,
-    select,
-    textarea {
-        font-size: 16px !important;
+    html body input,
+    html body select,
+    html body textarea {
+        font-size: 16px;
     }
 }
 
@@ -2607,8 +2607,8 @@ body.cuenta-modal-open {
     box-shadow: 0 4px 10px rgba(21, 128, 61, 0.3);
 }
 
-.text-center {
-    text-align: center !important;
+html body .text-center {
+    text-align: center;
 }
 
 
@@ -2674,7 +2674,8 @@ body.cuenta-modal-open {
 
 
 .profile-hero-card {
-    background: linear-gradient(135deg, #0a4f5c 0%, #15803D 50%, #14b8a6 100%);
+    background: #15803d;
+    border: 1px solid #0f6b32;
     border-radius: 20px;
     padding: 24px 28px;
     color: #ffffff;
@@ -2683,7 +2684,7 @@ body.cuenta-modal-open {
     align-items: center;
     gap: 20px;
     margin-bottom: 28px;
-    box-shadow: 0 12px 30px rgba(13, 95, 110, 0.22);
+    box-shadow: 0 12px 28px rgba(15, 118, 55, 0.18);
     position: relative;
     overflow: hidden;
 }
@@ -2781,6 +2782,60 @@ body.cuenta-modal-open {
 
 .profile-hero-toggle .toggle-edit-label {
     color: #ffffff;
+}
+
+/* Formulario de seguridad del administrador: misma lectura visual que Cuenta */
+#formCambiarPasswordAdmin {
+    width: 100%;
+}
+
+#formCambiarPasswordAdmin .admin-password-fields {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+    width: 100%;
+}
+
+#formCambiarPasswordAdmin .cuenta-form-group {
+    padding: 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+}
+
+#formCambiarPasswordAdmin .cuenta-form-group:first-child {
+    grid-column: 1 / -1;
+}
+
+#formCambiarPasswordAdmin .input-field-std {
+    background: #ffffff;
+    padding-right: 58px;
+}
+
+#formCambiarPasswordAdmin .btn-verify-pass {
+    background: #15803d;
+    box-shadow: 0 4px 12px rgba(21, 128, 61, 0.18);
+}
+
+#formCambiarPasswordAdmin .btn-verify-pass:hover,
+#formCambiarPasswordAdmin .btn-verify-pass:active {
+    background: #166534;
+    box-shadow: 0 6px 16px rgba(21, 128, 61, 0.24);
+}
+
+#formCambiarPasswordAdmin .toggle-password-btn {
+    color: #15803d;
+}
+
+#formCambiarPasswordAdmin .cuenta-form-actions {
+    grid-column: 1 / -1;
+}
+
+.admin-profile-container .security-tips-panel {
+    border: 1px solid #bbf7d0;
+    border-radius: 14px;
+    background: #f0fdf4;
+    padding: 22px;
 }
 
 @media (max-width: 640px) {
@@ -2915,11 +2970,11 @@ body.cuenta-modal-open {
     box-shadow: 0 0 0 3px rgba(13, 95, 110, 0.15);
 }
 
-.input-field-readonly {
-    background-color: #f8fafc !important;
-    cursor: not-allowed !important;
-    color: #64748b !important;
-    border-color: #e2e8f0 !important;
+html body .input-field-readonly {
+    background-color: #f8fafc;
+    cursor: not-allowed;
+    color: #64748b;
+    border-color: #e2e8f0;
 }
 
 .input-field-icon-wrap {
@@ -2944,26 +2999,26 @@ body.cuenta-modal-open {
     width: 100%;
 }
 
-.btn-verify-pass {
-    background: linear-gradient(135deg, #15803D 0%, #14b8a6 100%) !important;
-    color: #ffffff !important;
-    border: none !important;
-    padding: 0 18px !important;
-    border-radius: 12px !important;
-    font-weight: 700 !important;
-    font-size: 0.85rem !important;
-    min-height: 44px !important;
-    white-space: nowrap !important;
-    cursor: pointer !important;
-    box-shadow: 0 2px 10px rgba(20, 184, 166, 0.25) !important;
-    transition: all 0.2s ease !important;
-    flex-shrink: 0 !important;
+html body .btn-verify-pass {
+    background: linear-gradient(135deg, #15803D 0%, #14b8a6 100%);
+    color: #ffffff;
+    border: none;
+    padding: 0 18px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    min-height: 44px;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(20, 184, 166, 0.25);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
 }
 
-.btn-verify-pass:hover,
-.btn-verify-pass:active {
-    transform: translateY(-1px) !important;
-    box-shadow: 0 4px 14px rgba(20, 184, 166, 0.4) !important;
+html body .btn-verify-pass:hover,
+html body .btn-verify-pass:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(20, 184, 166, 0.4);
 }
 
 .toggle-password-btn {
@@ -3044,38 +3099,144 @@ body.cuenta-modal-open {
 
 
 @media (max-width: 768px) {
-    .admin-profile-container {
-        padding-left: 12px !important;
-        padding-right: 12px !important;
+    html body .admin-profile-container {
+        padding-left: 12px;
+        padding-right: 12px;
     }
 
-    .admin-panel-card {
-        border-radius: 16px !important;
-        margin-bottom: 20px !important;
+    html body .admin-panel-card {
+        border-radius: 16px;
+        margin-bottom: 20px;
     }
 
-    .admin-panel-body {
-        padding: 16px 16px !important;
+    html body .admin-panel-body {
+        padding: 16px 16px;
     }
 
-    .security-layout {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 16px !important;
-        align-items: stretch !important;
+    html body .security-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        align-items: stretch;
     }
 
-    #formCambiarPasswordAdmin {
-        width: 100% !important;
-        min-width: 100% !important;
-        flex: none !important;
-        margin-top: 0 !important;
+    html body #formCambiarPasswordAdmin {
+        width: 100%;
+        min-width: 100%;
+        flex: none;
+        margin-top: 0;
     }
 
-    .security-tips-panel {
-        width: 100% !important;
-        flex: none !important;
-        min-width: 100% !important;
-        margin-top: 0 !important;
+    html body .security-tips-panel {
+        width: 100%;
+        flex: none;
+        min-width: 100%;
+        margin-top: 0;
+    }
+}
+
+.profile-hero-card::before {
+    content: '';
+    position: absolute;
+    top: -70px;
+    right: 22%;
+    width: 220px;
+    height: 220px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.admin-profile-container {
+    max-width: 1120px;
+}
+
+.admin-profile-container .admin-panel-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    overflow: hidden;
+}
+
+.admin-profile-container .panel-header {
+    background: #ffffff;
+}
+
+.admin-profile-container .profile-section-header {
+    display: block;
+    padding: 26px 24px 20px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-profile-container .profile-section-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.admin-profile-container .profile-section-copy {
+    min-width: 0;
+}
+
+.admin-profile-container .profile-section-eyebrow {
+    display: block;
+    margin-bottom: 4px;
+    color: #15803d;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+}
+
+.admin-profile-container .profile-section-copy h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 1.55rem;
+    line-height: 1.15;
+    font-weight: 800;
+}
+
+.admin-profile-container .profile-section-copy p {
+    margin: 8px 0 0;
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+.admin-profile-container .profile-section-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.admin-profile-container .profile-section-icon-info {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.admin-profile-container .profile-section-icon-security {
+    background: #f0fdf4;
+    color: #15803d;
+}
+
+.admin-profile-container .security-layout {
+    display: block;
+}
+
+.admin-profile-container #formCambiarPasswordAdmin {
+    max-width: none;
+}
+
+.admin-profile-container #formCambiarPasswordAdmin + .security-tips-panel {
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+}
+
+@media (max-width: 600px) {
+    .admin-profile-container .profile-section-header {
+        padding: 22px 16px 18px;
     }
 }

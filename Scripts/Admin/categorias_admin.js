@@ -205,6 +205,44 @@ window.filtrarTabla = function(tableId, inputId, colIdx) {
     }
 };
 
+function cerrarMenusFiltroCat() {
+    document.querySelectorAll('.cat-filter-menu.open').forEach(function(m) { m.classList.remove('open'); });
+    document.querySelectorAll('.cat-filter-action[aria-expanded="true"]').forEach(function(b) { b.setAttribute('aria-expanded', 'false'); });
+}
+
+window.toggleFiltroCategorias = function(tableId) {
+    const menuId = tableId === 'tablaGrupos' ? 'filtroMenuGrupos' : 'filtroMenuCategorias';
+    const menu = document.getElementById(menuId);
+    const btn = document.getElementById(tableId === 'tablaGrupos' ? 'btnFiltroGrupos' : 'btnFiltroCategorias');
+    if (!menu) return;
+    const abrir = !menu.classList.contains('open');
+    cerrarMenusFiltroCat();
+    if (abrir) {
+        menu.classList.add('open');
+        if (btn) btn.setAttribute('aria-expanded', 'true');
+    }
+};
+
+window.setFiltroEstadoCategoria = function(tableId, valor) {
+    const key = tableId === 'tablaGrupos' ? 'tablaGrupos' : 'tablaCategorias';
+    filterStateCat[key] = valor;
+    pagesStateCat[key] = 1;
+    const menuId = tableId === 'tablaGrupos' ? 'filtroMenuGrupos' : 'filtroMenuCategorias';
+    document.querySelectorAll('#' + menuId + ' .cat-filter-option').forEach(function(o) {
+        o.classList.toggle('is-active', o.dataset.filtro === valor);
+    });
+    cerrarMenusFiltroCat();
+    if (tableId === 'tablaGrupos') {
+        paginateTableCat('tablaGrupos', 'paginationListGrupos', 'tablaGrupos', 'tablaGrupos');
+    } else {
+        paginateTableCat('tablaCategorias', 'paginationListCat', 'tablaCategorias', 'tablaCategorias');
+    }
+};
+
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.cat-filter-wrap')) cerrarMenusFiltroCat();
+});
+
 window.previewGrupoFileImage = function(input) {
     if (input.files && input.files[0]) {
         var reader = new FileReader();
@@ -309,6 +347,75 @@ window.editarCategoria = function(cat) {
     document.getElementById('catGrupoSelect').value = cat.id_grupo || '';
     document.getElementById('btnGuardarCat').textContent = 'Actualizar Cambios';
     document.getElementById('modalCategoriaAdmin').style.display = 'flex';
+};
+
+window.exportarSubcategoriasPDF = function() {
+    const data = window.__subcategoriasData || [];
+    if (!data.length) {
+        alert('No hay subcategorías para exportar.');
+        return;
+    }
+
+    function escaparHtml(v) {
+        return String(v == null ? '' : v)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function cargarHtml2Pdf(cb) {
+        if (typeof window.html2pdf !== 'undefined') { cb(); return; }
+        const exist = document.querySelector('script[src*="html2pdf"]');
+        if (exist) { exist.addEventListener('load', function() { cb(); }); return; }
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+        s.onload = function() { cb(); };
+        s.onerror = function() { alert('No se pudo cargar la librería para exportar PDF.'); };
+        document.head.appendChild(s);
+    }
+
+    const fecha = new Date().toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+    let filas = '';
+    data.forEach(function(c, i) {
+        filas += '<tr>'
+            + '<td style="padding:5px 8px;border:1px solid #cbd5e1;">' + (i + 1) + '</td>'
+            + '<td style="padding:5px 8px;border:1px solid #cbd5e1;">#' + c.id + '</td>'
+            + '<td style="padding:5px 8px;border:1px solid #cbd5e1;"><strong>' + escaparHtml(c.nombre) + '</strong></td>'
+            + '<td style="padding:5px 8px;border:1px solid #cbd5e1;">' + escaparHtml(c.macro || '—') + '</td>'
+            + '<td style="padding:5px 8px;border:1px solid #cbd5e1;">' + escaparHtml(c.categoria || '—') + '</td>'
+            + '<td style="padding:5px 8px;border:1px solid #cbd5e1;">' + escaparHtml(c.descripcion || '—') + '</td>'
+            + '<td style="padding:5px 8px;border:1px solid #cbd5e1;">' + (c.activo ? 'Activo' : 'Inactivo') + '</td>'
+            + '</tr>';
+    });
+
+    const cont = document.createElement('div');
+    cont.style.cssText = 'width:190mm;padding:4mm;background:#fff;font-family:Arial,Helvetica,sans-serif;color:#0f172a;';
+    cont.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #15803d;padding-bottom:8px;margin-bottom:12px;">'
+        + '<div><div style="font-size:16px;font-weight:800;">La Caserita — ERP</div>'
+        + '<div style="font-size:12px;color:#64748b;">Listado de Subcategorías (Nivel 3)</div></div>'
+        + '<div style="font-size:11px;color:#64748b;text-align:right;">Generado: ' + fecha + '<br>Total: ' + data.length + '</div>'
+        + '</div>'
+        + '<table style="width:100%;border-collapse:collapse;font-size:11px;">'
+        + '<thead><tr style="background:#f1f5f9;text-align:left;">'
+        + '<th style="padding:6px 8px;border:1px solid #cbd5e1;">#</th>'
+        + '<th style="padding:6px 8px;border:1px solid #cbd5e1;">ID</th>'
+        + '<th style="padding:6px 8px;border:1px solid #cbd5e1;">Subcategoría</th>'
+        + '<th style="padding:6px 8px;border:1px solid #cbd5e1;">Macrocategoría</th>'
+        + '<th style="padding:6px 8px;border:1px solid #cbd5e1;">Categoría</th>'
+        + '<th style="padding:6px 8px;border:1px solid #cbd5e1;">Descripción</th>'
+        + '<th style="padding:6px 8px;border:1px solid #cbd5e1;">Estado</th>'
+        + '</tr></thead><tbody>' + filas + '</tbody></table>';
+
+    cargarHtml2Pdf(function() {
+        window.html2pdf().set({
+            margin: [8, 8, 8, 8],
+            filename: 'subcategorias_' + new Date().toISOString().slice(0, 10) + '.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true, logging: false },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        }).from(cont).save();
+    });
 };
 
 window.cerrarModalId = function(id) {

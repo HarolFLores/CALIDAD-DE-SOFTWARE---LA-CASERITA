@@ -55,7 +55,7 @@ require_once 'Core/ajaxHelper.php';
                         <span class="brand-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
                         </span>
-                        <span class="brand-title">Control de Inventario & Stock</span>
+                        <span class="brand-title">Productos</span>
                     </div>
                 </div>
                 <div class="admin-topbar-actions">
@@ -69,7 +69,7 @@ require_once 'Core/ajaxHelper.php';
 <link rel="stylesheet" href="Styles/Vistas/Inventario/inventario.css?v=<?= time(); ?>">
 <link rel="stylesheet" href="Styles/Vistas/Inventario/inventario_panel.css?v=<?= time(); ?>">
 
-    <main class="main-content inventario-main container-admin" style="padding-top: 15px; padding-bottom: 50px;">
+    <main class="main-content inventario-main container-admin admin-fullwidth" style="padding-top: 15px; padding-bottom: 50px;">
         <?php
             $countActivos = 0;
             $countInactivos = 0;
@@ -196,26 +196,38 @@ require_once 'Core/ajaxHelper.php';
                 <span class="stat-title">MENOS VENDIDO</span>
                 <span class="stat-val"><?php echo $countMenosVendidos; ?></span>
             </div>
-        </div>
-        <div class="inventory-code-metrics" aria-label="Cobertura de códigos de productos">
-            <button type="button" class="inventory-code-metric" aria-pressed="false" onclick="filterByCodeMetric('sku', this)">
-                <span>PRODUCTOS CON SKU</span><strong><?= $countConSku ?></strong>
-            </button>
-            <button type="button" class="inventory-code-metric" aria-pressed="false" onclick="filterByCodeMetric('barcode', this)">
-                <span>PRODUCTOS CON CÓDIGO DE BARRAS</span><strong><?= $countConCodigoBarras ?></strong>
-            </button>
+            <div class="stat-card-square" onclick="filterByCodeMetric('sku', this)" title="Productos con SKU registrado" aria-pressed="false">
+                <span class="stat-title">CON SKU</span>
+                <span class="stat-val"><?= $countConSku ?></span>
+            </div>
+            <div class="stat-card-square" onclick="filterByCodeMetric('barcode', this)" title="Productos con código de barras registrado" aria-pressed="false">
+                <span class="stat-title">CON BARRAS</span>
+                <span class="stat-val"><?= $countConCodigoBarras ?></span>
+            </div>
         </div>
 
         <!-- Tabla y Buscador -->
         <section class="panel" style="margin-bottom: 28px; background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,0.04); overflow: hidden;">
-            <div class="panel-header" style="display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid #e2e8f0; background: #ffffff; flex-wrap: wrap; gap: 14px;">
-                <h2 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: #0f172a;">Productos en Inventario</h2>
-                
-                <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; flex: 1; justify-content: flex-end;">
+            <div class="panel-header">
+                <div class="panel-heading-row">
+                    <h2>Productos en Inventario</h2>
+                    <div class="inventory-heading-actions">
+                    <button type="button" class="btn btn-primary" onclick="abrirModalCrearProducto()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        <span>Nuevo producto</span>
+                    </button>
+                    <button type="button" class="inventory-export-action" onclick="exportarInventarioCSV()" title="Exportar la lista completa a Excel / CSV">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        <span>Exportar Excel / CSV</span>
+                    </button>
+                    </div>
+                </div>
+
+                <div class="panel-controls">
                     <!-- Barra de búsqueda estética con botón de cámara integrado en el input (Imagen 4) -->
-                    <div style="position: relative; flex: 1; max-width: 400px; min-width: 220px;">
+                    <div class="inventory-search-control">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); pointer-events: none;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                        <input type="text" id="searchInventario" class="search-input" placeholder="Buscar producto, SKU o código..." style="width: 100%; padding: 10px 42px 10px 40px; border: 1.5px solid #cbd5e1; border-radius: 24px; font-size: 0.88rem; outline: none; background: #f8fafc; box-sizing: border-box;">
+                        <input type="text" id="searchInventario" class="search-input" placeholder="Buscar producto, SKU o código..." style="width: 100%; padding: 8px 40px 8px 34px; border: 1.5px solid #cbd5e1; border-radius: 24px; font-size: 0.82rem; outline: none; background: #f8fafc; box-sizing: border-box;">
                         <button type="button" onclick="UniversalCameraScanner.open({ targetInputId: 'searchInventario', title: 'Buscar Producto por Código de Barras' })" class="btn-inline-input-scanner" style="right: 12px;" title="Usar celular vinculado para escanear" aria-label="Escanear con celular vinculado">
                             <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
@@ -239,11 +251,20 @@ require_once 'Core/ajaxHelper.php';
                             <option value="stock_desc">Stock (Mayor a Menor)</option>
                         </select>
                     </div>
+                    <div class="inventario-filter-control">
+                        <span>Filtrar por</span>
+                        <select id="selectFiltroInventario" aria-label="Filtrar productos" onchange="filterByStatCard(this.value, null);">
+                            <option value="all">Todos</option>
+                            <option value="activos">Activos</option>
+                            <option value="inactivos">Inactivos</option>
+                            <option value="disponible">Disponibles</option>
+                            <option value="stock_bajo">Stock bajo</option>
+                            <option value="reposiciones">Reposiciones</option>
+                            <option value="mas_vendido">Más vendidos</option>
+                            <option value="menos_vendido">Menos vendidos</option>
+                        </select>
+                    </div>
 
-                    <button type="button" class="btn btn-primary" onclick="abrirModalCrearProducto()" style="background: #15803d; color: #ffffff; border: none; font-weight: 700; padding: 9px 16px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem; box-shadow: 0 2px 8px rgba(21,128,61,0.25); white-space: nowrap;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                        <span>Nuevo Producto</span>
-                    </button>
                 </div>
             </div>
 
@@ -251,15 +272,15 @@ require_once 'Core/ajaxHelper.php';
                 <table class="table inventario-table" id="inventarioTable" style="width: 100%; border-collapse: collapse;">
                     <thead>
                         <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; text-align: left;">
-                            <th style="padding: 14px 20px; font-size: 0.78rem; font-weight: 800; color: #64748b; text-transform: uppercase;">PRODUCTO</th>
-                            <th style="padding: 14px 16px; font-size: 0.78rem; font-weight: 800; color: #64748b; text-transform: uppercase;">PRECIO COMPRA</th>
-                            <th style="padding: 14px 16px; font-size: 0.78rem; font-weight: 800; color: #64748b; text-transform: uppercase;">PRECIO VENTA</th>
-                            <th style="padding: 14px 16px; font-size: 0.78rem; font-weight: 800; color: #64748b; text-transform: uppercase;">STOCK ACTUAL</th>
-                            <th style="padding: 14px 16px; font-size: 0.78rem; font-weight: 800; color: #64748b; text-transform: uppercase;">STOCK MÍNIMO</th>
-                            <th style="padding: 14px 16px; font-size: 0.78rem; font-weight: 800; color: #64748b; text-transform: uppercase;">UBICACIÓN</th>
-                            <th style="padding: 14px 16px; font-size: 0.78rem; font-weight: 800; color: #64748b; text-transform: uppercase;">ESTADO</th>
-                            <th style="padding: 14px 16px; font-size: 0.78rem; font-weight: 800; color: #64748b; text-transform: uppercase;">ÚLTIMA ACT.</th>
-                            <th class="text-right actions-col" style="padding: 14px 20px; width: 48px; text-align: center;"></th>
+                            <th style="padding: 12px 20px; font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase; white-space: nowrap;">PRODUCTO</th>
+                            <th style="padding: 12px 10px; font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase; white-space: nowrap;">PRECIO COMPRA</th>
+                            <th style="padding: 12px 10px; font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase; white-space: nowrap;">PRECIO VENTA</th>
+                            <th style="padding: 12px 10px; font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase; white-space: nowrap;">STOCK ACTUAL</th>
+                            <th style="padding: 12px 10px; font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase; white-space: nowrap;">STOCK MÍNIMO</th>
+                            <th style="padding: 12px 10px; font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase; white-space: nowrap;">UBICACIÓN</th>
+                            <th style="padding: 12px 10px; font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase; white-space: nowrap;">ESTADO</th>
+                            <th style="padding: 12px 10px; font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase; white-space: nowrap;">ÚLTIMA ACT.</th>
+                            <th class="actions-col" style="padding: 12px 10px; text-align: center;"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -328,7 +349,7 @@ require_once 'Core/ajaxHelper.php';
                                     <td style="padding: 14px 16px; color: #64748b; font-size: 0.82rem;">
                                         <?php echo date('d/m/Y H:i', strtotime($item['ultima_act'])); ?>
                                     </td>
-                                    <td class="actions-col" style="padding: 14px 20px; text-align: right; white-space: nowrap; vertical-align: middle;">
+                                    <td class="actions-col" style="padding: 14px 12px; text-align: center; white-space: nowrap; vertical-align: middle;">
                                         <div class="table-kebab-container">
                                             <button type="button" class="table-kebab-btn" aria-label="Acciones de producto" title="Opciones">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
@@ -341,6 +362,10 @@ require_once 'Core/ajaxHelper.php';
                                                 <button type="button" class="table-kebab-item" onclick="abrirModalReposicion('<?php echo (int)$item['id_producto']; ?>', '<?php echo htmlspecialchars($item['titulo'], ENT_QUOTES); ?>', '<?php echo $unidad; ?>', '<?php echo htmlspecialchars($item['codigo'] ?? '', ENT_QUOTES); ?>', '<?php echo htmlspecialchars($item['codigo_barras'] ?? '', ENT_QUOTES); ?>')">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v8"></path><path d="m8 12 4 4 4-4"></path><path d="M20 16.5A9 9 0 1 1 19.2 7"></path></svg>
                                                     Reponer stock
+                                                </button>
+                                                <button type="button" class="table-kebab-item" onclick="registrarCompraProducto('<?php echo (int)$item['id_producto']; ?>')">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                                                    Registrar compra
                                                 </button>
                                                 <button type="button" class="table-kebab-item" onclick='window.confirmarCambioEstadoProducto(<?= (int)$item['id_producto']; ?>, <?= $isActivoProd ? 0 : 1; ?>, <?= json_encode($item['titulo'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>)'>
                                                     <?php if ($isActivoProd): ?>
@@ -442,7 +467,6 @@ require_once 'Core/ajaxHelper.php';
                     </div>
 
                     <div class="modal-footer" style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
-                        <button type="button" class="btn btn-secondary" onclick="cerrarModal('modalReposicion')">Cancelar</button>
                         <button type="submit" class="btn btn-primary btn-save" style="background: #15803d;">Guardar Reposición</button>
                     </div>
                 </form>
@@ -450,14 +474,23 @@ require_once 'Core/ajaxHelper.php';
         </div>
     </div>
 
+    <?php
+        // Mapa auxiliar subcategoría (N3) -> nombre de la categoría padre (N2),
+        // para mostrarlo en el combobox de búsqueda de subcategorías.
+        $__subcatGrupoNombres = [];
+        if (!empty($grupos)) {
+            foreach ($grupos as $__g) {
+                $__subcatGrupoNombres[(string)$__g['id_grupo']] = $__g['nombre'];
+            }
+        }
+    ?>
+
     <!-- MODAL NUEVO PRODUCTO DESDE INVENTARIO (IMAGEN 3) -->
     <div class="modal-overlay" id="modalNuevoProducto">
         <div class="modal-content" style="max-width: 560px; border-radius: 16px;">
             <div class="modal-header" style="padding: 18px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
                 <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #0f172a;">Registrar Nuevo Producto</h3>
-                <button type="button" class="modal-close" onclick="cerrarModal('modalNuevoProducto')" aria-label="Cerrar" style="border: none; background: #f1f5f9; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
+                <button type="button" class="btn-close-universal" onclick="cerrarModal('modalNuevoProducto')" aria-label="Cerrar">&times;</button>
             </div>
             <div class="modal-body" style="padding: 24px; max-height: 80vh; overflow-y: auto;">
                 <form method="POST" action="index.php?action=crear_producto" enctype="multipart/form-data" id="formNuevoProductoInventario">
@@ -499,7 +532,7 @@ require_once 'Core/ajaxHelper.php';
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
                             <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem; font-weight: 700; color: #15803d; cursor: pointer;">
                                 <input type="checkbox" name="en_oferta" id="nuevoProdEnOferta" value="1" onchange="toggleOfertaCamposNuevo(this.checked)" style="width: 18px; height: 18px; accent-color: #15803d;">
-                                <span>🔥 ¿Este producto entra en Oferta Especial / Descuento?</span>
+                                <span>¿Aplicar oferta especial o descuento?</span>
                             </label>
                             <span id="badgePctNuevo" style="display: none; padding: 4px 10px; border-radius: 20px; background: #dcfce7; color: #15803d; font-weight: 800; font-size: 0.82rem; border: 1px solid #bbf7d0;"></span>
                         </div>
@@ -542,41 +575,27 @@ require_once 'Core/ajaxHelper.php';
                         </div>
                     </div>
 
-                    <!-- 3 SELECTORES CASCADA: Macrocategoría -> Categoría -> Subcategoría (IMAGEN 2) -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px;">
-                        <div class="grupo">
-                            <label class="label" style="display: block; font-weight: 700; font-size: 0.72rem; color: #334155; text-transform: uppercase; margin-bottom: 6px;">MACROCATEGORÍA (N1)</label>
-                            <select id="nuevoMomentoSelect" class="input-modern" onchange="onNuevoMomentoChange(this.value)" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; background: #fff;">
-                                <option value="">-- Seleccionar N1 --</option>
-                                <?php if (!empty($moments)): ?>
-                                    <?php foreach ($moments as $m): ?>
-                                        <option value="<?= $m['id_momento']; ?>"><?= htmlspecialchars($m['nombre']); ?></option>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </select>
-                        </div>
-                        <div class="grupo">
-                            <label class="label" style="display: block; font-weight: 700; font-size: 0.72rem; color: #334155; text-transform: uppercase; margin-bottom: 6px;">CATEGORÍA (N2)</label>
-                            <select id="nuevoGrupoSelect" name="id_grupo" class="input-modern" disabled onchange="onNuevoGrupoChange(this.value)" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; background: #fff;">
-                                <option value="">-- Seleccione N1 primero --</option>
-                                <?php if (!empty($grupos)): ?>
-                                    <?php foreach ($grupos as $g): ?>
-                                        <option value="<?= $g['id_grupo']; ?>" data-momento="<?= $g['id_momento']; ?>"><?= htmlspecialchars($g['nombre']); ?></option>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </select>
-                        </div>
-                        <div class="grupo">
-                            <label class="label" style="display: block; font-weight: 700; font-size: 0.72rem; color: #334155; text-transform: uppercase; margin-bottom: 6px;">SUBCATEGORÍA (N3) *</label>
-                            <select name="id_categoria" id="nuevoCategoriaSelect" required disabled class="input-modern" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; background: #fff;">
-                                <option value="">-- Seleccione N2 primero --</option>
+                    <!-- SUBCATEGORÍA (N3) con búsqueda en vivo -->
+                    <div class="grupo" style="margin-bottom: 16px;">
+                        <label class="label" style="display: block; font-weight: 700; font-size: 0.78rem; color: #334155; text-transform: uppercase; margin-bottom: 6px;">SUBCATEGORÍA (N3) *</label>
+                        <div class="subcat-combo">
+                            <input type="text" class="subcat-input" id="nuevoSubcatInput" placeholder="Escribe para buscar la subcategoría..." autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" required>
+                            <input type="hidden" name="id_categoria" id="nuevoSubcatId">
+                            <input type="hidden" name="id_grupo" id="nuevoSubcatGrupo">
+                            <div class="subcat-dropdown" id="nuevoSubcatDropdown" role="listbox">
                                 <?php if (!empty($categorias)): ?>
                                     <?php foreach ($categorias as $cat): ?>
-                                        <option value="<?= $cat['id_categoria']; ?>" data-grupo="<?= $cat['id_grupo']; ?>" data-momento="<?= $cat['id_momento']; ?>"><?= htmlspecialchars($cat['nombre']); ?></option>
+                                        <div class="subcat-option" role="option" data-id="<?= htmlspecialchars($cat['id_categoria']); ?>" data-grupo="<?= htmlspecialchars($cat['id_grupo']); ?>" data-nombre="<?= htmlspecialchars($cat['nombre']); ?>">
+                                            <span class="subcat-opt-name"><?= htmlspecialchars($cat['nombre']); ?></span>
+                                            <?php $__grpNom = $__subcatGrupoNombres[(string)$cat['id_grupo']] ?? ''; ?>
+                                            <?php if ($__grpNom !== ''): ?><span class="subcat-opt-path"><?= htmlspecialchars($__grpNom); ?></span><?php endif; ?>
+                                        </div>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
-                            </select>
+                                <div class="subcat-empty" style="display:none;">Sin resultados</div>
+                            </div>
                         </div>
+                        <small class="subcat-hint">Empieza a escribir y elige una opción de la lista.</small>
                     </div>
 
                     <!-- Hasta 4 Imágenes por producto -->
@@ -635,16 +654,7 @@ require_once 'Core/ajaxHelper.php';
                         <textarea name="descripcion" rows="2" class="input-modern" placeholder="Detalles, especificaciones o recomendaciones..." style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; box-sizing: border-box; resize: vertical;"></textarea>
                     </div>
 
-                    <!-- Sugerencia -->
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem; font-weight: 600; color: #334155; cursor: pointer;">
-                            <input type="checkbox" name="es_sugerencia" value="1" style="accent-color: #15803d; width: 16px; height: 16px;">
-                            <span>Destacar como producto sugerido / oferta especial</span>
-                        </label>
-                    </div>
-
                     <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
-                        <button type="button" class="btn btn-secondary" onclick="cerrarModal('modalNuevoProducto')">Cancelar</button>
                         <button type="submit" class="btn btn-primary" style="background: #15803d; border-color: #15803d; font-weight: 700;">Guardar Producto</button>
                     </div>
                 </form>
@@ -657,9 +667,7 @@ require_once 'Core/ajaxHelper.php';
         <div class="modal-content" style="max-width: 560px; border-radius: 16px;">
             <div class="modal-header" style="padding: 18px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
                 <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #0f172a;">Editar Información del Producto</h3>
-                <button type="button" class="modal-close" onclick="cerrarModal('modalEditarProducto')" aria-label="Cerrar" style="border: none; background: #f1f5f9; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
+                <button type="button" class="btn-close-universal" onclick="cerrarModal('modalEditarProducto')" aria-label="Cerrar">&times;</button>
             </div>
             <div class="modal-body" style="padding: 24px; max-height: 80vh; overflow-y: auto;">
                 <form method="POST" action="index.php?action=actualizar_producto" enctype="multipart/form-data" id="formEditarProductoInventario">
@@ -706,7 +714,7 @@ require_once 'Core/ajaxHelper.php';
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
                             <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem; font-weight: 700; color: #15803d; cursor: pointer;">
                                 <input type="checkbox" name="en_oferta" id="editProdEnOferta" value="1" onchange="toggleOfertaCamposEdit(this.checked)" style="width: 18px; height: 18px; accent-color: #15803d;">
-                                <span>🔥 ¿Este producto entra en Oferta Especial / Descuento?</span>
+                                <span>¿Aplicar oferta especial o descuento?</span>
                             </label>
                             <span id="badgePctEdit" style="display: none; padding: 4px 10px; border-radius: 20px; background: #dcfce7; color: #15803d; font-weight: 800; font-size: 0.82rem; border: 1px solid #bbf7d0;"></span>
                         </div>
@@ -749,41 +757,27 @@ require_once 'Core/ajaxHelper.php';
                         </div>
                     </div>
 
-                    <!-- 3 SELECTORES CASCADA EDIT: Macrocategoría -> Categoría -> Subcategoría -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px;">
-                        <div class="grupo">
-                            <label class="label" style="display: block; font-weight: 700; font-size: 0.72rem; color: #334155; text-transform: uppercase; margin-bottom: 6px;">MACROCATEGORÍA (N1)</label>
-                            <select id="editProdMomento" class="input-modern" onchange="onEditMomentoChange(this.value)" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; background: #fff;">
-                                <option value="">-- Seleccionar N1 --</option>
-                                <?php if (!empty($moments)): ?>
-                                    <?php foreach ($moments as $m): ?>
-                                        <option value="<?= $m['id_momento']; ?>"><?= htmlspecialchars($m['nombre']); ?></option>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </select>
-                        </div>
-                        <div class="grupo">
-                            <label class="label" style="display: block; font-weight: 700; font-size: 0.72rem; color: #334155; text-transform: uppercase; margin-bottom: 6px;">CATEGORÍA (N2)</label>
-                            <select id="editProdGrupo" name="id_grupo" class="input-modern" disabled onchange="onEditGrupoChange(this.value)" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; background: #fff;">
-                                <option value="">-- Seleccione N1 primero --</option>
-                                <?php if (!empty($grupos)): ?>
-                                    <?php foreach ($grupos as $g): ?>
-                                        <option value="<?= $g['id_grupo']; ?>" data-momento="<?= $g['id_momento']; ?>"><?= htmlspecialchars($g['nombre']); ?></option>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </select>
-                        </div>
-                        <div class="grupo">
-                            <label class="label" style="display: block; font-weight: 700; font-size: 0.72rem; color: #334155; text-transform: uppercase; margin-bottom: 6px;">SUBCATEGORÍA (N3) *</label>
-                            <select name="id_categoria" id="editProdCategoria" disabled class="input-modern" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.85rem; background: #fff;">
-                                <option value="">-- Seleccione N2 primero --</option>
+                    <!-- SUBCATEGORÍA (N3) con búsqueda en vivo -->
+                    <div class="grupo" style="margin-bottom: 16px;">
+                        <label class="label" style="display: block; font-weight: 700; font-size: 0.78rem; color: #334155; text-transform: uppercase; margin-bottom: 6px;">SUBCATEGORÍA (N3) *</label>
+                        <div class="subcat-combo">
+                            <input type="text" class="subcat-input" id="editSubcatInput" placeholder="Escribe para buscar la subcategoría..." autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" required>
+                            <input type="hidden" name="id_categoria" id="editSubcatId">
+                            <input type="hidden" name="id_grupo" id="editSubcatGrupo">
+                            <div class="subcat-dropdown" id="editSubcatDropdown" role="listbox">
                                 <?php if (!empty($categorias)): ?>
                                     <?php foreach ($categorias as $cat): ?>
-                                        <option value="<?= $cat['id_categoria']; ?>" data-grupo="<?= $cat['id_grupo']; ?>" data-momento="<?= $cat['id_momento']; ?>"><?= htmlspecialchars($cat['nombre']); ?></option>
+                                        <div class="subcat-option" role="option" data-id="<?= htmlspecialchars($cat['id_categoria']); ?>" data-grupo="<?= htmlspecialchars($cat['id_grupo']); ?>" data-nombre="<?= htmlspecialchars($cat['nombre']); ?>">
+                                            <span class="subcat-opt-name"><?= htmlspecialchars($cat['nombre']); ?></span>
+                                            <?php $__grpNom = $__subcatGrupoNombres[(string)$cat['id_grupo']] ?? ''; ?>
+                                            <?php if ($__grpNom !== ''): ?><span class="subcat-opt-path"><?= htmlspecialchars($__grpNom); ?></span><?php endif; ?>
+                                        </div>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
-                            </select>
+                                <div class="subcat-empty" style="display:none;">Sin resultados</div>
+                            </div>
                         </div>
+                        <small class="subcat-hint">Empieza a escribir y elige una opción de la lista.</small>
                     </div>
 
                     <!-- Hasta 4 Imágenes Edit -->
@@ -842,16 +836,7 @@ require_once 'Core/ajaxHelper.php';
                         <textarea name="descripcion" id="editProdDescripcion" rows="3" class="input-modern" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; box-sizing: border-box; resize: vertical;" placeholder="Descripción o detalles del producto..."></textarea>
                     </div>
 
-                    <!-- Sugerencia Edit -->
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem; font-weight: 600; color: #334155; cursor: pointer;">
-                            <input type="checkbox" name="es_sugerencia" id="editProdEsSugerencia" value="1" style="accent-color: #15803d; width: 16px; height: 16px;">
-                            <span>Destacar como producto sugerido / oferta especial</span>
-                        </label>
-                    </div>
-
                     <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
-                        <button type="button" class="btn btn-secondary" onclick="cerrarModal('modalEditarProducto')">Cancelar</button>
                         <button type="submit" class="btn btn-primary" style="background: #15803d; font-weight: 700;">Guardar Cambios</button>
                     </div>
                 </form>
@@ -869,7 +854,6 @@ require_once 'Core/ajaxHelper.php';
             <h3 style="margin: 0 0 8px 0; color: #0f172a; font-size: 1.2rem; font-weight: 800;">¿Eliminar producto?</h3>
             <p id="textoEliminarProd" style="color: #64748b; font-size: 0.92rem; margin: 0 0 22px 0;">Esta acción no se puede deshacer.</p>
             <div style="display: flex; gap: 10px; justify-content: center;">
-                <button type="button" onclick="cerrarModal('modalConfirmarEliminarProd')" style="padding: 10px 20px; border-radius: 8px; border: 1px solid #cbd5e1; background: #f8fafc; font-weight: 700; cursor: pointer; color: #475569;">Cancelar</button>
                 <a id="btnEliminarProdLink" href="#" style="padding: 10px 22px; border-radius: 8px; background: #dc2626; color: #ffffff; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center;">Sí, Eliminar</a>
             </div>
         </div>
@@ -882,7 +866,6 @@ require_once 'Core/ajaxHelper.php';
             <h3 id="tituloConfirmarEstadoProd" style="margin:0 0 8px;color:#0f172a;font-size:1.2rem;font-weight:800;">Confirmar cambio de estado</h3>
             <p id="textoConfirmarEstadoProd" style="color:#64748b;font-size:.92rem;margin:0 0 22px;"></p>
             <div style="display:flex;gap:10px;justify-content:center;">
-                <button type="button" onclick="cerrarModal('modalConfirmarEstadoProd')" style="padding:10px 20px;border-radius:8px;border:1px solid #cbd5e1;background:#f8fafc;font-weight:700;cursor:pointer;color:#475569;">Cancelar</button>
                 <a id="btnConfirmarEstadoProd" href="#" style="padding:10px 22px;border-radius:8px;color:#fff;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;">Confirmar</a>
             </div>
         </div>

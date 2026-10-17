@@ -64,7 +64,7 @@
 .delivery-history-clear{height:40px;padding:0 12px;border:1px solid #d5e0df;border-radius:7px;background:#f7faf8;color:#38574a;font-weight:700;cursor:pointer}
 .delivery-history-clear:hover{border-color:#16803e;color:#14532d;background:#eff8f1}
 .delivery-history-filter-count{grid-column:1/-1;color:#64748b;font-size:.78rem}
-.delivery-list .history-item[hidden]{display:none!important}
+html body .delivery-list .history-item[hidden]{display:none}
 .delivery-history-no-results{margin:0;padding:18px;text-align:center;border:1px dashed #c8d9d2;border-radius:8px;color:#64748b}
 @media(max-width:900px){.delivery-history-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.delivery-history-search{grid-column:1/-1}.delivery-history-filter-count{grid-column:1/-1}}
 @media(max-width:520px){.delivery-history-filters{grid-template-columns:1fr}.delivery-history-search,.delivery-history-filter-count{grid-column:auto}.delivery-history-clear{width:100%}}

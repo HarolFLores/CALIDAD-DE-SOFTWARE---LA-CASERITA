@@ -38,17 +38,18 @@ class ProductoModel{
         return $this->getProduct();
     }
 
-    public function createProduct($id_categoria, $id_grupo, $titulo, $descripcion, $precio, $unidad_medida, $stock, $imagen, $es_sugerencia, $stock_minimo = 5, $ubicacion = 'Almacén principal', $codigo = null, $precio_anterior = null, $imagen_2 = null, $imagen_3 = null, $imagen_4 = null, $codigo_barras = null){
+    public function createProduct($id_categoria, $id_grupo, $titulo, $descripcion, $precio, $unidad_medida, $stock, $imagen, $es_sugerencia, $stock_minimo = 5, $ubicacion = 'Almacén principal', $codigo = null, $precio_anterior = null, $imagen_2 = null, $imagen_3 = null, $imagen_4 = null, $codigo_barras = null, $id_usuario = null){
         try {
             $this->conn->beginTransaction();
 
-            $query = "INSERT INTO producto (id_categoria, id_grupo, titulo, descripcion, precio, precio_anterior, unidad_medida, stock, imagen, imagen_2, imagen_3, imagen_4, es_sugerencia, codigo, codigo_barras, activo) 
-                VALUES (:id_categoria, :id_grupo, :titulo, :descripcion, :precio, :precio_anterior, :unidad_medida, :stock, :imagen, :imagen_2, :imagen_3, :imagen_4, :es_sugerencia, :codigo, :codigo_barras, 1)";
+            $query = "INSERT INTO producto (id_categoria, id_grupo, nombre, titulo, descripcion, precio, precio_anterior, unidad_medida, stock, imagen, imagen_2, imagen_3, imagen_4, es_sugerencia, codigo, codigo_barras, activo) 
+                VALUES (:id_categoria, :id_grupo, :nombre, :titulo, :descripcion, :precio, :precio_anterior, :unidad_medida, :stock, :imagen, :imagen_2, :imagen_3, :imagen_4, :es_sugerencia, :codigo, :codigo_barras, 1)";
 
             $stmt = $this->conn->prepare($query);
 
             $stmt->bindValue(':id_categoria', $id_categoria ?: null, PDO::PARAM_INT);
             $stmt->bindValue(':id_grupo', $id_grupo ?: null, PDO::PARAM_INT);
+            $stmt->bindParam(':nombre', $titulo);
             $stmt->bindParam(':titulo', $titulo);
             $stmt->bindParam(':descripcion', $descripcion);
             $stmt->bindParam(':precio', $precio);
@@ -84,6 +85,29 @@ class ProductoModel{
             $stmtInv->bindParam(':stock_minimo', $stock_minimo);
             $stmtInv->bindParam(':ubicacion', $ubicacion);
             $stmtInv->execute();
+
+            $stockInicial = (int)$stock;
+            if ($stockInicial > 0) {
+                $idUserKardex = (int)$id_usuario;
+                if ($idUserKardex <= 0) {
+                    try {
+                        $stmtUser = $this->conn->query("SELECT id_usuario FROM usuario WHERE rol = 'admin' ORDER BY id_usuario ASC LIMIT 1");
+                        $idUserKardex = (int)$stmtUser->fetchColumn();
+                    } catch (Exception $eUser) {
+                        $idUserKardex = 0;
+                    }
+                }
+                if ($idUserKardex > 0) {
+                    $stmtKdx = $this->conn->prepare("INSERT INTO kardex (id_producto, id_usuario, tipo_movimiento, motivo, cantidad, costo_unitario, precio_unitario, stock_anterior, stock_actual, referencia_id, referencia_tipo, fecha)
+                                                     VALUES (:id_producto, :id_usuario, 'ENTRADA', 'Stock inicial - Registro de producto', :cantidad, 0, :precio, 0, :stock_actual, NULL, 'registro_producto', NOW())");
+                    $stmtKdx->bindParam(':id_producto', $id_producto, PDO::PARAM_INT);
+                    $stmtKdx->bindParam(':id_usuario', $idUserKardex, PDO::PARAM_INT);
+                    $stmtKdx->bindParam(':cantidad', $stockInicial, PDO::PARAM_INT);
+                    $stmtKdx->bindValue(':precio', $precio);
+                    $stmtKdx->bindParam(':stock_actual', $stockInicial, PDO::PARAM_INT);
+                    $stmtKdx->execute();
+                }
+            }
 
             $this->conn->commit();
             return true;

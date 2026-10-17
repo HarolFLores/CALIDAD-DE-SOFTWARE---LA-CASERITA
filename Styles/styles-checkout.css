@@ -1442,8 +1442,8 @@ img {
     font-size: 0.85rem;
 }
 
-.co-muted {
-    color: var(--co-muted) !important;
+html body .co-muted {
+    color: var(--co-muted);
 }
 
 .co-italic {

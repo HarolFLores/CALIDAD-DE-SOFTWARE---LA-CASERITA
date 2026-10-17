@@ -101,7 +101,7 @@ function resolverNombreDestino($url, $destinosList) {
     if (empty($url)) return 'Catálogo Completo';
     foreach ($destinosList as $d) {
         if ($d['url'] === $url) {
-            return $d['icono'] . ' ' . $d['nombre'];
+            return $d['nombre'];
         }
     }
     if (strpos($url, 'id_momento') !== false) return 'Macrocategoría seleccionada';
@@ -138,7 +138,7 @@ function resolverNombreDestino($url, $destinosList) {
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
                     </button>
                     <div class="admin-topbar-brand">
-                        <span class="brand-title">Gestión de Banners & Carrusel</span>
+                        <span class="brand-title">Banners y carrusel</span>
                     </div>
                 </div>
                 <div class="admin-topbar-actions">
@@ -176,9 +176,6 @@ function resolverNombreDestino($url, $destinosList) {
             Los cambios se guardarán y reflejarán en la portada de la tienda.
         </p>
         <div style="display: flex; gap: 12px; justify-content: center;">
-            <button type="button" onclick="window.cerrarConfirmacionModal()" style="padding: 10px 20px; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; font-weight: 700; font-size: 0.88rem; cursor: pointer;">
-                Cancelar
-            </button>
             <button type="button" id="btnConfirmarProceder" style="padding: 10px 22px; border-radius: 8px; border: none; background: #15803d; color: #ffffff; font-weight: 700; font-size: 0.88rem; cursor: pointer; box-shadow: 0 2px 8px rgba(21,128,61,0.25);">
                 Sí, Confirmar
             </button>
@@ -225,6 +222,7 @@ function resolverNombreDestino($url, $destinosList) {
             <!-- Destino con Barra de Búsqueda -->
             <div>
                 <label style="display: block; font-size: 0.74rem; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.04em;">Destino al hacer clic en "Ver más"</label>
+
                 <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; margin-bottom: 8px;">
                     <div id="modalDestBadge" style="font-size: 0.88rem; font-weight: 700; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                         🛒 Catálogo Completo
@@ -232,12 +230,12 @@ function resolverNombreDestino($url, $destinosList) {
                 </div>
 
                 <!-- Buscador en tiempo real de categorías y macrocategorías -->
-                <div style="border: 1.5px solid #cbd5e1; border-radius: 10px; overflow: hidden; background: #ffffff;">
-                    <div style="padding: 8px 12px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 8px;">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                        <input type="text" id="modalDestSearch" placeholder="Buscar categoría o macrocategoría..." style="width: 100%; border: none; background: transparent; font-size: 0.84rem; outline: none;" oninput="window.modalFiltrarDestinos(this.value)">
+                <div class="dest-picker">
+                    <div class="dest-picker-search">
+                        <svg class="dest-picker-search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input type="text" id="modalDestSearch" placeholder="Buscar categoría o macrocategoría..." oninput="window.modalFiltrarDestinos(this.value)">
                     </div>
-                    <div id="modalDestResults" style="max-height: 160px; overflow-y: auto; padding: 4px 0;">
+                    <div id="modalDestResults" class="dest-picker-results">
                         <!-- Renderizado por JS -->
                     </div>
                 </div>
@@ -246,11 +244,11 @@ function resolverNombreDestino($url, $destinosList) {
 
         <!-- Footer del Modal: Guardar, Cancelar o Eliminar -->
         <div style="padding: 16px 24px; border-top: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #f8fafc; border-radius: 0 0 18px 18px;">
-            <button type="button" onclick="window.modalPedirEliminar()" style="padding: 9px 16px; border-radius: 8px; border: 1px solid #fecaca; background: #fee2e2; color: #dc2626; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+            <button type="button" id="btnModalEliminarBanner" onclick="window.modalPedirEliminar()" style="padding: 9px 16px; border-radius: 8px; border: 1px solid #fecaca; background: #fee2e2; color: #dc2626; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                 <span>Eliminar</span>
             </button>
-            <div style="display: flex; gap: 10px;">
+            <div style="display: flex; gap: 10px; margin-left: auto;">
                 <button type="button" onclick="window.modalPedirGuardar()" style="padding: 9px 22px; border-radius: 8px; border: none; background: #15803d; color: #ffffff; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(21,128,61,0.25);">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                     <span>Guardar</span>
@@ -261,26 +259,26 @@ function resolverNombreDestino($url, $destinosList) {
 </div>
 
 <!-- CONTENEDOR PRINCIPAL CON ESPACIADO IDÉNTICO A IMAGEN 2 (.container-admin) -->
-<main class="main-content container-admin" style="padding-top: 25px; padding-bottom: 50px;">
+<main class="main-content container-admin admin-fullwidth" style="padding-top: 25px; padding-bottom: 50px;">
     
 
 
 
     <!-- TARJETAS CUADRADAS COMPACTAS (IMAGEN 2) -->
     <div class="stats-grid-square">
-        <div class="stat-card-square active-card">
+        <div class="stat-card-square active-card" data-banner-filter="all" role="button" tabindex="0" aria-pressed="true">
             <span class="stat-title">TOTAL BANNERS</span>
             <span class="stat-val" id="lblTotalBanners"><?= count($slidesCarrusel); ?></span>
         </div>
-        <div class="stat-card-square">
+        <div class="stat-card-square" data-banner-filter="macro" role="button" tabindex="0" aria-pressed="false">
             <span class="stat-title">MACROCATEGORÍAS DISPONIBLES</span>
             <span class="stat-val"><?= count($macrocategorias); ?></span>
         </div>
-        <div class="stat-card-square">
+        <div class="stat-card-square" data-banner-filter="category" role="button" tabindex="0" aria-pressed="false">
             <span class="stat-title">CATEGORÍAS DISPONIBLES</span>
             <span class="stat-val"><?= count($gruposCategorias); ?></span>
         </div>
-        <div class="stat-card-square">
+        <div class="stat-card-square" data-banner-filter="active" role="button" tabindex="0" aria-pressed="false">
             <span class="stat-title">ESTADO EN TIENDA</span>
             <span class="stat-val" style="font-size: 1.05rem; color: #15803d;">Activo</span>
         </div>
@@ -319,6 +317,8 @@ function resolverNombreDestino($url, $destinosList) {
     let indexEditandoActualmente = -1;
     let archivoPendienteSubida = null;
     let accionConfirmacionPendiente = null;
+    let filtroBannersActual = 'all';
+    let modoCreacionBanner = false;
 
     // Toast interactivo (Imagen 4)
     window.mostrarCarruselToast = function(titulo, mensaje, esError = false) {
@@ -365,18 +365,56 @@ function resolverNombreDestino($url, $destinosList) {
     }
 
     // RENDERIZADO DE LAS TARJETAS (3 POR FILA, IMÁGENES REDUCIDAS, SOLO BOTÓN EDITAR)
+    function obtenerBannersFiltrados() {
+        if (filtroBannersActual === 'all' || filtroBannersActual === 'active') {
+            return listaBanners.map((banner, index) => ({ banner, index }));
+        }
+
+        const patron = filtroBannersActual === 'macro' ? 'id_momento' : 'id_grupo';
+        return listaBanners
+            .map((banner, index) => ({ banner, index }))
+            .filter(({ banner }) => String(banner.link || banner.enlace || '').includes(patron));
+    }
+
+    function actualizarTarjetasBanner() {
+        document.querySelectorAll('[data-banner-filter]').forEach(card => {
+            const seleccionado = card.dataset.bannerFilter === filtroBannersActual;
+            card.classList.toggle('active-card', seleccionado);
+            card.setAttribute('aria-pressed', seleccionado ? 'true' : 'false');
+        });
+    }
+
+    window.filtrarBannersPorTarjeta = function(filtro) {
+        filtroBannersActual = filtro || 'all';
+        actualizarTarjetasBanner();
+        renderizarGridBanners();
+        document.getElementById('carruselCardsGrid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    document.querySelectorAll('[data-banner-filter]').forEach(card => {
+        const seleccionar = () => window.filtrarBannersPorTarjeta(card.dataset.bannerFilter);
+        card.addEventListener('click', seleccionar);
+        card.addEventListener('keydown', event => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                seleccionar();
+            }
+        });
+    });
+
     function renderizarGridBanners() {
         const grid = document.getElementById('carruselCardsGrid');
         const lblTotal = document.getElementById('lblTotalBanners');
         if (lblTotal) lblTotal.textContent = listaBanners.length;
         if (!grid) return;
 
-        if (listaBanners.length === 0) {
+        const bannersVisibles = obtenerBannersFiltrados();
+        if (bannersVisibles.length === 0) {
             grid.innerHTML = '<div style="grid-column: 1 / -1; padding: 40px; text-align: center; color: #94a3b8; background: #ffffff; border-radius: 14px; border: 1px solid #e2e8f0;">No hay banners configurados actualmente.</div>';
             return;
         }
 
-        grid.innerHTML = listaBanners.map((b, i) => {
+        grid.innerHTML = bannersVisibles.map(({ banner: b, index: i }) => {
             const imgSrc = b.imagen || 'Images/123.webp';
             const linkSrc = b.link || b.enlace || '#catalogo';
             const destText = resolverNombreDestino(linkSrc);
@@ -411,15 +449,20 @@ function resolverNombreDestino($url, $destinosList) {
         }).join('');
     }
 
-    // ABRIR MODAL DE EDICIÓN DE BANNER
-    window.abrirModalEditarBanner = function(idx) {
+    // ABRIR MODAL DE EDICIÓN / CREACIÓN DE BANNER
+    window.abrirModalEditarBanner = function(idx, esNuevo) {
+        esNuevo = !!esNuevo;
+        modoCreacionBanner = esNuevo;
         indexEditandoActualmente = idx;
         archivoPendienteSubida = null;
 
         const b = listaBanners[idx];
         if (!b) return;
 
-        document.getElementById('editModalTitulo').textContent = 'Editar Banner #' + (idx + 1);
+        document.getElementById('editModalTitulo').textContent = esNuevo ? 'Nuevo Banner' : ('Editar Banner #' + (idx + 1));
+        const btnEliminar = document.getElementById('btnModalEliminarBanner');
+        if (btnEliminar) btnEliminar.style.display = esNuevo ? 'none' : 'inline-flex';
+
         const previewImg = document.getElementById('modalPreviewImg');
         const miniThumb = document.getElementById('modalMiniThumb');
         const fileStatus = document.getElementById('modalFileStatus');
@@ -430,8 +473,9 @@ function resolverNombreDestino($url, $destinosList) {
         if (previewImg) previewImg.src = imgSrc;
         if (miniThumb) miniThumb.src = imgSrc;
         if (fileStatus) {
-            fileStatus.textContent = 'Imagen actual asignada';
+            fileStatus.textContent = esNuevo ? 'Selecciona una imagen desde tu equipo' : 'Imagen actual asignada';
             fileStatus.style.color = '#64748b';
+            fileStatus.style.fontWeight = 'normal';
         }
         if (destBadge) destBadge.textContent = resolverNombreDestino(b.link || b.enlace || '#catalogo');
         if (searchInput) searchInput.value = '';
@@ -442,6 +486,12 @@ function resolverNombreDestino($url, $destinosList) {
 
     window.cerrarModalEditarBanner = function() {
         document.getElementById('modalEditarBanner').style.display = 'none';
+        // Si se canceló la creación, descartar el banner temporal
+        if (modoCreacionBanner && indexEditandoActualmente >= 0 && indexEditandoActualmente === listaBanners.length - 1) {
+            listaBanners.pop();
+            renderizarGridBanners();
+        }
+        modoCreacionBanner = false;
         indexEditandoActualmente = -1;
         archivoPendienteSubida = null;
     };
@@ -478,19 +528,20 @@ function resolverNombreDestino($url, $destinosList) {
         });
 
         if (filtrados.length === 0) {
-            resultsBox.innerHTML = '<div style="padding:12px; text-align:center; color:#94a3b8; font-size:0.80rem;">No se encontraron categorías.</div>';
+            resultsBox.innerHTML = '<div class="dest-picker-empty">No se encontraron categorías.</div>';
             return;
         }
 
+        const bannerActual = (indexEditandoActualmente >= 0) ? listaBanners[indexEditandoActualmente] : null;
+        const actualUrl = bannerActual ? (bannerActual.link || bannerActual.enlace || '') : '';
+
         resultsBox.innerHTML = filtrados.map(d => `
-            <div class="dest-opt-item" onclick="window.modalSeleccionarDestino('${d.url}', '${d.nombre.replace(/'/g, "\\'")}')">
-                <div>
-                    <div style="font-size:0.84rem; font-weight:700; color:#0f172a;">${d.nombre}</div>
-                    <div style="font-size:0.72rem; color:#64748b;">${d.subtitulo}</div>
+            <div class="dest-opt-item${d.url === actualUrl ? ' is-selected' : ''}" data-url="${d.url.replace(/"/g, '&quot;')}" onclick="window.modalSeleccionarDestino('${d.url}', '${d.nombre.replace(/'/g, "\\'")}')">
+                <div class="dest-opt-info">
+                    <span class="dest-opt-name">${d.nombre}</span>
+                    <span class="dest-opt-sub">${d.subtitulo}</span>
                 </div>
-                <span style="font-size:0.68rem; font-weight:800; background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; white-space:nowrap;">
-                    ${d.categoria}
-                </span>
+                <span class="dest-opt-tag">${d.categoria}</span>
             </div>
         `).join('');
     };
@@ -505,6 +556,9 @@ function resolverNombreDestino($url, $destinosList) {
             badge.style.color = '#15803d';
             setTimeout(() => { badge.style.color = '#0f172a'; }, 1000);
         }
+        document.querySelectorAll('#modalDestResults .dest-opt-item').forEach(function(el) {
+            el.classList.toggle('is-selected', el.dataset.url === url);
+        });
     };
 
     // MODAL DE CONFIRMACIÓN REUTILIZABLE
@@ -543,9 +597,10 @@ function resolverNombreDestino($url, $destinosList) {
         accionConfirmacionPendiente = accionProceder;
         if (btnProc) {
             btnProc.onclick = function() {
+                const accion = accionConfirmacionPendiente;
                 window.cerrarConfirmacionModal();
-                if (typeof accionConfirmacionPendiente === 'function') {
-                    accionConfirmacionPendiente();
+                if (typeof accion === 'function') {
+                    accion();
                 }
             };
         }
@@ -616,6 +671,7 @@ function resolverNombreDestino($url, $destinosList) {
         })
         .then(r => r.json())
         .then(res => {
+            modoCreacionBanner = false;
             window.cerrarModalEditarBanner();
             window.mostrarCarruselToast('Éxito', fueEliminado ? 'Banner eliminado correctamente.' : 'Banner guardado con éxito.', false);
             
@@ -648,6 +704,7 @@ function resolverNombreDestino($url, $destinosList) {
                 }
             }
             renderizarGridBanners();
+            modoCreacionBanner = false;
             window.cerrarModalEditarBanner();
             window.mostrarCarruselToast('Éxito', 'Cambios guardados con éxito.', false);
         });
@@ -661,8 +718,7 @@ function resolverNombreDestino($url, $destinosList) {
             enlace: '#catalogo'
         };
         listaBanners.push(nuevo);
-        renderizarGridBanners();
-        window.abrirModalEditarBanner(listaBanners.length - 1);
+        window.abrirModalEditarBanner(listaBanners.length - 1, true);
     };
 
     // Render inicial

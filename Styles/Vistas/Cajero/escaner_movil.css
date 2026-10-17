@@ -145,19 +145,19 @@
             align-items: center;
             justify-content: center;
         }
-        .camera-card.success-flash {
-            border-color: #10b981 !important;
-            box-shadow: 0 0 30px rgba(16, 185, 129, 0.9) !important;
+        html body .camera-card.success-flash {
+            border-color: #10b981;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.9);
         }
         #reader {
             width: 100%;
             min-height: 290px;
             background: #000;
         }
-        #reader video {
+        html body #reader video {
             border-radius: 14px;
-            object-fit: cover !important;
-            width: 100% !important;
+            object-fit: cover;
+            width: 100%;
             min-height: 290px;
             display: block;
         }

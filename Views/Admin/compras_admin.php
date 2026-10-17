@@ -58,7 +58,7 @@ $cantProveedoresConCompras = count($proveedoresDistintos);
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
                     </button>
                     <div class="admin-topbar-brand">
-                        <span class="brand-title">Compras & Reposición de Stock</span>
+                        <span class="brand-title">Compras y reposición</span>
                     </div>
                 </div>
                 <div class="admin-topbar-actions">
@@ -109,8 +109,14 @@ $cantProveedoresConCompras = count($proveedoresDistintos);
     <!-- TABLA DE HISTORIAL DE COMPRAS -->
     <div class="compras-main-card">
         <div class="compras-card-header">
-            <div class="compras-card-title">
-                Historial de Compras & Reposiciones de Almacén
+            <div class="compras-card-title-row">
+                <div class="compras-card-title">
+                    Historial de Compras & Reposiciones de Almacén
+                </div>
+                <button type="button" onclick="abrirModalCompra()" class="module-inline-action">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <span>Registrar nueva compra</span>
+                </button>
             </div>
             <div class="compras-controls">
                 <div class="compras-search-wrapper">
@@ -123,10 +129,6 @@ $cantProveedoresConCompras = count($proveedoresDistintos);
                         <option value="<?= htmlspecialchars(strtolower($pv['razon_social'])) ?>"><?= htmlspecialchars($pv['razon_social']) ?></option>
                     <?php endforeach; ?>
                 </select>
-                <button type="button" onclick="abrirModalCompra()" class="btn btn-primary" style="background:#15803d; color:#fff; border:none; padding:9px 18px; border-radius:10px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:8px; box-shadow:0 3px 10px rgba(21,128,61,0.25); font-size:0.88rem; transition:all 0.2s ease; white-space:nowrap;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    <span>+ Registrar Nueva Compra</span>
-                </button>
             </div>
         </div>
 
@@ -166,7 +168,6 @@ $cantProveedoresConCompras = count($proveedoresDistintos);
                                 data-proveedor="<?= htmlspecialchars(strtolower($provNombre)) ?>"
                                 data-comprobante="<?= htmlspecialchars(strtolower($item['nro_comprobante'] ?? '')) ?>">
                                 <td style="white-space:nowrap; font-size:0.82rem; color:#64748b;">
-                                    <i class="fa-regular fa-calendar-days" style="margin-right:4px;"></i>
                                     <?= date('d/m/Y H:i', strtotime($item['fecha'])) ?>
                                 </td>
                                 <td>
@@ -187,19 +188,19 @@ $cantProveedoresConCompras = count($proveedoresDistintos);
                                     S/ <?= number_format($costo, 2) ?>
                                 </td>
                                 <td>
-                                    <strong style="color:#0284c7; font-size:0.95rem;">S/ <?= number_format($subtotal, 2) ?></strong>
+                                    <strong style="color:#0f172a; font-size:0.95rem;">S/ <?= number_format($subtotal, 2) ?></strong>
                                 </td>
                                 <td>
                                     <?php if (!empty($item['precio_venta_sugerido'])): ?>
-                                        <span style="color:#15803d; font-weight:700;">S/ <?= number_format((float)$item['precio_venta_sugerido'], 2) ?></span>
+                                        <span style="color:#334155; font-weight:700;">S/ <?= number_format((float)$item['precio_venta_sugerido'], 2) ?></span>
                                     <?php else: ?>
                                         <span style="color:#94a3b8;">--</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
                                     <?php if (!empty($item['nro_comprobante'])): ?>
-                                        <span style="background:#f1f5f9; padding:3px 8px; border-radius:6px; font-weight:700; font-size:0.78rem; color:#334155;">
-                                            <i class="fa-solid fa-file-invoice" style="margin-right:3px;"></i><?= htmlspecialchars($item['nro_comprobante']) ?>
+                                        <span style="font-weight:700; font-size:0.82rem; color:#334155;">
+                                            <?= htmlspecialchars($item['nro_comprobante']) ?>
                                         </span>
                                     <?php else: ?>
                                         <span style="color:#cbd5e1; font-size:0.80rem;">Sin comprobante</span>
@@ -336,10 +337,23 @@ $cantProveedoresConCompras = count($proveedoresDistintos);
                         <label class="comp-label required">Costo Unitario de Compra (S/)</label>
                         <input type="number" name="costo_unitario" id="compra_costo" class="comp-input" min="0.01" step="0.01" placeholder="Ej: 8.50" required oninput="calcularTotalCompra()">
                     </div>
-                    <div>
-                        <label class="comp-label">Precio de Venta al Público (S/)</label>
-                        <input type="number" name="precio_venta_sugerido" id="compra_precio_venta" class="comp-input" min="0.01" step="0.01" placeholder="Precio sugerido al cliente">
-                        <small style="color:#64748b; font-size:0.75rem;">Actual: S/ <span id="lblPrecioVentaActual">0.00</span></small>
+                    <div class="comp-col-full comp-offer-box">
+                        <label class="comp-offer-check">
+                            <input type="checkbox" name="en_oferta" id="compra_en_oferta" value="1" onchange="toggleOfertaCompra(this.checked)">
+                            <span>¿Aplicar oferta especial o descuento?</span>
+                        </label>
+                        <input type="hidden" name="actualizar_oferta" id="actualizar_oferta" value="0">
+                        <div id="compraOfertaCampos" class="comp-offer-fields comp-offer-single">
+                            <div class="comp-offer-col" id="compOfertaInicialWrap" style="display:none;">
+                                <label class="comp-label required">PRECIO INICIAL / REAL (S/)</label>
+                                <input type="number" name="precio_anterior" id="compra_precio_anterior" class="comp-input" min="0.01" step="0.01" placeholder="Ej. 20.00">
+                            </div>
+                            <div class="comp-offer-col">
+                                <label class="comp-label" id="lblPrecioVentaCompra">PRECIO VENTA (S/)</label>
+                                <input type="number" name="precio_venta_sugerido" id="compra_precio_venta" class="comp-input" min="0.01" step="0.01" placeholder="Precio sugerido al cliente">
+                                <small style="color:#64748b; font-size:0.75rem;">Actual: S/ <span id="lblPrecioVentaActual">0.00</span></small>
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <label class="comp-label">N° de Factura / Guía / Boleta</label>
@@ -382,7 +396,6 @@ $cantProveedoresConCompras = count($proveedoresDistintos);
                 </div>
             </div>
             <div class="comp-modal-footer">
-                <button type="button" class="btn" style="background:#f1f5f9; color:#475569; padding:9px 18px; border-radius:8px; border:none; cursor:pointer; font-weight:600;" onclick="cerrarModalCompra()">Cancelar</button>
                 <button type="submit" class="btn btn-primary" id="btnGuardarCompra" style="background:#15803d; color:#fff; padding:9px 20px; border-radius:8px; border:none; font-weight:700; cursor:pointer; box-shadow:0 2px 8px rgba(21,128,61,0.25);">
                     <i class="fa-solid fa-check"></i> Registrar Compra en Kardex
                 </button>
@@ -399,7 +412,9 @@ $cantProveedoresConCompras = count($proveedoresDistintos);
         document.getElementById('formCompra').reset();
         document.getElementById('lblTotalCompraCalculado').textContent = 'S/ 0.00';
         document.getElementById('productoSeleccionadoInfo').style.display = 'none';
+        document.getElementById('actualizar_oferta').value = '0';
         cambiarTipoIngreso('existente');
+        toggleOfertaCompra(false);
     }
 
     function cerrarModalCompra() {
@@ -480,11 +495,35 @@ $cantProveedoresConCompras = count($proveedoresDistintos);
         document.getElementById('lblPrecioVentaActual').textContent = precioVenta.toFixed(2);
         document.getElementById('compra_precio_venta').value = precioVenta > 0 ? precioVenta.toFixed(2) : '';
 
+        const precioAnterior = parseFloat(prod.precio_anterior || 0);
+        const tieneOferta = precioAnterior > precioVenta;
+        document.getElementById('actualizar_oferta').value = '1';
+        document.getElementById('compra_en_oferta').checked = tieneOferta;
+        document.getElementById('compra_precio_anterior').value = tieneOferta ? precioAnterior.toFixed(2) : '';
+        toggleOfertaCompra(tieneOferta);
+
         if (prod.precio_costo && parseFloat(prod.precio_costo) > 0) {
             document.getElementById('compra_costo').value = parseFloat(prod.precio_costo).toFixed(2);
         }
 
         calcularTotalCompra();
+    }
+
+    function toggleOfertaCompra(activa) {
+        const campos = document.getElementById('compraOfertaCampos');
+        const inicial = document.getElementById('compOfertaInicialWrap');
+        const precioAnterior = document.getElementById('compra_precio_anterior');
+        const precioVenta = document.getElementById('compra_precio_venta');
+        const etiqueta = document.getElementById('lblPrecioVentaCompra');
+        if (!campos || !precioAnterior || !precioVenta || !etiqueta) return;
+
+        if (inicial) inicial.style.display = activa ? 'block' : 'none';
+        campos.classList.toggle('comp-offer-double', !!activa);
+        campos.classList.toggle('comp-offer-single', !activa);
+        precioAnterior.required = activa;
+        precioVenta.required = activa;
+        etiqueta.textContent = activa ? 'Precio oferta especial (S/)' : 'Precio de venta al público (S/)';
+        if (!activa) precioAnterior.value = '';
     }
 
     function calcularTotalCompra() {
@@ -586,6 +625,15 @@ $cantProveedoresConCompras = count($proveedoresDistintos);
 
     window.addEventListener('DOMContentLoaded', () => {
         renderPaginacionCompras();
+
+        const idProdUrl = new URLSearchParams(window.location.search).get('producto');
+        if (idProdUrl) {
+            abrirModalCompra();
+            const prod = listaProductos.find(p => String(p.id_producto) === String(idProdUrl));
+            if (prod) {
+                seleccionarProductoCompra(prod);
+            }
+        }
     });
 </script>
 

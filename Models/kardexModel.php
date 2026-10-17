@@ -46,7 +46,7 @@ class KardexModel {
      * Lista movimientos con detalle de producto y usuario
      */
     public function listarMovimientos($idProducto = null, $limite = 500, $offset = 0, $fechaDesde = null, $fechaHasta = null, $orden = 'DESC') {
-        $sql = "SELECT k.*, p.nombre as producto_nombre, p.codigo, p.codigo_barras, p.unidad_medida,
+        $sql = "SELECT k.*, COALESCE(NULLIF(p.nombre, ''), p.titulo) as producto_nombre, p.codigo, p.codigo_barras, p.unidad_medida, p.imagen,
                        u.nombre as usuario_nombre, u.apellido as usuario_apellido, u.rol as usuario_rol
                 FROM kardex k
                 JOIN producto p ON k.id_producto = p.id_producto

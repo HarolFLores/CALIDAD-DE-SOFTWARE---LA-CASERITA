@@ -103,150 +103,34 @@ class ProveedorModel {
         $observacion = '',
         $descontarDeCaja = false,
         $idSesionCaja = null,
-        $datosNuevoProducto = null
+        $datosNuevoProducto = null,
+        $precioAnterior = null,
+        $actualizarOferta = false
     ) {
-        $cantidad = (int)$cantidad;
-        $costoUnit = (float)$costoUnit;
-
-        if ($cantidad <= 0 || $costoUnit <= 0) {
-            return ['ok' => false, 'mensaje' => 'Cantidad y costo unitario deben ser mayores a cero'];
-        }
-
-        try {
-            $this->conn->beginTransaction();
-
-            // Si se solicita crear nuevo producto al vuelo
-            if ($idProducto <= 0 && !empty($datosNuevoProducto['nombre'])) {
-                $nomProd = trim($datosNuevoProducto['nombre']);
-                $skuProd = trim($datosNuevoProducto['sku'] ?? ('PROD-' . rand(1000, 9999)));
-                $codBarras = !empty($datosNuevoProducto['codigo_barras']) ? trim($datosNuevoProducto['codigo_barras']) : null;
-                $precioVenta = !empty($precioSugerido) ? (float)$precioSugerido : round($costoUnit * 1.30, 2);
-                $idCat = !empty($datosNuevoProducto['id_categoria']) ? (int)$datosNuevoProducto['id_categoria'] : 1;
-
-                $sqlNewP = "INSERT INTO producto (nombre, titulo, codigo, codigo_barras, precio_costo, precio, stock, id_categoria, activo, unidad_medida, imagen)
-                            VALUES (:nom, :nom, :cod, :barras, :costo, :precio, 0, :id_cat, 1, 'UND', 'Images/productos/default.png')";
-                $stmtNewP = $this->conn->prepare($sqlNewP);
-                $stmtNewP->bindParam(':nom', $nomProd);
-                $stmtNewP->bindParam(':cod', $skuProd);
-                $stmtNewP->bindParam(':barras', $codBarras);
-                $stmtNewP->bindParam(':costo', $costoUnit);
-                $stmtNewP->bindParam(':precio', $precioVenta);
-                $stmtNewP->bindParam(':id_cat', $idCat, PDO::PARAM_INT);
-                $stmtNewP->execute();
-                $idProducto = (int)$this->conn->lastInsertId();
-            }
-
-            // 1. Obtener producto actual
-            $sqlP = "SELECT id_producto, stock, precio_costo, precio, nombre FROM producto WHERE id_producto = :id FOR UPDATE";
-            $stmtP = $this->conn->prepare($sqlP);
-            $stmtP->bindParam(':id', $idProducto, PDO::PARAM_INT);
-            $stmtP->execute();
-            $prod = $stmtP->fetch(PDO::FETCH_ASSOC);
-
-            if (!$prod) {
-                $this->conn->rollBack();
-                return ['ok' => false, 'mensaje' => 'Producto no encontrado'];
-            }
-
-            // Obtener razón social del proveedor
-            $nombreProveedor = 'Proveedor Ocasional';
-            if ($idProveedor) {
-                $prov = $this->obtenerProveedor($idProveedor);
-                if ($prov) $nombreProveedor = $prov['razon_social'];
-            }
-
-            $stockAnterior = (int)$prod['stock'];
-            $nuevoStock = $stockAnterior + $cantidad;
-
-            // 2. Registrar en reposición
-            $sqlRepo = "INSERT INTO reposicion (id_producto, id_proveedor, id_usuario, cantidad, costo_unitario, precio_venta_sugerido, proveedor, nro_comprobante, lote, fecha_vencimiento, observacion, fecha)
-                        VALUES (:id_prod, :id_prov, :id_user, :cant, :costo, :sug, :prov_nom, :comp, :lote, :venc, :obs, NOW())";
-            $stmtRepo = $this->conn->prepare($sqlRepo);
-            $stmtRepo->bindParam(':id_prod', $idProducto, PDO::PARAM_INT);
-            $stmtRepo->bindParam(':id_prov', $idProveedor, $idProveedor ? PDO::PARAM_INT : PDO::PARAM_NULL);
-            $stmtRepo->bindParam(':id_user', $idUsuario, PDO::PARAM_INT);
-            $stmtRepo->bindParam(':cant', $cantidad, PDO::PARAM_INT);
-            $stmtRepo->bindParam(':costo', $costoUnit);
-            $stmtRepo->bindParam(':sug', $precioSugerido, $precioSugerido ? PDO::PARAM_STR : PDO::PARAM_NULL);
-            $stmtRepo->bindParam(':prov_nom', $nombreProveedor);
-            $stmtRepo->bindParam(':comp', $comprobante);
-            $stmtRepo->bindParam(':lote', $lote);
-            $stmtRepo->bindParam(':venc', $vencimiento, $vencimiento ? PDO::PARAM_STR : PDO::PARAM_NULL);
-            $stmtRepo->bindParam(':obs', $observacion);
-            $stmtRepo->execute();
-            $idReposicion = $this->conn->lastInsertId();
-
-            // 3. Actualizar producto (stock y actualizar costo)
-            $sqlUpdProd = "UPDATE producto SET 
-                            stock = :stk, 
-                            precio_costo = :costo,
-                            precio = COALESCE(:nuevo_precio, precio)
-                           WHERE id_producto = :id";
-            $stmtUpdProd = $this->conn->prepare($sqlUpdProd);
-            $stmtUpdProd->bindParam(':stk', $nuevoStock, PDO::PARAM_INT);
-            $stmtUpdProd->bindParam(':costo', $costoUnit);
-            $stmtUpdProd->bindParam(':nuevo_precio', $precioSugerido, $precioSugerido ? PDO::PARAM_STR : PDO::PARAM_NULL);
-            $stmtUpdProd->bindParam(':id', $idProducto, PDO::PARAM_INT);
-            $stmtUpdProd->execute();
-
-            // 4. Actualizar inventario si existe
-            try {
-                $sqlUpdInv = "UPDATE inventario SET stock_actual = :stk WHERE id_producto = :id";
-                $stmtUpdInv = $this->conn->prepare($sqlUpdInv);
-                $stmtUpdInv->bindParam(':stk', $nuevoStock, PDO::PARAM_INT);
-                $stmtUpdInv->bindParam(':id', $idProducto, PDO::PARAM_INT);
-                $stmtUpdInv->execute();
-            } catch (Exception $eInv) {
-                // ignore
-            }
-
-            // 5. Registrar en Kardex
-            $this->kardexModel->registrarMovimiento(
-                $idProducto,
-                $idUsuario,
-                'ENTRADA',
-                'Compra Proveedor: ' . $nombreProveedor . ($comprobante ? ' (' . $comprobante . ')' : ''),
-                $cantidad,
-                $costoUnit,
-                $prod['precio'],
-                $stockAnterior,
-                $nuevoStock,
-                $idReposicion,
-                'reposicion'
-            );
-
-            // 6. Si se descuenta de caja chica
-            if ($descontarDeCaja && $idSesionCaja) {
-                $totalCompra = round($cantidad * $costoUnit, 2);
-                $sqlCaja = "INSERT INTO movimiento_caja (id_sesion, id_usuario, tipo, categoria, monto, motivo, comprobante_ref, fecha)
-                            VALUES (:id_sesion, :id_user, 'EGRESO', 'proveedor', :monto, :motivo, :comp, NOW())";
-                $stmtCaja = $this->conn->prepare($sqlCaja);
-                $motivoEgreso = "Pago Compra Proveedor: " . $nombreProveedor . " (" . $prod['nombre'] . ")";
-                $stmtCaja->bindParam(':id_sesion', $idSesionCaja, PDO::PARAM_INT);
-                $stmtCaja->bindParam(':id_user', $idUsuario, PDO::PARAM_INT);
-                $stmtCaja->bindParam(':monto', $totalCompra);
-                $stmtCaja->bindParam(':motivo', $motivoEgreso);
-                $stmtCaja->bindParam(':comp', $comprobante);
-                $stmtCaja->execute();
-
-                $this->conn->query("UPDATE sesion_caja SET total_egresos = total_egresos + {$totalCompra} WHERE id_sesion = {$idSesionCaja}");
-            }
-
-            $this->conn->commit();
-            return [
-                'ok' => true,
-                'mensaje' => 'Compra registrada con éxito. Se agregaron +' . $cantidad . ' unidades a "' . $prod['nombre'] . '" (Stock actual: ' . $nuevoStock . ')',
-                'nuevo_stock' => $nuevoStock
-            ];
-
-        } catch (Exception $e) {
-            $this->conn->rollBack();
-            return ['ok' => false, 'mensaje' => 'Error: ' . $e->getMessage()];
-        }
+        require_once __DIR__ . '/entradaMercanciaModel.php';
+        $servicio = new EntradaMercanciaModel();
+        return $servicio->registrarEntradaMercancia([
+            'id_producto' => $idProducto,
+            'id_proveedor' => $idProveedor,
+            'id_usuario' => $idUsuario,
+            'cantidad' => $cantidad,
+            'costo_unitario' => $costoUnit,
+            'precio_venta_sugerido' => $precioSugerido,
+            'nro_comprobante' => $comprobante,
+            'lote' => $lote,
+            'fecha_vencimiento' => $vencimiento,
+            'observacion' => $observacion,
+            'tipo' => 'compra',
+            'descontar_caja' => $descontarDeCaja,
+            'id_sesion_caja' => $idSesionCaja,
+            'datos_nuevo_producto' => $datosNuevoProducto,
+            'precio_anterior' => $precioAnterior,
+            'actualizar_oferta' => $actualizarOferta
+        ]);
     }
 
     public function listarReposiciones($limite = 500) {
-        $sql = "SELECT r.*, p.nombre as producto_nombre, p.codigo, p.codigo_barras,
+        $sql = "SELECT r.*, COALESCE(NULLIF(p.nombre, ''), p.titulo) as producto_nombre, p.codigo, p.codigo_barras,
                        pv.razon_social as proveedor_razon_social,
                        u.nombre as usuario_nombre, u.apellido as usuario_apellido
                 FROM reposicion r

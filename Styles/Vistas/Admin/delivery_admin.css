@@ -335,14 +335,14 @@
         }
 
         /* Diseño limpio de Estados con punto de color idéntico a Imagen 2 */
-        .status-pill {
+        html body .status-pill {
             display: inline-flex;
             align-items: center;
             gap: 7px;
             padding: 0;
             border: none;
             border-radius: 0;
-            background: transparent !important;
+            background: transparent;
             color: #0f172a;
             font-size: 0.84rem;
             font-weight: 700;
@@ -373,3 +373,87 @@
         .status-pill.entregado::before { background: #16a34a; }
         .status-pill.cancelado::before,
         .status-pill.fallido::before { background: #ef4444; }
+
+/* ===== Impresión de la Boleta (Ver detalle) ===== */
+    @media print {
+        html body * { visibility: hidden; }
+        html body #modalDetalleDeliv {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: auto;
+            background: #fff;
+            padding: 0;
+            margin: 0;
+            display: block;
+            opacity: 1;
+            pointer-events: all;
+            backdrop-filter: none;
+        }
+        html body #modalDetalleDeliv > div {
+            box-shadow: none;
+            border-radius: 0;
+            max-width: 80mm;
+            width: 80mm;
+            max-height: none;
+            margin: 0;
+            overflow: visible;
+        }
+        html body #delivTicketImprimible,
+        html body #delivTicketImprimible * {
+            visibility: visible;
+        }
+        html body #delivTicketImprimible {
+            border: none;
+            box-shadow: none;
+            padding: 0;
+            width: 80mm;
+            max-width: 80mm;
+        }
+        html body .deliv-ticket-no-print { display: none; }
+    }
+
+        /* ============================================================
+           SELECTOR DE VISTA: BANDEJA DE PEDIDOS (HU33) / DESPACHOS
+           ============================================================ */
+        .is-hidden { display: none; }
+
+        .dlv-view-switch {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 18px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 2px;
+        }
+
+        .dlv-view-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.86rem;
+            font-weight: 600;
+            color: #475569;
+            background: transparent;
+            border: none;
+            border-bottom: 2.5px solid transparent;
+            padding: 9px 14px;
+            margin-bottom: -1px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+        }
+
+        .dlv-view-btn svg { flex-shrink: 0; }
+
+        .dlv-view-btn:hover { color: #15803d; background: #f8fafc; }
+
+        .dlv-view-btn.active {
+            color: #15803d;
+            border-bottom-color: #15803d;
+        }
+
+        @media (max-width: 560px) {
+            .dlv-view-btn { font-size: 0.8rem; padding: 8px 10px; gap: 6px; }
+        }

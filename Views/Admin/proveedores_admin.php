@@ -51,7 +51,7 @@ $stats        = $stats ?? ($estadisticas ?? [
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
                     </button>
                     <div class="admin-topbar-brand">
-                        <span class="brand-title">Gestión de Proveedores & Compras</span>
+                        <span class="brand-title">Proveedores</span>
                     </div>
                 </div>
                 <div class="admin-topbar-actions">
@@ -116,7 +116,27 @@ $stats        = $stats ?? ($estadisticas ?? [
     <!-- SECCIÓN DIRECTORIO PROVEEDORES -->
     <div id="seccionProveedores" class="prov-main-card">
         <div class="prov-card-header">
-            <div class="prov-card-title">Listado de Proveedores Registrados</div>
+            <div class="prov-header-top">
+                <div class="prov-title-wrap">
+                    <span class="prov-title-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+                    </span>
+                    <div>
+                        <div class="prov-card-title">Listado de Proveedores Registrados</div>
+                        <div class="prov-card-sub">Administra tus proveedores y consulta su historial de compras</div>
+                    </div>
+                </div>
+                <div class="prov-header-actions">
+                    <button type="button" onclick="abrirModalProveedor()" class="prov-btn prov-btn-primary">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        <span>Nuevo Proveedor</span>
+                    </button>
+                    <a href="index.php?action=compras_admin" class="prov-btn prov-btn-outline">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                        <span>Compras</span>
+                    </a>
+                </div>
+            </div>
             <div class="prov-controls">
                 <div class="prov-search-wrapper">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -127,14 +147,6 @@ $stats        = $stats ?? ($estadisticas ?? [
                     <option value="activos">Solo Activos</option>
                     <option value="inactivos">Solo Inactivos</option>
                 </select>
-                <button type="button" onclick="abrirModalProveedor()" class="btn btn-primary" style="background:#15803D; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 6px rgba(21,128,61,0.22); font-size:0.85rem;">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    <span>Nuevo Proveedor</span>
-                </button>
-                <a href="index.php?action=compras_admin" class="btn btn-secondary" style="background:#0284c7; color:#fff; text-decoration:none; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 6px rgba(2,132,199,0.22); font-size:0.85rem;">
-                    <svg width="15" height="15" viewBox="0 0 640 512" fill="currentColor"><path d="M256 48c0-26.5 21.5-48 48-48L592 0c26.5 0 48 21.5 48 48l0 416c0 26.5-21.5 48-48 48l-210.7 0c1.8-5 2.7-10.4 2.7-16l0-242.7c18.6-6.6 32-24.4 32-45.3l0-32c0-26.5-21.5-48-48-48l-112 0 0-80zM571.3 347.3c6.2-6.2 6.2-16.4 0-22.6l-64-64c-6.2-6.2-16.4-6.2-22.6 0l-64 64c-6.2 6.2-6.2 16.4 0 22.6s16.4 6.2 22.6 0L480 310.6 480 432c0 8.8 7.2 16 16 16s16-7.2 16-16l0-121.4 36.7 36.7c6.2 6.2 16.4 6.2 22.6 0zM0 176c0-8.8 7.2-16 16-16l352 0c8.8 0 16 7.2 16 16l0 32c0 8.8-7.2 16-16 16L16 224c-8.8 0-16-7.2-16-16l0-32zm352 80l0 224c0 17.7-14.3 32-32 32L64 512c-17.7 0-32-14.3-32-32l0-224 320 0zM144 320c-8.8 0-16 7.2-16 16s7.2 16 16 16l96 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-96 0z"/></svg>
-                    <span>Compras</span>
-                </a>
             </div>
         </div>
 
@@ -240,7 +252,6 @@ $stats        = $stats ?? ($estadisticas ?? [
                 </div>
             </div>
             <div class="prov-modal-footer">
-                <button type="button" class="btn" style="background:#f1f5f9; color:#475569; padding:9px 18px; border-radius:8px; border:none; cursor:pointer;" onclick="cerrarModal('modalProveedor')">Cancelar</button>
                 <button type="submit" class="btn btn-primary" id="btnGuardarProv" style="background:#15803D; color:#fff; padding:9px 20px; border-radius:8px; border:none; font-weight:700; cursor:pointer;">Guardar Proveedor</button>
             </div>
         </form>
@@ -433,7 +444,6 @@ $stats        = $stats ?? ($estadisticas ?? [
                 </div>
             </div>
             <div class="prov-modal-footer">
-                <button type="button" class="btn" style="background:#f1f5f9; color:#475569; padding:9px 18px; border-radius:8px; border:none; cursor:pointer;" onclick="cerrarModal('modalCompra')">Cancelar</button>
                 <button type="submit" class="btn btn-secondary" style="background:#2563EB; color:#fff; padding:9px 20px; border-radius:8px; border:none; font-weight:700; cursor:pointer;">Procesar & Registrar Entrada</button>
             </div>
         </form>
@@ -452,7 +462,6 @@ $stats        = $stats ?? ($estadisticas ?? [
         <h3 id="confTitulo" style="margin: 0 0 8px; font-size: 1.25rem; font-weight: 800; color: #0f172a;">Inactivar proveedor</h3>
         <p id="confMensaje" style="margin: 0 0 24px; color: #64748b; font-size: 0.92rem;">¿Confirmas inactivar este proveedor?</p>
         <div style="display: flex; justify-content: center; gap: 12px;">
-            <button type="button" onclick="cerrarModal('modalConfirmacion')" style="padding: 10px 18px; border: 1px solid #cbd5e1; border-radius: 8px; background: #f8fafc; color: #475569; font-weight: 700; cursor: pointer;">Cancelar</button>
             <button type="button" id="confBtnProceder" onclick="ejecutarCambioEstadoProveedor()" style="padding: 10px 22px; border-radius: 8px; color: #ffffff; background: #dc2626; font-weight: 700; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">Inactivar</button>
         </div>
     </div>
@@ -580,19 +589,21 @@ $stats        = $stats ?? ($estadisticas ?? [
                         </td>
                         <td style="text-align: center; white-space: nowrap;"><span style="font-weight:700; color:#0f172a;">${comprasCount}</span></td>
                         <td style="text-align: right; white-space: nowrap;"><span style="font-weight:800; color:#0f172a;">S/ ${montoComp}</span></td>
-                        <td style="text-align: right; white-space: nowrap; position: relative;">
-                            <div class="table-kebab-wrapper" style="display:inline-block; position:relative; text-align:left;">
-                                <button type="button" class="table-kebab-btn" aria-label="Acciones">⋮</button>
+                        <td style="text-align: right; white-space: nowrap;">
+                            <div class="table-kebab-container">
+                                <button type="button" class="table-kebab-btn" aria-label="Acciones del proveedor" title="Opciones">
+                                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg>
+                                </button>
                                 <div class="table-kebab-menu">
-                                    <a href="index.php?action=compras_admin" class="kebab-item">
+                                    <a href="index.php?action=compras_admin" class="table-kebab-item">
                                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                                         Ver compras
                                     </a>
-                                    <button type="button" class="kebab-item" onclick='abrirModalEditarProveedor(${JSON.stringify(p)})'>
+                                    <button type="button" class="table-kebab-item" onclick='abrirModalEditarProveedor(${JSON.stringify(p)})'>
                                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                                         Editar
                                     </button>
-                                    <button type="button" class="kebab-item ${esActivo ? 'danger' : ''}" onclick="confirmarCambioEstado(${p.id_proveedor}, '${esActivo ? 'inactivar' : 'activar'}', '${p.razon_social}')">
+                                    <button type="button" class="table-kebab-item ${esActivo ? 'danger' : ''}" onclick="confirmarCambioEstado(${p.id_proveedor}, '${esActivo ? 'inactivar' : 'activar'}', '${p.razon_social}')">
                                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
                                         ${esActivo ? 'Desactivar' : 'Activar'}
                                     </button>

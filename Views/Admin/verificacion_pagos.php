@@ -55,7 +55,7 @@ foreach ($verificaciones as $v) {
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
                     </button>
                     <div class="admin-topbar-brand">
-                        <span class="brand-title">Auditoría de Pagos Digitales</span>
+                        <span class="brand-title">Auditoría de pagos</span>
                     </div>
                 </div>
                 <div class="admin-topbar-actions">
@@ -93,9 +93,6 @@ foreach ($verificaciones as $v) {
             Mensaje de confirmación.
         </p>
         <div style="display: flex; gap: 12px; justify-content: center;">
-            <button type="button" onclick="window.cerrarVerifConfirmacion()" style="padding: 10px 20px; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; font-weight: 700; font-size: 0.88rem; cursor: pointer;">
-                Cancelar
-            </button>
             <button type="button" id="btnVerifConfirmarProceder" style="padding: 10px 22px; border-radius: 8px; border: none; background: #15803d; color: #ffffff; font-weight: 700; font-size: 0.88rem; cursor: pointer; box-shadow: 0 2px 8px rgba(21,128,61,0.25);">
                 Sí, Confirmar
             </button>
@@ -103,7 +100,7 @@ foreach ($verificaciones as $v) {
     </div>
 </div>
 
-<main class="main-content container-admin" style="padding-top: 25px; padding-bottom: 50px;">
+<main class="main-content container-admin admin-fullwidth" style="padding-top: 25px; padding-bottom: 50px;">
     
 
 
@@ -169,7 +166,7 @@ foreach ($verificaciones as $v) {
 <!-- Modal Zoom Voucher Lightbox -->
 <div id="modalZoom" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 99999; justify-content: center; align-items: center; padding: 20px;" onclick="window.cerrarZoom()">
     <div style="max-width: 90%; max-height: 90%; position: relative;" onclick="event.stopPropagation()">
-        <button type="button" onclick="window.cerrarZoom()" style="position: absolute; top: -14px; right: -14px; width: 34px; height: 34px; border-radius: 50%; background: #ffffff; color: #0f172a; border: none; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">&times;</button>
+        <button type="button" class="btn-close-universal" onclick="window.cerrarZoom()" aria-label="Cerrar" style="position: absolute; top: -14px; right: -14px;">&times;</button>
         <img id="imgZoomVoucher" src="" style="max-width: 100%; max-height: 85vh; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
     </div>
 </div>
@@ -189,7 +186,6 @@ foreach ($verificaciones as $v) {
                 <textarea name="motivo_rechazo" id="txtMotivoRechazo" required rows="3" placeholder="Ej: No figura en los movimientos bancarios / Monto no coincide" style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.90rem; box-sizing: border-box; outline: none;"></textarea>
             </div>
             <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                <button type="button" onclick="window.cerrarModalRechazo()" style="padding: 9px 18px; background: #f1f5f9; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; color: #475569;">Cancelar</button>
                 <button type="submit" style="padding: 9px 20px; background: #dc2626; color: #ffffff; border: none; border-radius: 8px; font-weight: 800; cursor: pointer;">Rechazar Pago</button>
             </div>
         </form>
