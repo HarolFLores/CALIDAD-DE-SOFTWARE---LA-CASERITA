@@ -14,9 +14,9 @@ class DataBase {
         $this->driver = getenv('DB_DRIVER') ?: 'mysql';
         $this->host = getenv('DB_HOST') ?: 'db.fr-roub1.bengt.wasmernet.com';
         $this->port = getenv('DB_PORT') ?: '20184'; 
-        $this->dbname = getenv('DB_NAME') ?: 'la_Caserita';
-        $this->user = getenv('DB_USER') ?: 'user_7058c7c6';
-        $this->password = getenv('DB_PASS') !== false ? getenv('DB_PASS') : 'pw_BjPYPXyrKQprufCd7ml71BtOUgdbnLfr';
+        $this->dbname = getenv('DB_NAME') ?: 'laCaserita';
+        $this->user = getenv('DB_USER') ?: 'user_71673c9e';
+        $this->password = getenv('DB_PASS') !== false ? getenv('DB_PASS') : 'pw_nfGNN5VuTNNoRi9lmitPJbg7vkfhO61q';
     }
 
     public function getConnection() {
