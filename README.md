@@ -25,7 +25,7 @@ La Caserita cubre todo el ciclo comercial de una tienda de abarrotes/frutas:
 |--------------|-------------------------------------------------------------------------|
 | `cliente`    | Tienda, carrito, checkout, mi cuenta                                    |
 | `cajero`     | POS, caja, historial de ventas, escáner móvil                           |
-| `admin`      | Todo el panel ERP y también POS                                         |
+| `admin`      | Todo el panel                                       |
 | `repartidor` | Panel de entregas                                                       |
 
 ## Arquitectura
