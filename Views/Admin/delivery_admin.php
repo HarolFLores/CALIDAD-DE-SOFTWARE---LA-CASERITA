@@ -128,13 +128,7 @@ foreach ($envios as $env) {
 <main class="main-content container-admin" style="padding-top: 25px; padding-bottom: 50px;">
     
 
-    <!-- HEADER DE SECCIÓN EN RECUADRO UNIFICADO -->
-    <div class="admin-header">
-        <div class="admin-header-titles">
-            <h1>Logística y Despacho</h1>
-            <p>Supervisa los pedidos con despacho a domicilio, asigna motorizados y actualiza el estado de las entregas en tiempo real.</p>
-        </div>
-    </div>
+
 
     <!-- TARJETAS CUADRADAS COMPACTAS (IMAGEN 2) -->
     <div class="deliv-stats-grid">
@@ -144,35 +138,35 @@ foreach ($envios as $env) {
         </div>
         <div class="deliv-stat-card <?= $filtroActual === 'delivery' ? 'active-card' : ''; ?>" id="cardDelivTipoDelivery" onclick="window.filtrarEstadoDeliv('delivery')">
             <span class="deliv-stat-title">DELIVERY</span>
-            <span class="deliv-stat-number" id="lblDeliveryCount" style="color: #2563eb;"><?= $deliveryCount; ?></span>
+            <span class="deliv-stat-number" id="lblDeliveryCount"><?= $deliveryCount; ?></span>
         </div>
         <div class="deliv-stat-card <?= $filtroActual === 'sin_repartidor' ? 'active-card' : ''; ?>" id="cardDelivSinRepartidor" onclick="window.filtrarEstadoDeliv('sin_repartidor')">
             <span class="deliv-stat-title">SIN REPARTIDOR</span>
-            <span class="deliv-stat-number" id="lblSinRepartidorCount" style="color: #dc2626;"><?= $sinRepartidorCount; ?></span>
+            <span class="deliv-stat-number" id="lblSinRepartidorCount"><?= $sinRepartidorCount; ?></span>
         </div>
         <div class="deliv-stat-card <?= $filtroActual === 'Pendiente' ? 'active-card' : ''; ?>" id="cardDelivPend" onclick="window.filtrarEstadoDeliv('Pendiente')">
             <span class="deliv-stat-title">PENDIENTES</span>
-            <span class="deliv-stat-number" id="lblPendientesCount" style="color: #d97706;"><?= $pendientesCount; ?></span>
+            <span class="deliv-stat-number" id="lblPendientesCount"><?= $pendientesCount; ?></span>
         </div>
         <div class="deliv-stat-card <?= ($filtroActual === 'En Preparacion' || $filtroActual === 'En Preparación') ? 'active-card' : ''; ?>" id="cardDelivPrep" onclick="window.filtrarEstadoDeliv('En Preparacion')">
             <span class="deliv-stat-title">EN PREPARACIÓN</span>
-            <span class="deliv-stat-number" id="lblEnPrepCount" style="color: #6366f1;"><?= $enPrepCount; ?></span>
+            <span class="deliv-stat-number" id="lblEnPrepCount"><?= $enPrepCount; ?></span>
         </div>
         <div class="deliv-stat-card <?= ($filtroActual === 'Asignado' || $filtroActual === 'En Ruta') ? 'active-card' : ''; ?>" id="cardDelivRuta" onclick="window.filtrarEstadoDeliv('En Ruta')">
             <span class="deliv-stat-title">EN RUTA / ASIGNADOS</span>
-            <span class="deliv-stat-number" id="lblEnRutaCount" style="color: #1d4ed8;"><?= $enRutaCount; ?></span>
+            <span class="deliv-stat-number" id="lblEnRutaCount"><?= $enRutaCount; ?></span>
         </div>
         <div class="deliv-stat-card <?= $filtroActual === 'recojo' ? 'active-card' : ''; ?>" id="cardDelivRecojo" onclick="window.filtrarEstadoDeliv('recojo')">
             <span class="deliv-stat-title">RECOJO EN TIENDA</span>
-            <span class="deliv-stat-number" id="lblRecojoCount" style="color: #0891b2;"><?= $recojoCount; ?></span>
+            <span class="deliv-stat-number" id="lblRecojoCount"><?= $recojoCount; ?></span>
         </div>
         <div class="deliv-stat-card <?= $filtroActual === 'Entregado' ? 'active-card' : ''; ?>" id="cardDelivEntr" onclick="window.filtrarEstadoDeliv('Entregado')">
             <span class="deliv-stat-title">ENTREGADOS</span>
-            <span class="deliv-stat-number" id="lblEntregadosCount" style="color: #15803d;"><?= $entregadosCount; ?></span>
+            <span class="deliv-stat-number" id="lblEntregadosCount"><?= $entregadosCount; ?></span>
         </div>
         <div class="deliv-stat-card <?= $filtroActual === 'por_cobrar' ? 'active-card' : ''; ?>" id="cardDelivCobrar" onclick="window.filtrarEstadoDeliv('por_cobrar')">
             <span class="deliv-stat-title">TOTAL POR COBRAR</span>
-            <span class="deliv-stat-number" id="lblTotalPorCobrar" style="font-size: 1.15rem; color: #0f172a;">S/ <?= number_format($totalPorCobrar, 2); ?></span>
+            <span class="deliv-stat-number" id="lblTotalPorCobrar" style="font-size: 1.15rem;"><?= 'S/ ' . number_format($totalPorCobrar, 2); ?></span>
         </div>
     </div>
 
@@ -187,6 +181,9 @@ foreach ($envios as $env) {
                     <option value="recojo">Solo Recojo en Tienda</option>
                 </select>
                 <input type="text" id="busquedaDelivInput" class="deliv-search-input" placeholder="Buscar por pedido, cliente o dirección..." oninput="window.filtrarDeliveryEnVivo()">
+                <button type="button" class="btn-limpiar-filtros" onclick="window.limpiarFiltrosDeliv()" title="Restablecer filtros">
+                    Limpiar
+                </button>
             </div>
         </div>
 
@@ -494,6 +491,15 @@ foreach ($envios as $env) {
         busquedaTexto = (document.getElementById('busquedaDelivInput')?.value || '').toLowerCase().trim();
         paginaActual = 1;
         renderizarTabla();
+    };
+
+    window.limpiarFiltrosDeliv = function() {
+        const selTipo = document.getElementById('filtroTipoSelect');
+        if (selTipo) selTipo.value = 'todos';
+        const inpBusq = document.getElementById('busquedaDelivInput');
+        if (inpBusq) inpBusq.value = '';
+        busquedaTexto = '';
+        window.filtrarEstadoDeliv('todos');
     };
 
     function renderizarTabla() {

@@ -579,6 +579,7 @@ class PedidoModel{
     {
         $sql = "SELECT
                     p.id_pedido,
+                    p.canal,
                     p.total,
                     p.estado,
                     p.tipo_entrega,

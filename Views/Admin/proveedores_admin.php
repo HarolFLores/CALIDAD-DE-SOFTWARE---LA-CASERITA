@@ -65,27 +65,6 @@ $stats        = $stats ?? ($estadisticas ?? [
 
 
 <main class="proveedores-view-wrapper">
-    <!-- Header Principal en Recuadro Unificado -->
-    <div class="admin-header">
-        <div class="admin-header-titles">
-            <h1 style="display:flex; align-items:center; gap:10px;">
-                <i class="fa-solid fa-handshake" style="color:#15803D;"></i>
-                Directorio de Proveedores
-            </h1>
-            <p>Catálogo maestro de empresas proveedoras, datos fiscales (RUC), contactos y acuerdos comerciales.</p>
-        </div>
-        <div class="admin-header-actions prov-header-actions" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-            <button type="button" onclick="abrirModalProveedor()" class="btn btn-primary" style="background:#15803D; color:#fff; border:none; padding:10px 18px; border-radius:10px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 12px rgba(21,128,61,0.22); transition:all 0.2s ease;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                <span>Nuevo Proveedor</span>
-            </button>
-            <a href="index.php?action=compras_admin" class="btn btn-secondary" style="background:#0284c7; color:#fff; text-decoration:none; padding:10px 18px; border-radius:10px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 12px rgba(2,132,199,0.22); transition:all 0.2s ease;">
-                <svg width="18" height="18" viewBox="0 0 640 512" fill="currentColor"><path d="M256 48c0-26.5 21.5-48 48-48L592 0c26.5 0 48 21.5 48 48l0 416c0 26.5-21.5 48-48 48l-210.7 0c1.8-5 2.7-10.4 2.7-16l0-242.7c18.6-6.6 32-24.4 32-45.3l0-32c0-26.5-21.5-48-48-48l-112 0 0-80zM571.3 347.3c6.2-6.2 6.2-16.4 0-22.6l-64-64c-6.2-6.2-16.4-6.2-22.6 0l-64 64c-6.2 6.2-6.2 16.4 0 22.6s16.4 6.2 22.6 0L480 310.6 480 432c0 8.8 7.2 16 16 16s16-7.2 16-16l0-121.4 36.7 36.7c6.2 6.2 16.4 6.2 22.6 0zM0 176c0-8.8 7.2-16 16-16l352 0c8.8 0 16 7.2 16 16l0 32c0 8.8-7.2 16-16 16L16 224c-8.8 0-16-7.2-16-16l0-32zm352 80l0 224c0 17.7-14.3 32-32 32L64 512c-17.7 0-32-14.3-32-32l0-224 320 0zM144 320c-8.8 0-16 7.2-16 16s7.2 16 16 16l96 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-96 0z"/></svg>
-                <span>Ir a Compras & Reposición</span>
-            </a>
-        </div>
-    </div>
-
     <?php if ($flash_success || $flash_error): 
         $esError = !empty($flash_error);
         $msgFlash = $flash_error ?: $flash_success;
@@ -148,6 +127,14 @@ $stats        = $stats ?? ($estadisticas ?? [
                     <option value="activos">Solo Activos</option>
                     <option value="inactivos">Solo Inactivos</option>
                 </select>
+                <button type="button" onclick="abrirModalProveedor()" class="btn btn-primary" style="background:#15803D; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 6px rgba(21,128,61,0.22); font-size:0.85rem;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <span>Nuevo Proveedor</span>
+                </button>
+                <a href="index.php?action=compras_admin" class="btn btn-secondary" style="background:#0284c7; color:#fff; text-decoration:none; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 6px rgba(2,132,199,0.22); font-size:0.85rem;">
+                    <svg width="15" height="15" viewBox="0 0 640 512" fill="currentColor"><path d="M256 48c0-26.5 21.5-48 48-48L592 0c26.5 0 48 21.5 48 48l0 416c0 26.5-21.5 48-48 48l-210.7 0c1.8-5 2.7-10.4 2.7-16l0-242.7c18.6-6.6 32-24.4 32-45.3l0-32c0-26.5-21.5-48-48-48l-112 0 0-80zM571.3 347.3c6.2-6.2 6.2-16.4 0-22.6l-64-64c-6.2-6.2-16.4-6.2-22.6 0l-64 64c-6.2 6.2-6.2 16.4 0 22.6s16.4 6.2 22.6 0L480 310.6 480 432c0 8.8 7.2 16 16 16s16-7.2 16-16l0-121.4 36.7 36.7c6.2 6.2 16.4 6.2 22.6 0zM0 176c0-8.8 7.2-16 16-16l352 0c8.8 0 16 7.2 16 16l0 32c0 8.8-7.2 16-16 16L16 224c-8.8 0-16-7.2-16-16l0-32zm352 80l0 224c0 17.7-14.3 32-32 32L64 512c-17.7 0-32-14.3-32-32l0-224 320 0zM144 320c-8.8 0-16 7.2-16 16s7.2 16 16 16l96 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-96 0z"/></svg>
+                    <span>Compras</span>
+                </a>
             </div>
         </div>
 

@@ -28,7 +28,7 @@ $adminInicial = strtoupper(substr($adminNombre, 0, 1));
     </div>
     <!-- Brand Desktop -->
     <a href="index.php?action=dashboard_ganancias" class="sidebar-brand hide-on-mobile">
-        <img src="Images/logo_backup.png" alt="Logo" class="sidebar-brand-img">
+        <img src="Images/logo_backup.png" alt="La Caserita" class="sidebar-brand-img">
         <div class="sidebar-brand-text">
             <span>La Caserita</span>
         </div>

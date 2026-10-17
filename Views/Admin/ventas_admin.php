@@ -116,14 +116,7 @@
 
 
 
-    <main class="main-content container-admin" style="padding-top: 15px; padding-bottom: 50px;">
-        
-        <div class="admin-header" style="margin-bottom: 20px;">
-            <div class="admin-header-titles">
-                <h1 style="font-size: 1.6rem; font-weight: 800; color: #0f172a; margin: 0;">Ventas</h1>
-                <p style="margin: 4px 0 0; color: #64748b; font-size: 0.90rem;">Gestiona los pedidos realizados por los clientes.</p>
-            </div>
-        </div>
+    <main class="main-content container-admin ventas-admin-content">
 
         <!-- Tarjetas pequeñas sin icono (interactivas) -->
         <div class="stats-grid-square" id="vaStatsGrid">
@@ -170,6 +163,11 @@
                         <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                         <input type="text" id="vaSearch" placeholder="Buscar por N° pedido o cliente...">
                     </div>
+                    <select id="vaFiltroCanal" class="va-filter-select" aria-label="Filtrar por canal de venta">
+                        <option value="">Todos los canales</option>
+                        <option value="WEB">Venta Web</option>
+                        <option value="POS">Venta POS</option>
+                    </select>
                     <select id="vaFiltroEstado" class="va-filter-select" aria-label="Filtrar por estado">
                         <option value="">Todos los estados</option>
                         <option value="pendiente">Pendiente</option>
@@ -185,6 +183,9 @@
                         <option value="recojo">Recojo en tienda</option>
                     </select>
                     <input type="date" id="vaFiltroFecha" class="va-filter-date" title="Filtrar por fecha">
+                    <button type="button" id="vaBtnLimpiar" class="btn-limpiar-filtros" title="Restablecer filtros">
+                        Limpiar
+                    </button>
                 </div>
             </div>
 
@@ -199,6 +200,7 @@
                     <thead>
                         <tr>
                             <th>N° PEDIDO</th>
+                            <th style="text-align: center;">CANAL</th>
                             <th>CLIENTE</th>
                             <th>CORREO</th>
                             <th>T. ENTREGA</th>
@@ -214,16 +216,19 @@
                             <?php
                                 $idPed         = (int)$v['id_pedido'];
                                 $padId         = str_pad($idPed, 5, '0', STR_PAD_LEFT);
+                                $canalPed      = strtoupper(trim((string)($v['canal'] ?? 'WEB')));
+                                if ($canalPed !== 'POS') $canalPed = 'WEB';
                                 $nombreCliente = trim(($v['usuario_nombre'] ?? '') . ' ' . ($v['usuario_apellido'] ?? '')) ?: 'Sin nombre';
                                 $correoCliente = trim($v['usuario_correo'] ?? '');
                                 $fechaRaw      = !empty($v['fecha']) ? date('Y-m-d', strtotime($v['fecha'])) : '';
                                 $estadoCod     = normalizarEstadoCod($v['estado'] ?? '');
                                 $entregaCod    = normalizarEntregaCod($v['tipo_entrega'] ?? '');
                                 $stInfo        = estadoInfoAdmin($v['estado'] ?? '');
-                                $busqTexto     = strtolower("#{$padId} {$idPed} " . ($v['codigo_pedido'] ?? '') . " {$nombreCliente} {$correoCliente} {$entregaCod} " . ($v['metodo_pago'] ?? ''));
+                                $busqTexto     = strtolower("#{$padId} {$idPed} {$canalPed} " . ($v['codigo_pedido'] ?? '') . " {$nombreCliente} {$correoCliente} {$entregaCod} " . ($v['metodo_pago'] ?? ''));
                             ?>
                             <tr class="va-row"
                                 data-id="<?= $idPed; ?>"
+                                data-canal="<?= $canalPed; ?>"
                                 data-estado="<?= $estadoCod; ?>"
                                 data-entrega="<?= $entregaCod; ?>"
                                 data-fecha="<?= $fechaRaw; ?>"
@@ -231,6 +236,9 @@
                                 <!-- Columna N° Pedido: SOLO el número de pedido -->
                                 <td style="font-weight: 800; font-size: 0.80rem; white-space: nowrap;">
                                     #<?= $padId; ?>
+                                </td>
+                                <td style="text-align: center; white-space: nowrap;">
+                                    <span class="canal-text" title="<?= $canalPed === 'POS' ? 'Venta Mostrador POS' : 'Venta Tienda Web'; ?>"><?= $canalPed; ?></span>
                                 </td>
                                 <td style="font-weight: 700; color: #334155; font-size: 0.82rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="<?= htmlspecialchars($nombreCliente, ENT_QUOTES, 'UTF-8'); ?>">
                                     <?= htmlspecialchars($nombreCliente, ENT_QUOTES, 'UTF-8'); ?>

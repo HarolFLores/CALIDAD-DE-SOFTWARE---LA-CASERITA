@@ -106,13 +106,7 @@ foreach ($verificaciones as $v) {
 <main class="main-content container-admin" style="padding-top: 25px; padding-bottom: 50px;">
     
 
-    <!-- HEADER DE SECCIÓN EN RECUADRO UNIFICADO -->
-    <div class="admin-header">
-        <div class="admin-header-titles">
-            <h1>Auditoría de Pagos Digitales</h1>
-            <p>Reporte de auditoría de transacciones y estados de pago emitidos automáticamente por el sistema para los clientes.</p>
-        </div>
-    </div>
+
 
     <!-- TARJETAS DE ESTADÍSTICAS -->
     <div class="verif-stats-grid">
@@ -122,19 +116,19 @@ foreach ($verificaciones as $v) {
         </div>
         <div class="verif-stat-card <?= $filtro === 'Pendiente' ? 'active-card' : ''; ?>" id="cardVerifPend" onclick="window.filtrarEstadoVerif('Pendiente')">
             <span class="verif-stat-title">PENDIENTES</span>
-            <span class="verif-stat-number" id="lblPendientesCount" style="color: #d97706;"><?= $pendientesCount; ?></span>
+            <span class="verif-stat-number" id="lblPendientesCount"><?= $pendientesCount; ?></span>
         </div>
         <div class="verif-stat-card <?= $filtro === 'Aprobado' ? 'active-card' : ''; ?>" id="cardVerifAprob" onclick="window.filtrarEstadoVerif('Aprobado')">
             <span class="verif-stat-title">APROBADOS</span>
-            <span class="verif-stat-number" id="lblAprobadosCount" style="color: #15803d;"><?= $aprobadosCount; ?></span>
+            <span class="verif-stat-number" id="lblAprobadosCount"><?= $aprobadosCount; ?></span>
         </div>
         <div class="verif-stat-card <?= $filtro === 'Rechazado' ? 'active-card' : ''; ?>" id="cardVerifRech" onclick="window.filtrarEstadoVerif('Rechazado')">
             <span class="verif-stat-title">RECHAZADOS</span>
-            <span class="verif-stat-number" id="lblRechazadosCount" style="color: #dc2626;"><?= $rechazadosCount; ?></span>
+            <span class="verif-stat-number" id="lblRechazadosCount"><?= $rechazadosCount; ?></span>
         </div>
         <div class="verif-stat-card" onclick="window.filtrarEstadoVerif('Aprobado')">
             <span class="verif-stat-title">MONTO APROBADO</span>
-            <span class="verif-stat-number" id="lblMontoAprobado" style="font-size: 1.15rem; color: #15803d;">S/ <?= number_format($montoAprobado, 2); ?></span>
+            <span class="verif-stat-number" id="lblMontoAprobado" style="font-size: 1.15rem;">S/ <?= number_format($montoAprobado, 2); ?></span>
         </div>
     </div>
 
@@ -155,11 +149,10 @@ foreach ($verificaciones as $v) {
                         <th>PEDIDO</th>
                         <th>CLIENTE</th>
                         <th>MÉTODO</th>
-                        <th>CÓD. OPERACIÓN / OTP</th>
+                        <th>CÓD. OPERACIÓN</th>
                         <th>TELÉFONO EMISOR</th>
                         <th style="text-align: right;">MONTO</th>
-                        <th style="text-align: center;">ESTADO SISTEMA</th>
-                        <th>CANAL / AUDITORÍA</th>
+                        <th style="text-align: center;">ESTADO</th>
                     </tr>
                 </thead>
                 <tbody id="tbodyVerif">
@@ -450,55 +443,45 @@ foreach ($verificaciones as $v) {
         const paginaItems = filtrados.slice(inicio, fin);
 
         if (paginaItems.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:36px; color:#94a3b8;">No se encontraron comprobantes con el filtro aplicado.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:36px; color:#94a3b8;">No se encontraron comprobantes con el filtro aplicado.</td></tr>';
         } else {
             tbody.innerHTML = paginaItems.map(v => {
-                const esPend = (v.estado_verificacion || 'Pendiente') === 'Pendiente';
                 const estLower = (v.estado_verificacion || 'Pendiente').toLowerCase();
-                const esYape = (v.metodo_nombre || '').toLowerCase().includes('yape');
-                const colorMet = esYape ? '#7c3aed' : '#0284c7';
-                const bgMet = esYape ? '#f5f3ff' : '#f0f9ff';
                 const nroPed = v.codigo_pedido || ('#' + String(v.id_pedido).padStart(5, '0'));
                 const fecha = v.fecha_envio ? new Date(v.fecha_envio).toLocaleString('es-PE', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
 
                 return `
                     <tr>
-                        <td style="color:#64748b; font-size:0.82rem; white-space:nowrap;">${fecha}</td>
+                        <td style="color:#64748b; font-size:0.80rem; white-space:nowrap;">${fecha}</td>
                         <td>
-                            <strong style="color:#0f172a; font-weight:800;">${nroPed}</strong>
-                            <div style="font-size:0.75rem; color:#64748b;">Total: S/ ${parseFloat(v.pedido_total || 0).toFixed(2)}</div>
+                            <div style="color:#0f172a; font-weight:800; font-size:0.84rem;">${nroPed}</div>
+                            <div style="font-size:0.74rem; color:#64748b;">Total: S/ ${parseFloat(v.pedido_total || 0).toFixed(2)}</div>
                         </td>
                         <td>
-                            <div style="font-weight:700; color:#0f172a;">${(v.cliente_nombre || '')} ${(v.cliente_apellido || '')}</div>
-                            <small style="color:#64748b; font-size:0.75rem;">${v.cliente_correo || '—'}</small>
+                            <div style="font-weight:700; color:#0f172a; font-size:0.84rem;">${(v.cliente_nombre || '')} ${(v.cliente_apellido || '')}</div>
+                            <small style="color:#64748b; font-size:0.74rem;">${v.cliente_correo || '—'}</small>
                         </td>
                         <td>
-                            <span style="background:${bgMet}; color:${colorMet}; padding:3px 8px; border-radius:6px; font-weight:800; font-size:0.78rem;">
+                            <div style="font-weight:700; color:#334155; font-size:0.80rem;" title="${v.metodo_nombre || 'Billetera'}">
                                 ${v.metodo_nombre || 'Billetera'}
+                            </div>
+                        </td>
+                        <td>
+                            <span style="font-size:0.84rem; font-weight:700; color:#0f172a;">
+                                ${v.codigo_operacion || 'S/N'}
                             </span>
                         </td>
                         <td>
-                            <code style="font-size:0.88rem; font-weight:800; color:#0f172a; background:#f1f5f9; padding:2px 6px; border-radius:4px;">
-                                ${v.codigo_operacion || 'S/N'}
-                            </code>
-                        </td>
-                        <td>
-                            <span style="font-weight:600; color:#334155; font-size:0.85rem;">${v.celular_remitente || '—'}</span>
+                            <span style="font-weight:600; color:#334155; font-size:0.82rem;">${v.celular_remitente || '—'}</span>
                             ${v.titular_origen ? `<div style="font-size:0.72rem; color:#64748b;">Titular: ${v.titular_origen}</div>` : ''}
                         </td>
-                        <td style="text-align:right; font-weight:800; font-size:1.02rem; color:#0f172a;">
+                        <td style="text-align:right; font-weight:800; font-size:0.92rem; color:#0f172a; white-space:nowrap;">
                             S/ ${parseFloat(v.monto_reportado || 0).toFixed(2)}
                         </td>
                         <td style="text-align:center;">
                             <span class="status-pill ${estLower}">
                                 ${v.estado_verificacion || 'Pendiente'}
                             </span>
-                        </td>
-                        <td>
-                            <span style="font-size:0.82rem; font-weight:700; color:#334155; display:block;">
-                                ${v.canal_pasarela || 'Pasarela Digital'}
-                            </span>
-                            <small style="color:#64748b; font-size:0.74rem;">Auditado por ${v.verificador_nombre || 'Sistema'}</small>
                         </td>
                     </tr>
                 `;

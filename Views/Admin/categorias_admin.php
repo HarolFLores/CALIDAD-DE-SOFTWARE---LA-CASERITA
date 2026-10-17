@@ -83,22 +83,7 @@ if (!empty($categorias_bd)) {
 <div class="categorias-admin-wrapper" style="padding:26px 24px;min-height:calc(100vh - 75px);">
 
 
-<div class="admin-header">
-    <div class="admin-header-titles">
-        <h1 id="mainTitleAdmin">Gestión de Categorías</h1>
-        <p>Organiza las categorías maestras, subcategorías y clasificación del catálogo de productos.</p>
-    </div>
-    <div class="admin-header-actions" style="display:flex;gap:10px;flex-wrap:wrap;">
-        <button type="button" id="btnNuevoGrupo" onclick="window.abrirModalGrupo()" style="background:#15803d;color:#fff;border:none;font-weight:700;padding:10px 18px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(21,128,61,.25);transition:all .2s ease;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            <span>Nueva Categoría</span>
-        </button>
-        <button type="button" id="btnNuevaCategoria" onclick="window.abrirModalCategoria()" style="background:#0284c7;color:#fff;border:none;font-weight:700;padding:10px 18px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(2,132,199,.25);transition:all .2s ease;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            <span>Nueva Subcategoría</span>
-        </button>
-    </div>
-</div>
+
 
 <?php if ($flash_success || $flash_error || in_array($avisoAccion, ['estado_actualizado', 'estado_error'], true)): 
     $esError = ($flash_error || $avisoAccion === 'estado_error');
@@ -233,7 +218,13 @@ if (!empty($categorias_bd)) {
 <div id="tabViewCategorias" style="display:none;background:#fff;border-radius:14px;border:1px solid #e2e8f0;box-shadow:0 4px 12px rgba(0,0,0,.03);overflow:hidden;margin-bottom:30px;">
 <div style="padding:18px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f1f5f9;flex-wrap:wrap;gap:14px;">
 <div><h3 style="margin:0;font-size:1.15rem;font-weight:800;color:#0f172a;">Listado de Categorias (Nivel 2)</h3><p style="margin:3px 0 0;font-size:.82rem;color:#64748b;">Categorias que agrupan los productos bajo cada macrocategoria.</p></div>
-<input type="text" id="filtroGrupos" onkeyup="window.filtrarTabla('tablaGrupos','filtroGrupos',2)" placeholder="Buscar categoria..." style="padding:8px 14px;border:1px solid #cbd5e1;border-radius:8px;font-size:.88rem;min-width:240px;">
+<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <input type="text" id="filtroGrupos" onkeyup="window.filtrarTabla('tablaGrupos','filtroGrupos',2)" placeholder="Buscar categoria..." style="padding:8px 14px;border:1px solid #cbd5e1;border-radius:8px;font-size:.88rem;min-width:220px;">
+    <button type="button" id="btnNuevoGrupo" onclick="window.abrirModalGrupo()" style="background:#15803d;color:#fff;border:none;font-weight:700;padding:8px 14px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:0.85rem;box-shadow:0 2px 6px rgba(21,128,61,.2);transition:all .2s ease;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <span>Nueva Categoría</span>
+    </button>
+</div>
 </div>
 <div style="overflow-x:auto;">
 <table style="width:100%;border-collapse:collapse;text-align:left;" id="tablaGrupos">
@@ -300,7 +291,17 @@ if (!empty($categorias_bd)) {
 <div id="tabViewSubcategorias" style="background:#fff;border-radius:14px;border:1px solid #e2e8f0;box-shadow:0 4px 12px rgba(0,0,0,.03);overflow:hidden;margin-bottom:30px;">
 <div style="padding:18px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f1f5f9;flex-wrap:wrap;gap:14px;">
 <div><h3 style="margin:0;font-size:1.15rem;font-weight:800;color:#0f172a;">Listado de Subcategorias (Nivel 3)</h3><p style="margin:3px 0 0;font-size:.82rem;color:#64748b;">Subcategorias de productos asociadas a una Categoria y Macrocategoria.</p></div>
-<input type="text" id="filtroCategorias" onkeyup="window.filtrarTabla('tablaCategorias','filtroCategorias',2)" placeholder="Buscar subcategoria..." style="padding:8px 14px;border:1px solid #cbd5e1;border-radius:8px;font-size:.88rem;min-width:240px;">
+<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <input type="text" id="filtroCategorias" onkeyup="window.filtrarTabla('tablaCategorias','filtroCategorias',2)" placeholder="Buscar subcategoria..." style="padding:8px 14px;border:1px solid #cbd5e1;border-radius:8px;font-size:.88rem;min-width:220px;">
+    <button type="button" id="btnNuevaCategoria" onclick="window.abrirModalCategoria()" style="background:#0284c7;color:#fff;border:none;font-weight:700;padding:8px 14px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:0.85rem;box-shadow:0 2px 6px rgba(2,132,199,.2);transition:all .2s ease;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <span>Nueva Subcategoría</span>
+    </button>
+    <button type="button" onclick="window.abrirModalGrupo()" style="background:#15803d;color:#fff;border:none;font-weight:700;padding:8px 14px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:0.85rem;box-shadow:0 2px 6px rgba(21,128,61,.2);transition:all .2s ease;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <span>Nueva Categoría</span>
+    </button>
+</div>
 </div>
 <div style="overflow-x:auto;">
 <table style="width:100%;border-collapse:collapse;text-align:left;" id="tablaCategorias">
