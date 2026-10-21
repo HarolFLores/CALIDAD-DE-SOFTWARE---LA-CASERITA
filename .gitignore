@@ -1,7 +1,9 @@
 # Entorno y secretos
 .env
+.env.wasmer
 .env.*
 !.env.example
+.vscode/
 
 # Respaldos y artefactos de agentes
 /backups/
