@@ -84,6 +84,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="Scripts/admin-spa.js?v=<?= time(); ?>" defer></script>
+    <script src="Scripts/pagination.js?v=<?= time(); ?>"></script>
 <link rel="stylesheet" href="Styles/Vistas/Admin/ventas_admin.css?v=<?= filemtime(__DIR__ . '/../../Styles/Vistas/Admin/ventas_admin.css'); ?>">
 </head>
 <body>
@@ -312,10 +313,8 @@
                 <?php endif; ?>
             </div>
 
-            <!-- Paginación estilo Imagen 3 -->
-            <div style="display: flex; align-items: center; justify-content: center; padding: 14px 20px; border-top: 1px solid #e2e8f0; background: #fff;" id="vaPaginationControls">
-                <div style="display: flex; align-items: center; gap: 6px;" id="vaPaginationList"></div>
-            </div>
+            <!-- Paginación unificada -->
+            <div class="pg-footer" id="vaPaginationControls"></div>
         </section>
     </main>
 

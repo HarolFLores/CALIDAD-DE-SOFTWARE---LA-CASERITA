@@ -6,6 +6,11 @@
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     }
     $csrf_token = $_SESSION['csrf_token'];
+    $apisConfig = [];
+    if (is_file(__DIR__ . '/../../Config/apis.php')) {
+        $apisConfig = require __DIR__ . '/../../Config/apis.php';
+    }
+    $googleClientId = $apisConfig['google']['client_id'] ?? '';
 ?>
 
 <!DOCTYPE html>
@@ -41,7 +46,7 @@
                 <!-- Botón Oficial de Google Sign-In -->
                 <div style="margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; width: 100%;">
                     <div id="g_id_onload"
-                         data-client_id="1026978247159-p7mer3bmdjm52dkji27b02ucbk5cdo6o.apps.googleusercontent.com"
+                         data-client_id="<?= htmlspecialchars($googleClientId, ENT_QUOTES, 'UTF-8') ?>"
                          data-callback="handleGoogleCredentialResponse"
                          data-auto_prompt="false">
                     </div>

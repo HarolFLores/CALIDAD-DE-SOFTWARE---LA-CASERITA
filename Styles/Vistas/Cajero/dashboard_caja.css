@@ -36,7 +36,7 @@
         .cashier-session-banner p{margin:0;color:#68776f;font-size:.84rem}
         .cashier-expected{text-align:right}
         .cashier-expected span{display:block;color:#718078;font-size:.66rem;font-weight:850;letter-spacing:.04em}
-        .cashier-expected strong{display:block;margin-top:4px;color:#15803d;font-size:1.7rem}
+        .cashier-expected strong{display:block;margin-top:4px;color:#0f172a;font-size:1.7rem}
 
         .cashier-closed-banner{display:flex;align-items:center;gap:18px;padding:20px;background:#ffffff;border:1px solid #fecaca;border-radius:10px;margin-bottom:20px}
         .closed-banner-icon{width:48px;height:48px;border-radius:50%;background:#fee2e2;color:#dc2626;display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0}
@@ -92,15 +92,8 @@
         .cashier-table-scroll td{padding:12px 16px;border-top:1px solid #edf2ee;color:#334155;font-size:.82rem}
         .cashier-align-right{text-align:right}
         .cashier-no-data{text-align:center;padding:28px;color:#78877f}
-        .badge-metodo{padding:3px 8px;border-radius:4px;background:#f1f5f9;color:#475569;font-size:0.72rem;font-weight:700}
-
-        /* ACCIONES (Estilo de la imagen de referencia) */
-        .btn-action-history{width:34px;height:34px;border:none;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;color:#ffffff;cursor:pointer;transition:transform .15s ease, background .2s ease;box-shadow:0 2px 4px rgba(0,0,0,0.08)}
-        .btn-action-history:hover{transform:translateY(-1px);box-shadow:0 4px 8px rgba(0,0,0,0.12)}
-        .btn-action-history.btn-preview{background:#0284c7}
-        .btn-action-history.btn-preview:hover{background:#0369a1}
-        .btn-action-history.btn-print{background:#15803d}
-        .btn-action-history.btn-print:hover{background:#166534}
+        .badge-metodo{padding:0;background:transparent;color:#334155;font-size:0.82rem;font-weight:500}
+        .cashier-sale-total{font-weight:800;color:#0f172a}
 
         /* MODAL PREVISUALIZACIÓN DE TICKET */
         .ticket-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.65);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px}
@@ -132,6 +125,20 @@
         .btn-ticket-print:hover{background:#166534}
         .btn-ticket-close{padding:0 16px;min-height:40px;background:#f1f5f9;color:#475569;border:none;border-radius:8px;font-weight:700;font-size:0.85rem;cursor:pointer}
         .btn-ticket-close:hover{background:#e2e8f0;color:#0f172a}
+
+        /* Alerta de stock bajo */
+        .cashier-stock-alert{border-color:#fed7aa;margin-bottom:24px}
+        .cashier-stock-alert .panel-header{margin-bottom:12px}
+        .stock-alert-icon{color:#b45309}
+        .stock-alert-link{font-size:0.78rem;font-weight:700;color:#15803d;text-decoration:none}
+        .stock-alert-link:hover{color:#166534;text-decoration:underline}
+        .stock-alert-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+        .stock-alert-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px}
+        .stock-alert-name{font-size:0.82rem;font-weight:600;color:#0f172a;line-height:1.3}
+        .stock-alert-qty{font-size:0.78rem;font-weight:800;white-space:nowrap;color:#b45309;text-align:right}
+        .stock-alert-qty small{display:block;font-size:0.66rem;font-weight:600;color:#92400e}
+        .stock-alert-qty.is-out{color:#b91c1c}
+        .stock-alert-more{grid-column:1 / -1;margin:2px 0 0;font-size:0.78rem;color:#64748b}
 
         /* ESTILOS DE IMPRESIÓN LIMPIOS */
         @media print {
@@ -170,6 +177,7 @@
             .cashier-closed-banner,
             .cashier-kpis-grid,
             .cashier-dashboard-row,
+            .cashier-stock-alert,
             .cashier-movements-panel,
             .ticket-no-print {
                 display: none;
@@ -214,4 +222,5 @@
             .cashier-expected{text-align:left}
             .cashier-closed-banner{flex-direction:column;align-items:flex-start}
             .btn-goto-arqueo{margin-left:0}
+            .stock-alert-list{grid-template-columns:1fr}
         }

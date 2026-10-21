@@ -426,6 +426,23 @@ class ControllerUserAdmin {
         $lockTime = $_SESSION['password_lock_until_admin'] ?? 0;
         $remainingLock = max(0, $lockTime - time());
 
+        $mpRolLabel = 'Administrador';
+        $mpPerfilAction = 'actualizar_perfil_admin';
+        $mpPasswordAction = 'cambiar_password_admin';
+        $mpVerifyAction = 'verificar_password_actual_admin';
+
+        $fechaLabel = '—';
+        if (!empty($usuario['fecha_registro'])) {
+            $ts = strtotime($usuario['fecha_registro']);
+            if ($ts !== false) $fechaLabel = date('d/m/Y', $ts);
+        }
+        $activoCuenta = (int)($usuario['activo'] ?? 0) === 1;
+
+        $mpStats = [
+            ['label' => 'Miembro desde', 'value' => $fechaLabel, 'icon' => 'calendar', 'tone' => 'teal'],
+            ['label' => 'Estado de cuenta', 'value' => $activoCuenta ? 'Activo' : 'Inactivo', 'icon' => $activoCuenta ? 'checkCircle' : 'alert', 'tone' => $activoCuenta ? 'green' : 'red'],
+        ];
+
         include 'Views/Usuarios/mi_perfil_admin.php';
     }
 

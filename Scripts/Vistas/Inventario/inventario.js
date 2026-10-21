@@ -281,7 +281,7 @@ window.previewImgModal = function(input, imgId, labelId) {
                 return;
             }
 
-            const headers = ['Producto', 'SKU', 'Código de barras', 'Precio compra', 'Precio venta', 'Stock actual', 'Stock mínimo', 'Ubicación', 'Estado', 'Última actualización'];
+            const headers = ['Producto', 'SKU', 'Código de barras', 'Precio compra', 'Precio venta', 'Stock actual', 'Stock mínimo', 'Estado', 'Última actualización'];
             const esc = function(v) {
                 return '"' + String(v == null ? '' : v).replace(/\s+/g, ' ').replace(/"/g, '""').trim() + '"';
             };
@@ -299,8 +299,7 @@ window.previewImgModal = function(input, imgId, labelId) {
                     r.dataset.stock || '',
                     r.dataset.stockmin || '',
                     cell(5),
-                    cell(6),
-                    cell(7)
+                    cell(6)
                 ].map(esc).join(';'));
             });
 
@@ -334,7 +333,6 @@ window.previewImgModal = function(input, imgId, labelId) {
             setVal('editProdUnidad', item.unidad_medida || 'UND');
             setVal('editProdStock', parseFloat(item.stock_actual !== undefined ? item.stock_actual : (item.stock || 0)));
             setVal('editProdStockMinimo', parseFloat(item.stock_minimo || 5));
-            setVal('editProdUbicacion', item.ubicacion || '');
             setVal('editProdDescripcion', item.descripcion || '');
             setVal('editProdImagenActual', item.imagen || '');
             setVal('editProdImagenUrl', item.imagen || '');
@@ -437,7 +435,7 @@ window.previewImgModal = function(input, imgId, labelId) {
             const searchInput = document.getElementById('searchInventario');
             const selectOrden = document.getElementById('selectOrdenInventario');
             
-            const itemsPerPage = 5;
+            let pageSizeInv = 5;
             let currentPage = 1;
 
             function goToPage(page) {
@@ -489,7 +487,14 @@ window.previewImgModal = function(input, imgId, labelId) {
 
                 // 2. Ordenar filas
                 const ordenVal = selectOrden ? selectOrden.value : 'recomendados';
-                if (ordenVal === 'nombre_asc') {
+                if (ordenVal === 'recomendados') {
+                    filteredRows.sort((a, b) => {
+                        const aBajo = parseFloat(a.dataset.stock || '0') <= parseFloat(a.dataset.stockmin || '0') ? 0 : 1;
+                        const bBajo = parseFloat(b.dataset.stock || '0') <= parseFloat(b.dataset.stockmin || '0') ? 0 : 1;
+                        if (aBajo !== bBajo) return aBajo - bBajo;
+                        return (a.dataset.name || '').localeCompare(b.dataset.name || '', 'es', { sensitivity: 'base' });
+                    });
+                } else if (ordenVal === 'nombre_asc') {
                     filteredRows.sort((a, b) => a.textContent.localeCompare(b.textContent));
                 } else if (ordenVal === 'stock_asc') {
                     filteredRows.sort((a, b) => parseFloat(a.dataset.stock) - parseFloat(b.dataset.stock));
@@ -499,77 +504,32 @@ window.previewImgModal = function(input, imgId, labelId) {
                     filteredRows.sort((a, b) => parseInt(b.dataset.vendidos) - parseInt(a.dataset.vendidos));
                 }
 
+
                 const totalItems = filteredRows.length;
-                const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+                const totalPages = Math.ceil(totalItems / pageSizeInv) || 1;
 
                 if (currentPage > totalPages) currentPage = totalPages;
                 if (currentPage < 1) currentPage = 1;
 
-                const startIdx = (currentPage - 1) * itemsPerPage;
-                const endIdx = startIdx + itemsPerPage;
+                const startIdx = (currentPage - 1) * pageSizeInv;
+                const endIdx = startIdx + pageSizeInv;
 
                 allRows.forEach(row => row.style.display = 'none');
                 filteredRows.slice(startIdx, endIdx).forEach(row => row.style.display = '');
 
-                // 3. Render numérico estilo Imagen 2: < 1 2 3 ... 200 >
                 const pagesContainer = document.getElementById('paginationPagesList');
-                if (pagesContainer) {
-                    pagesContainer.innerHTML = '';
-
-                    // Flecha Anterior <
-                    const prevBtn = document.createElement('button');
-                    prevBtn.type = 'button';
-                    prevBtn.className = 'pagination-page-button';
-                    prevBtn.innerHTML = '&lsaquo;';
-                    prevBtn.setAttribute('aria-label', 'Pagina anterior');
-                    if (currentPage === 1) {
-                        prevBtn.disabled = true;
-                    } else {
-                        prevBtn.onclick = function() { goToPage(currentPage - 1); };
-                    }
-                    pagesContainer.appendChild(prevBtn);
-
-                    // Botones de página
-                    for (let p = 1; p <= totalPages; p++) {
-                        if (totalPages > 7 && p > 2 && p < totalPages - 1 && Math.abs(p - currentPage) > 1) {
-                            if (p === 3 || p === totalPages - 2) {
-                                const dots = document.createElement('span');
-                                dots.textContent = '...';
-                                dots.style.cssText = 'color:#94a3b8; padding:0 4px; font-weight:700; font-size:0.9rem;';
-                                pagesContainer.appendChild(dots);
-                            }
-                            continue;
+                if (pagesContainer && window.TblPagination) {
+                    window.TblPagination.render(pagesContainer, {
+                        pages: totalPages,
+                        page: currentPage,
+                        size: pageSizeInv,
+                        onPage: goToPage,
+                        onSize: function(size) {
+                            pageSizeInv = size;
+                            currentPage = 1;
+                            filterAndPaginate();
                         }
-
-                        const pageBtn = document.createElement('button');
-                        pageBtn.type = 'button';
-                        pageBtn.textContent = p;
-                        pageBtn.className = 'pagination-page-button';
-                        pageBtn.setAttribute('aria-label', 'Pagina ' + p);
-                        
-                        if (p === currentPage) {
-                            pageBtn.classList.add('is-current');
-                            pageBtn.setAttribute('aria-current', 'page');
-                        } else {
-                            pageBtn.onclick = (function(page) {
-                                return function() { goToPage(page); };
-                            })(p);
-                        }
-                        pagesContainer.appendChild(pageBtn);
-                    }
-
-                    // Flecha Siguiente >
-                    const nextBtn = document.createElement('button');
-                    nextBtn.type = 'button';
-                    nextBtn.className = 'pagination-page-button';
-                    nextBtn.innerHTML = '&rsaquo;';
-                    nextBtn.setAttribute('aria-label', 'Pagina siguiente');
-                    if (currentPage >= totalPages) {
-                        nextBtn.disabled = true;
-                    } else {
-                        nextBtn.onclick = function() { goToPage(currentPage + 1); };
-                    }
-                    pagesContainer.appendChild(nextBtn);
+                    });
                 }
             }
 

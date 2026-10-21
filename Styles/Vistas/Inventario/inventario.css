@@ -46,9 +46,11 @@
         line-height: 1;
         margin-top: 3px;
     }
-    .stat-card-square.active-card .stat-title,
-    .stat-card-square.active-card .stat-val {
+    .stat-card-square.active-card .stat-title {
         color: #15803d;
+    }
+    .stat-card-square.active-card .stat-val {
+        color: #0f172a;
     }
     .inventory-action-btn {
         width: 36px;
@@ -90,6 +92,46 @@
         font-size: 0.90rem;
         color: #0f172a;
     }
+    .inv-row.is-stock-low {
+        background: #fff5f5;
+    }
+    .inv-row.is-stock-low:hover {
+        background: #fee2e2;
+    }
+    .inv-row.is-stock-low .inv-stock-pill {
+        color: #b91c1c;
+    }
+
+    .inv-number-value {
+        color: #0f172a;
+        font-weight: 800;
+    }
+    .inv-price-block {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 5px;
+    }
+    .inv-old-price {
+        color: #94a3b8;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-decoration: line-through;
+    }
+    .inv-current-price {
+        color: #0f172a;
+        font-weight: 800;
+    }
+    .inv-discount-badge {
+        display: inline-flex;
+        padding: 1px 6px;
+        border-radius: 999px;
+        background: #dcfce7;
+        color: #15803d;
+        font-size: 0.68rem;
+        font-weight: 800;
+    }
+
     .ubicacion-tag {
         background: transparent;
         padding: 0;
@@ -115,6 +157,7 @@
         background: transparent;
         padding: 0;
         border: none;
+        white-space: nowrap;
     }
     .badge-deliv::before {
         content: "";

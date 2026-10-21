@@ -4,6 +4,9 @@ Aplicación web en PHP (sin framework) que integra una **tienda online**, un
 **punto de venta (POS)** para mostrador y un **panel de administración tipo ERP**
 para la gestión de productos, inventario, ventas, pedidos, compras, logística y pagos.
 
+> Documentación detallada: [`docs/README.md`](docs/README.md) — arquitectura,
+> seguridad, despliegue y base de datos.
+
 ## Descripción del proyecto
 
 La Caserita cubre todo el ciclo comercial de una tienda de abarrotes/frutas:
@@ -27,6 +30,14 @@ La Caserita cubre todo el ciclo comercial de una tienda de abarrotes/frutas:
 | `cajero`     | POS, caja, historial de ventas, escáner móvil                           |
 | `admin`      | Todo el panel                                       |
 | `repartidor` | Panel de entregas                                                       |
+
+## Configuración
+
+1. Copiar `.env.example` a `.env` y completar credenciales.
+2. No versionar `.env` ni respaldos/volcados SQL con datos reales.
+3. El esquema público es `database/schema.sql`; no contiene datos.
+4. En producción usar HTTPS y `SESSION_COOKIE_SECURE=1`.
+4. Ver [`docs/DESPLIEGUE.md`](docs/DESPLIEGUE.md) para Apache/Wasmer.
 
 ## Arquitectura
 

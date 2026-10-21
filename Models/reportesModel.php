@@ -109,4 +109,185 @@ class ReportesModel {
             'top_productos' => $topProductos
         ];
     }
+
+    private function consultarReporte($sql, array $params) {
+        $stmt = $this->conn->prepare($sql);
+        foreach ($params as $clave => $valor) {
+            $stmt->bindValue($clave, $valor);
+        }
+        $stmt->execute();
+        return $stmt;
+    }
+
+    public function obtenerReporteVentas($desde, $hasta, $canal = 'all') {
+        $desde = $desde ?: date('Y-m-01');
+        $hasta = $hasta ?: date('Y-m-d');
+        $canal = in_array($canal, ['POS', 'WEB'], true) ? $canal : 'all';
+
+        $where = "ped.estado NOT IN ('Cancelado') AND DATE(ped.fecha) BETWEEN :desde AND :hasta";
+        $params = [':desde' => $desde, ':hasta' => $hasta];
+        if ($canal !== 'all') {
+            $where .= " AND ped.canal = :canal";
+            $params[':canal'] = $canal;
+        }
+
+        $resumen = $this->consultarReporte(
+            "SELECT COALESCE(SUM(ped.total), 0) AS total_ventas,
+                    COUNT(*) AS total_pedidos,
+                    COALESCE(AVG(ped.total), 0) AS ticket_promedio
+             FROM pedido ped
+             WHERE {$where}",
+            $params
+        )->fetch(PDO::FETCH_ASSOC);
+
+        $cogsData = $this->consultarReporte(
+            "SELECT COALESCE(SUM(dp.cantidad * COALESCE(NULLIF(dp.costo_unitario, 0), p.precio_costo, 0)), 0) AS cogs
+             FROM detalle_pedido dp
+             JOIN pedido ped ON dp.id_pedido = ped.id_pedido
+             JOIN producto p ON dp.id_producto = p.id_producto
+             WHERE {$where}",
+            $params
+        )->fetch(PDO::FETCH_ASSOC);
+
+        $porDia = $this->consultarReporte(
+            "SELECT DATE(ped.fecha) AS fecha,
+                    COUNT(*) AS pedidos,
+                    COALESCE(SUM(ped.total), 0) AS total
+             FROM pedido ped
+             WHERE {$where}
+             GROUP BY DATE(ped.fecha)
+             ORDER BY fecha ASC",
+            $params
+        )->fetchAll(PDO::FETCH_ASSOC);
+
+        $costosPorDia = $this->consultarReporte(
+            "SELECT DATE(ped.fecha) AS fecha,
+                    COALESCE(SUM(dp.cantidad * COALESCE(NULLIF(dp.costo_unitario, 0), p.precio_costo, 0)), 0) AS costo
+             FROM detalle_pedido dp
+             JOIN pedido ped ON dp.id_pedido = ped.id_pedido
+             JOIN producto p ON dp.id_producto = p.id_producto
+             WHERE {$where}
+             GROUP BY DATE(ped.fecha)",
+            $params
+        )->fetchAll(PDO::FETCH_ASSOC);
+        $mapaCostos = [];
+        foreach ($costosPorDia as $filaCosto) {
+            $mapaCostos[$filaCosto['fecha']] = (float)$filaCosto['costo'];
+        }
+        foreach ($porDia as &$filaDia) {
+            $costoDia = (float)($mapaCostos[$filaDia['fecha']] ?? 0);
+            $totalDia = (float)$filaDia['total'];
+            $filaDia['total'] = $totalDia;
+            $filaDia['pedidos'] = (int)$filaDia['pedidos'];
+            $filaDia['costo'] = $costoDia;
+            $filaDia['ganancia'] = $totalDia - $costoDia;
+        }
+        unset($filaDia);
+
+        $porProducto = $this->consultarReporte(
+            "SELECT p.id_producto,
+                    COALESCE(NULLIF(p.nombre, ''), p.titulo) AS producto,
+                    COALESCE(c.nombre, 'Sin categoría') AS categoria,
+                    SUM(dp.cantidad) AS unidades,
+                    SUM(dp.subtotal) AS ingresos,
+                    SUM(dp.cantidad * COALESCE(NULLIF(dp.costo_unitario, 0), p.precio_costo, 0)) AS costo
+             FROM detalle_pedido dp
+             JOIN pedido ped ON dp.id_pedido = ped.id_pedido
+             JOIN producto p ON dp.id_producto = p.id_producto
+             LEFT JOIN categoria c ON p.id_categoria = c.id_categoria
+             WHERE {$where}
+             GROUP BY p.id_producto, producto, categoria
+             ORDER BY ingresos DESC",
+            $params
+        )->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($porProducto as &$productoReporte) {
+            $ingresosProducto = (float)$productoReporte['ingresos'];
+            $costoProducto = (float)$productoReporte['costo'];
+            $productoReporte['unidades'] = (float)$productoReporte['unidades'];
+            $productoReporte['ingresos'] = $ingresosProducto;
+            $productoReporte['costo'] = $costoProducto;
+            $productoReporte['ganancia'] = $ingresosProducto - $costoProducto;
+            $productoReporte['margen'] = $ingresosProducto > 0 ? round((($ingresosProducto - $costoProducto) / $ingresosProducto) * 100, 1) : 0;
+        }
+        unset($productoReporte);
+
+        $porCategoria = $this->consultarReporte(
+            "SELECT COALESCE(c.nombre, 'Sin categoría') AS categoria,
+                    SUM(dp.cantidad) AS unidades,
+                    SUM(dp.subtotal) AS ingresos,
+                    SUM(dp.cantidad * COALESCE(NULLIF(dp.costo_unitario, 0), p.precio_costo, 0)) AS costo
+             FROM detalle_pedido dp
+             JOIN pedido ped ON dp.id_pedido = ped.id_pedido
+             JOIN producto p ON dp.id_producto = p.id_producto
+             LEFT JOIN categoria c ON p.id_categoria = c.id_categoria
+             WHERE {$where}
+             GROUP BY categoria
+             ORDER BY ingresos DESC",
+            $params
+        )->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($porCategoria as &$categoriaReporte) {
+            $ingresosCategoria = (float)$categoriaReporte['ingresos'];
+            $costoCategoria = (float)$categoriaReporte['costo'];
+            $categoriaReporte['unidades'] = (float)$categoriaReporte['unidades'];
+            $categoriaReporte['ingresos'] = $ingresosCategoria;
+            $categoriaReporte['costo'] = $costoCategoria;
+            $categoriaReporte['ganancia'] = $ingresosCategoria - $costoCategoria;
+            $categoriaReporte['margen'] = $ingresosCategoria > 0 ? round((($ingresosCategoria - $costoCategoria) / $ingresosCategoria) * 100, 1) : 0;
+        }
+        unset($categoriaReporte);
+
+        $porMetodo = $this->consultarReporte(
+            "SELECT COALESCE(NULLIF(ped.metodo_pago, ''), 'Sin método') AS metodo,
+                    COUNT(*) AS pedidos,
+                    COALESCE(SUM(ped.total), 0) AS total
+             FROM pedido ped
+             WHERE {$where}
+             GROUP BY metodo
+             ORDER BY total DESC",
+            $params
+        )->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($porMetodo as &$metodoReporte) {
+            $metodoReporte['pedidos'] = (int)$metodoReporte['pedidos'];
+            $metodoReporte['total'] = (float)$metodoReporte['total'];
+        }
+        unset($metodoReporte);
+
+        $porCanal = $this->consultarReporte(
+            "SELECT COALESCE(NULLIF(ped.canal, ''), 'Sin canal') AS canal,
+                    COUNT(*) AS pedidos,
+                    COALESCE(SUM(ped.total), 0) AS total
+             FROM pedido ped
+             WHERE {$where}
+             GROUP BY canal
+             ORDER BY total DESC",
+            $params
+        )->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($porCanal as &$canalReporte) {
+            $canalReporte['pedidos'] = (int)$canalReporte['pedidos'];
+            $canalReporte['total'] = (float)$canalReporte['total'];
+        }
+        unset($canalReporte);
+
+        $totalVentas = (float)($resumen['total_ventas'] ?? 0);
+        $totalPedidos = (int)($resumen['total_pedidos'] ?? 0);
+        $cogs = (float)($cogsData['cogs'] ?? 0);
+        $gananciaBruta = $totalVentas - $cogs;
+
+        return [
+            'desde' => $desde,
+            'hasta' => $hasta,
+            'canal' => $canal,
+            'total_ventas' => $totalVentas,
+            'total_pedidos' => $totalPedidos,
+            'ticket_promedio' => $totalPedidos > 0 ? $totalVentas / $totalPedidos : 0,
+            'cogs' => $cogs,
+            'ganancia_bruta' => $gananciaBruta,
+            'margen_bruto' => $totalVentas > 0 ? round(($gananciaBruta / $totalVentas) * 100, 1) : 0,
+            'por_dia' => $porDia,
+            'por_producto' => $porProducto,
+            'por_categoria' => $porCategoria,
+            'por_metodo' => $porMetodo,
+            'por_canal' => $porCanal
+        ];
+    }
 }

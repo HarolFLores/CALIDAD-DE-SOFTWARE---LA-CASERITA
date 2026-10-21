@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/Env.php';
+Env::load();
+
 class DataBase {
     private static $conexion = null;
 
@@ -10,13 +13,13 @@ class DataBase {
     private $password = null;
 
     public function __construct() {
-        // Conexión por defecto (Wasmer DB en línea). Se puede sobreescribir con variables de entorno.
+        // Soporte por defecto para MySQL en XAMPP local
         $this->driver = getenv('DB_DRIVER') ?: 'mysql';
-        $this->host = getenv('DB_HOST') ?: 'db.fr-roub1.bengt.wasmernet.com';
-        $this->port = getenv('DB_PORT') ?: '20184';
-        $this->dbname = getenv('DB_NAME') ?: 'laCaserita';
-        $this->user = getenv('DB_USER') ?: 'user_d64aabaa';
-        $this->password = getenv('DB_PASS') !== false ? getenv('DB_PASS') : 'pw_Kf3xXuDELEUQKyZWmzxAFFRJbN6w22w9';
+        $this->host = getenv('DB_HOST') ?: 'localhost';
+        $this->port = getenv('DB_PORT') ?: '3306'; 
+        $this->dbname = getenv('DB_NAME') ?: 'lacaserita_db';
+        $this->user = getenv('DB_USER') ?: 'root';
+        $this->password = getenv('DB_PASS') !== false ? getenv('DB_PASS') : '';
     }
 
     public function getConnection() {
@@ -31,12 +34,17 @@ class DataBase {
                 $opciones = [
                     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                    PDO::ATTR_EMULATE_PREPARES   => false
+                    PDO::ATTR_EMULATE_PREPARES   => false,
+                    PDO::ATTR_TIMEOUT            => 8
                 ];
 
                 self::$conexion = new PDO($dsn, $this->user, $this->password, $opciones);
             } catch (PDOException $e) {
-                die('ERROR EN LA CONEXIÓN A LA BASE DE DATOS: ' . $e->getMessage());
+                error_log('DB connection error: ' . $e->getMessage());
+                if (PHP_SAPI !== 'cli') {
+                    http_response_code(500);
+                }
+                die('No se pudo conectar a la base de datos.');
             }
         }
         return self::$conexion;

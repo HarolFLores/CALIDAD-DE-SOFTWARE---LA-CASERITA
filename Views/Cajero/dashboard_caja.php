@@ -12,6 +12,7 @@ $porcTarjeta = round(($ventasTarjeta / $totalMetodos) * 100);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="Images/logo_backup.png">
     <title>Dashboard de caja - La Caserita</title>
     <link rel="stylesheet" href="Styles/global.css">
     <link rel="stylesheet" href="Styles/staff-panel.css?v=<?= time() ?>">
@@ -26,13 +27,7 @@ $porcTarjeta = round(($ventasTarjeta / $totalMetodos) * 100);
                 <button type="button" class="staff-menu-toggle hide-on-desktop" id="staffMenuToggle" aria-label="Abrir menú">
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
                 </button>
-                <span class="staff-topbar-title">Panel de caja</span>
-            </div>
-            <div class="staff-topbar-actions">
-                <a href="index.php?action=home_usuario" class="topbar-store-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                    Volver a Tienda
-                </a>
+                <span class="staff-topbar-title">Dashboard de caja</span>
             </div>
         </header>
 
@@ -44,7 +39,6 @@ $porcTarjeta = round(($ventasTarjeta / $totalMetodos) * 100);
             <section class="cashier-dashboard-heading">
                 <div>
                     <span class="staff-section-kicker">PANEL GENERAL</span>
-                    <h1>Dashboard de caja</h1>
                     <p><?= htmlspecialchars($nombre) ?> · Cajero</p>
                 </div>
                 <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
@@ -89,7 +83,7 @@ $porcTarjeta = round(($ventasTarjeta / $totalMetodos) * 100);
             <section class="cashier-kpis-grid">
                 <article class="kpi-card">
                     <span class="kpi-title">TOTAL VENTAS TURNO</span>
-                    <strong class="kpi-val" style="color:#15803d;">S/ <?= number_format($totalVentas, 2) ?></strong>
+                    <strong class="kpi-val">S/ <?= number_format($totalVentas, 2) ?></strong>
                     <span class="kpi-foot"><?= $totalTickets ?> comprobantes emitidos</span>
                 </article>
                 <article class="kpi-card">
@@ -99,12 +93,12 @@ $porcTarjeta = round(($ventasTarjeta / $totalMetodos) * 100);
                 </article>
                 <article class="kpi-card">
                     <span class="kpi-title">TICKET PROMEDIO</span>
-                    <strong class="kpi-val" style="color:#0284c7;">S/ <?= number_format($ticketPromedio, 2) ?></strong>
+                    <strong class="kpi-val">S/ <?= number_format($ticketPromedio, 2) ?></strong>
                     <span class="kpi-foot">Promedio por cliente</span>
                 </article>
                 <article class="kpi-card">
                     <span class="kpi-title">EFECTIVO EN GAVETA</span>
-                    <strong class="kpi-val" style="color:#b45309;">S/ <?= number_format((float)($resumen['efectivo_esperado'] ?? 0), 2) ?></strong>
+                    <strong class="kpi-val">S/ <?= number_format((float)($resumen['efectivo_esperado'] ?? 0), 2) ?></strong>
                     <span class="kpi-foot">Fondo inicial + ventas efectivo</span>
                 </article>
             </section>
@@ -149,7 +143,7 @@ $porcTarjeta = round(($ventasTarjeta / $totalMetodos) * 100);
                             </div>
                             <div class="mqs-item">
                                 <span>Gastos / Egresos:</span>
-                                <strong style="color:#dc2626;">S/ <?= number_format((float)($resumen['egresos'] ?? 0), 2) ?></strong>
+                                <strong>S/ <?= number_format((float)($resumen['egresos'] ?? 0), 2) ?></strong>
                             </div>
                         </div>
                     </div>
@@ -205,43 +199,37 @@ $porcTarjeta = round(($ventasTarjeta / $totalMetodos) * 100);
                                 <th style="text-align:center; width:100px;">ACCIÓN</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="tbodyUltimasVentas">
                             <?php if (!$historialVentas): ?>
                                 <tr>
                                     <td colspan="6" class="cashier-no-data">Aún no se han emitido tickets en este turno.</td>
                                 </tr>
                             <?php else: foreach ($historialVentas as $idx => $v): ?>
-                                <tr>
+                                <tr class="fila-ultima-venta">
                                     <td style="font-weight:700; color:#0f172a;"><?= htmlspecialchars($v['codigo_pedido'] ?: ('POS-' . $v['id_pedido'])) ?></td>
                                     <td><?= date('d/m/Y H:i', strtotime($v['fecha'])) ?></td>
                                     <td><?= htmlspecialchars($v['cliente_nombre'] ?: ($v['cliente_dni'] ?: 'Público General')) ?></td>
                                     <td>
                                         <span class="badge-metodo"><?= htmlspecialchars($v['metodo_pago'] ?: 'Efectivo') ?></span>
                                     </td>
-                                    <td class="cashier-align-right" style="font-weight:800; color:#15803d;">
+                                    <td class="cashier-align-right cashier-sale-total">
                                         S/ <?= number_format((float)$v['total'], 2) ?>
                                     </td>
                                     <td>
-                                        <div style="display:flex; gap:6px; align-items:center; justify-content:center;">
-                                            <button type="button" 
-                                                    class="btn-action-history btn-preview" 
-                                                    onclick="previsualizarTicket(<?= $idx ?>)" 
-                                                    title="Previsualizar comprobante">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                                    <circle cx="12" cy="12" r="3"></circle>
-                                                </svg>
+                                        <div class="table-kebab-container">
+                                            <button type="button" class="table-kebab-btn" aria-label="Acciones del comprobante" title="Opciones">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
                                             </button>
-                                            <button type="button" 
-                                                    class="btn-action-history btn-print" 
-                                                    onclick="imprimirTicketDirecto(<?= $idx ?>)" 
-                                                    title="Imprimir ticket térmico">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                                                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                                                    <rect x="6" y="14" width="12" height="8"></rect>
-                                                </svg>
-                                            </button>
+                                            <div class="table-kebab-menu">
+                                                <button type="button" class="table-kebab-item" onclick="previsualizarTicket(<?= $idx ?>)">
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                                    Ver comprobante
+                                                </button>
+                                                <button type="button" class="table-kebab-item" onclick="imprimirTicketDirecto(<?= $idx ?>)">
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                                                    Imprimir ticket
+                                                </button>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>
@@ -249,6 +237,7 @@ $porcTarjeta = round(($ventasTarjeta / $totalMetodos) * 100);
                         </tbody>
                     </table>
                 </div>
+                <div class="pg-footer" id="pagUltimasVentas"></div>
             </section>
         </main>
     </div>
@@ -258,7 +247,7 @@ $porcTarjeta = round(($ventasTarjeta / $totalMetodos) * 100);
         <div class="ticket-modal-content">
             <div class="ticket-modal-header ticket-no-print">
                 <h3 style="margin:0; font-size:1.02rem; color:#0f172a;"><i class="fa-solid fa-receipt" style="color:#15803d; margin-right:6px;"></i> Comprobante de Venta</h3>
-                <button type="button" onclick="cerrarTicketPreview()" class="ticket-modal-close" aria-label="Cerrar modal">&times;</button>
+                <button type="button" onclick="cerrarTicketPreview()" class="ticket-modal-close btn-close-universal" aria-label="Cerrar modal" title="Cerrar">&times;</button>
             </div>
 
             <div class="ticket-modal-body">
@@ -325,9 +314,6 @@ $porcTarjeta = round(($ventasTarjeta / $totalMetodos) * 100);
             <div class="ticket-modal-actions ticket-no-print">
                 <button type="button" class="btn-ticket-print" onclick="ejecutarImpresion()">
                     <i class="fa-solid fa-print"></i> IMPRIMIR TICKET
-                </button>
-                <button type="button" class="btn-ticket-close" onclick="cerrarTicketPreview()">
-                    Cerrar
                 </button>
             </div>
         </div>
@@ -469,6 +455,18 @@ $porcTarjeta = round(($ventasTarjeta / $totalMetodos) * 100);
                 cerrarTicketPreview();
             }
         }
+
+        (function () {
+            var container = document.getElementById('pagUltimasVentas');
+            var rows = Array.prototype.slice.call(document.querySelectorAll('#tbodyUltimasVentas .fila-ultima-venta'));
+            if (!container || !rows.length || !window.TblPagination) return;
+            window.TblPagination.create(container, {
+                size: 5,
+                rows: function () { return rows; },
+                show: function (row) { row.style.display = ''; },
+                hide: function (row) { row.style.display = 'none'; }
+            });
+        })();
     </script>
 
     

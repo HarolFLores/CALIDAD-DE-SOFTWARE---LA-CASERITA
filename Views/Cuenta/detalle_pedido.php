@@ -184,6 +184,8 @@
                 <?php 
                     $obsLimpia = preg_replace('/\[Pago[^\]]+\]/i', '', $observacion ?? '');
                     $obsLimpia = preg_replace('/\[Tarjeta[^\]]+\]/i', '', $obsLimpia);
+                    $obsLimpia = preg_replace('/\[Cancelación[^\]]*\]/iu', '', $obsLimpia);
+                    $obsLimpia = preg_replace('/\[Rechazo comprobante[^\]]*\]/iu', '', $obsLimpia);
                     $obsLimpia = trim(preg_replace('/^\s*\|\s*|\s*\|\s*$/', '', trim($obsLimpia)));
                     $obsLimpia = trim(preg_replace('/\s*\|\s*\|\s*/', ' | ', $obsLimpia));
                 ?>

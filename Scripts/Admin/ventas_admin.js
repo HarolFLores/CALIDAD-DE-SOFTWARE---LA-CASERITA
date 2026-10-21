@@ -10,10 +10,10 @@
     var statCards      = document.querySelectorAll('.stat-card-square[data-filtro-estado]');
     var rows           = Array.from(document.querySelectorAll('#vaTabla tbody tr.va-row'));
     var tablaBody      = document.querySelector('#vaTabla tbody');
-    var paginationList = document.getElementById('vaPaginationList');
+    var paginationControls = document.getElementById('vaPaginationControls');
 
     var currentPage = 1;
-    var pageSize = 5; // Paginación de 5 pedidos por página para mostrar controles idénticos a Imagen 3
+    var pageSize = 5;
     var currentFilteredRows = rows.slice();
 
     // Normalizador de estados en JS
@@ -27,6 +27,25 @@
         if (s.indexOf('entreg') !== -1) return 'entregado';
         if (s.indexOf('cancel') !== -1) return 'cancelado';
         return 'pendiente';
+    }
+
+    // Limpia datos internos de pago/tarjeta de la observación del cliente
+    function limpiarObservacionCliente(texto) {
+        var limpio = String(texto == null ? '' : texto);
+        limpio = limpio.replace(/\[(?:Tarjeta|Pago|Cancelaci[oó]n|Rechazo comprobante)[^\]]*\]/gi, ' ');
+        var partes = limpio.split(/\||\r?\n/);
+        var vistos = {};
+        var resultado = [];
+        partes.forEach(function (parte) {
+            var valor = parte.trim();
+            if (!valor) return;
+            if (/^(Horario|Programado)\s*:/i.test(valor)) return;
+            var clave = valor.toLowerCase();
+            if (vistos[clave]) return;
+            vistos[clave] = true;
+            resultado.push(valor);
+        });
+        return resultado.join(' ').trim();
     }
 
     // Configuración visual por estado
@@ -91,52 +110,16 @@
 
         toggleEmptyState(total === 0);
 
-        // Controles de paginación (Imagen 3)
-        if (!paginationList) return;
-        paginationList.innerHTML = '';
+        // Controles de paginación unificados
+        if (!paginationControls || !window.TblPagination) return;
 
-        if (total === 0) {
-            document.getElementById('vaPaginationControls').style.display = 'none';
-            return;
-        }
-        document.getElementById('vaPaginationControls').style.display = 'flex';
-
-        // Botón Anterior <
-        var prevBtn = document.createElement('button');
-        prevBtn.type = 'button';
-        prevBtn.className = 'pagination-page-button';
-        prevBtn.innerHTML = '‹';
-        prevBtn.disabled = currentPage === 1;
-        prevBtn.onclick = function() {
-            if (currentPage > 1) { currentPage--; renderPaginacion(); }
-        };
-        paginationList.appendChild(prevBtn);
-
-        // Páginas numeradas
-        for (var p = 1; p <= totalPages; p++) {
-            (function(pageNum) {
-                var btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'pagination-page-button' + (pageNum === currentPage ? ' is-current' : '');
-                btn.textContent = pageNum;
-                btn.onclick = function() {
-                    currentPage = pageNum;
-                    renderPaginacion();
-                };
-                paginationList.appendChild(btn);
-            })(p);
-        }
-
-        // Botón Siguiente >
-        var nextBtn = document.createElement('button');
-        nextBtn.type = 'button';
-        nextBtn.className = 'pagination-page-button';
-        nextBtn.innerHTML = '›';
-        nextBtn.disabled = currentPage === totalPages;
-        nextBtn.onclick = function() {
-            if (currentPage < totalPages) { currentPage++; renderPaginacion(); }
-        };
-        paginationList.appendChild(nextBtn);
+        window.TblPagination.render(paginationControls, {
+            pages: totalPages,
+            page: currentPage,
+            size: pageSize,
+            onPage: function (p) { currentPage = p; renderPaginacion(); },
+            onSize: function (s) { pageSize = s; currentPage = 1; renderPaginacion(); }
+        });
     }
 
     // Estado vacío: mensaje cuando los filtros no arrojan ningún pedido
@@ -335,10 +318,11 @@
                       + '<span style="font-size:.85rem;color:#334155;">' + escH(p.direccion_envio) + '</span></div>';
             }
 
-            if (p.observacion) {
+            var notaCliente = limpiarObservacionCliente(p.observacion);
+            if (notaCliente !== '') {
                 info += '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 14px;margin-bottom:16px;">'
                       + '<small style="display:block;color:#94a3b8;font-size:.70rem;font-weight:800;text-transform:uppercase;margin-bottom:2px;">Observación</small>'
-                      + '<span style="font-size:.85rem;color:#334155;">' + escH(p.observacion) + '</span></div>';
+                      + '<span style="font-size:.85rem;color:#334155;">' + escH(notaCliente) + '</span></div>';
             }
 
             // Productos
@@ -679,9 +663,10 @@
         }
 
         var rowObs = document.getElementById('rowAdminTicketObs');
-        if (p.observacion) {
+        var notaClienteTicket = limpiarObservacionCliente(p.observacion);
+        if (notaClienteTicket !== '') {
             rowObs.style.display = 'block';
-            document.getElementById('lblAdminTicketObs').textContent = p.observacion;
+            document.getElementById('lblAdminTicketObs').textContent = notaClienteTicket;
         } else {
             rowObs.style.display = 'none';
         }

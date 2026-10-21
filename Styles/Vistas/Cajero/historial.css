@@ -16,7 +16,7 @@
         .ticket-footer p { margin: 2px 0; font-size: 9.5px; }
         .ticket-barcode { margin-top: 6px; letter-spacing: 2px; font-size: 14px; font-weight: bold; }
 
-.cashier-history{max-width:1180px;margin:10px auto 30px;padding:0;color:#183a31}
+.cashier-history{width:100%;max-width:none;margin:10px 0 30px;padding:0;color:#183a31}
         .cashier-history-heading{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:18px 24px;margin-bottom:24px;box-shadow:0 1px 3px rgba(0,0,0,0.02)}
         .staff-section-kicker{font-size:.7rem;font-weight:850;letter-spacing:.1em;color:#15803d}
         .cashier-history h1{margin:4px 0;font-size:1.75rem;color:#0f172a}
@@ -28,19 +28,20 @@
         .history-metrics-grid{display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:14px;margin-bottom:18px}
         .h-metric-card{background:#ffffff;border:1px solid #e2e8f0;border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:3px}
         .h-metric-label{font-size:0.68rem;font-weight:800;color:#64748b;letter-spacing:0.04em}
-        .h-metric-val{font-size:1.55rem;font-weight:800;line-height:1.15}
+        .h-metric-val{font-size:1.55rem;font-weight:800;line-height:1.15;color:#0f172a}
         .h-metric-foot{font-size:0.75rem;color:#94a3b8}
 
         /* Barra de Filtros */
         .history-filters-bar{display:flex;align-items:center;gap:10px;padding:14px;background:#ffffff;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:18px;flex-wrap:wrap}
         .search-input-wrap{position:relative;flex:1;min-width:240px}
         .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:0.85rem}
-        .search-input-wrap input{width:100%;padding:9px 12px 9px 34px;border:1px solid #cbd5e1;border-radius:8px;font-size:0.84rem;color:#0f172a;box-sizing:border-wrap}
+        .search-input-wrap input{width:100%;padding:9px 12px 9px 34px;border:1px solid #cbd5e1;border-radius:8px;font-size:0.84rem;color:#0f172a;box-sizing:border-box}
         .search-input-wrap input:focus{outline:none;border-color:#15803d;box-shadow:0 0 0 3px rgba(21,128,61,0.12)}
 
         .filter-group{display:flex;align-items:center;gap:6px}
         .filter-label{font-size:0.78rem;font-weight:700;color:#475569}
-        .filter-group select, .filter-group input[type="date"]{padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:0.82rem;color:#0f172a;background:#ffffff;cursor:pointer}
+        .filter-group select, .filter-group input[type="date"]{min-height:38px;padding:8px 36px 8px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:0.82rem;color:#0f172a;background-color:#ffffff;cursor:pointer;box-sizing:border-box}
+        .filter-group .history-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;background-size:14px}
         .filter-group select:focus, .filter-group input:focus{outline:none;border-color:#15803d}
 
         .btn-reset-filters{padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;background:#f8fafc;color:#475569;font-size:0.8rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s ease}
@@ -52,13 +53,14 @@
         .cashier-history-table th{padding:12px 16px;background:#f8fafc;color:#64748b;font-size:.7rem;font-weight:700;letter-spacing:.04em}
         .cashier-history-table td{padding:12px 16px;border-top:1px solid #edf1ee;color:#334155;font-size:.85rem;vertical-align:middle}
         .cashier-history-table td small{display:block;margin-top:2px;color:#94a3b8;font-size:0.75rem}
-        .cashier-history-table .amount{text-align:right;color:#15803d;font-weight:800}
+        .cashier-history-table .amount{text-align:right;color:#0f172a;font-weight:800}
         .cashier-history-empty{text-align:center;padding:48px 16px;color:#64748b;font-size:0.88rem}
 
-        .badge-metodo{display:inline-block;padding:3px 8px;border-radius:4px;font-size:0.72rem;font-weight:700;background:#f1f5f9;color:#475569}
-        .badge-metodo.metodo-efectivo{background:#dcfce7;color:#15803d}
-        .badge-metodo.metodo-yape, .badge-metodo.metodo-plin{background:#e0f2fe;color:#0284c7}
-        .badge-metodo.metodo-tarjeta{background:#ede9fe;color:#7c3aed}
+        .badge-metodo{display:inline;color:#334155;font-size:0.82rem;font-weight:500;background:transparent}
+        .badge-metodo.metodo-efectivo,
+        .badge-metodo.metodo-yape,
+        .badge-metodo.metodo-plin,
+        .badge-metodo.metodo-tarjeta{color:#334155;background:transparent}
 
         /* ACCIONES (Estilo de la imagen de referencia) */
         .action-buttons-wrap{display:flex;gap:6px;align-items:center;justify-content:center}
@@ -178,4 +180,12 @@
             .filter-group{width:100%;justify-content:space-between}
             .filter-group select, .filter-group input{flex:1}
             .btn-reset-filters{width:100%;justify-content:center}
+        }
+
+        @media(max-width:520px){
+            .cashier-history-heading{padding:15px;align-items:flex-start}
+            .cashier-history h1{font-size:1.35rem}
+            .search-input-wrap{min-width:0}
+            .filter-group{align-items:stretch;flex-direction:column}
+            .filter-group select,.filter-group input{width:100%;min-width:0}
         }

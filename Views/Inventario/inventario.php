@@ -30,11 +30,14 @@ require_once 'Core/ajaxHelper.php';
     <link rel="stylesheet" href="Styles/styles-home.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="Styles/styles-users-admin.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="Styles/admin-spa.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="Styles/Vistas/Inventario/inventario.css?v=<?= time(); ?>">
+    <link rel="stylesheet" href="Styles/Vistas/Inventario/inventario_panel.css?v=<?= time(); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="Scripts/admin-spa.js?v=<?php echo time(); ?>" defer></script>
+    <script src="Scripts/pagination.js?v=<?php echo time(); ?>"></script>
     <!-- Lector remoto desde el celular vinculado -->
-    <script src="Scripts/scanner-camara.js"></script>
+    <script src="Scripts/scanner-camara.js?v=<?= filemtime(__DIR__ . '/../../Scripts/scanner-camara.js') ?>"></script>
     <link rel="icon" type="image/png" href="Images/logo_backup.png">
 </head>
 <body>
@@ -65,9 +68,6 @@ require_once 'Core/ajaxHelper.php';
 
             <div id="admin-container">
 <?php endif; ?>
-
-<link rel="stylesheet" href="Styles/Vistas/Inventario/inventario.css?v=<?= time(); ?>">
-<link rel="stylesheet" href="Styles/Vistas/Inventario/inventario_panel.css?v=<?= time(); ?>">
 
     <main class="main-content inventario-main container-admin admin-fullwidth" style="padding-top: 15px; padding-bottom: 50px;">
         <?php
@@ -277,7 +277,6 @@ require_once 'Core/ajaxHelper.php';
                             <th style="padding: 12px 10px; font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase; white-space: nowrap;">PRECIO VENTA</th>
                             <th style="padding: 12px 10px; font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase; white-space: nowrap;">STOCK ACTUAL</th>
                             <th style="padding: 12px 10px; font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase; white-space: nowrap;">STOCK MÍNIMO</th>
-                            <th style="padding: 12px 10px; font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase; white-space: nowrap;">UBICACIÓN</th>
                             <th style="padding: 12px 10px; font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase; white-space: nowrap;">ESTADO</th>
                             <th style="padding: 12px 10px; font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase; white-space: nowrap;">ÚLTIMA ACT.</th>
                             <th class="actions-col" style="padding: 12px 10px; text-align: center;"></th>
@@ -290,6 +289,10 @@ require_once 'Core/ajaxHelper.php';
                                     $stockActual = (float)$item['stock_actual'];
                                     $stockMinimo = (float)$item['stock_minimo'];
                                     $unidad = $item['unidad_medida'] === 'KG' ? 'kg' : 'und.';
+                                    $precioVenta = (float)($item['precio'] ?? 0);
+                                    $precioAnterior = (float)($item['precio_anterior'] ?? 0);
+                                    $tieneDescuento = $precioAnterior > $precioVenta && $precioVenta > 0;
+                                    $pctDescuento = $tieneDescuento ? (int)round((($precioAnterior - $precioVenta) / $precioAnterior) * 100) : 0;
 
                                     if($stockActual <= $stockMinimo){
                                         $estadoClase = 'status-tag-error';
@@ -305,7 +308,7 @@ require_once 'Core/ajaxHelper.php';
                                         && (int)($item['reposiciones_count'] ?? 0) === 0;
                                 ?>
                                 <?php $isActivoProd = (int)($item['activo'] ?? 1) === 1; ?>
-                                <tr data-id="<?= (int)$item['id_producto']; ?>" data-name="<?= htmlspecialchars($item['titulo'], ENT_QUOTES); ?>" data-unit="<?= htmlspecialchars($unidad, ENT_QUOTES); ?>" data-sku="<?= htmlspecialchars((string)($item['codigo'] ?? ''), ENT_QUOTES); ?>" data-barcode="<?= htmlspecialchars((string)($item['codigo_barras'] ?? ''), ENT_QUOTES); ?>" data-has-sku="<?= !empty(trim((string)($item['codigo'] ?? ''))) ? 1 : 0; ?>" data-has-barcode="<?= !empty(trim((string)($item['codigo_barras'] ?? ''))) ? 1 : 0; ?>" data-stock="<?= $stockActual; ?>" data-stockmin="<?= $stockMinimo; ?>" data-vendidos="<?= (int)($item['ventas_count'] ?? 0); ?>" data-activo="<?= $isActivoProd ? 1 : 0; ?>" style="border-bottom: 1px solid #f1f5f9;">
+                                <tr class="inv-row<?= $stockActual <= $stockMinimo ? ' is-stock-low' : '' ?>" data-id="<?= (int)$item['id_producto']; ?>" data-name="<?= htmlspecialchars($item['titulo'], ENT_QUOTES); ?>" data-unit="<?= htmlspecialchars($unidad, ENT_QUOTES); ?>" data-sku="<?= htmlspecialchars((string)($item['codigo'] ?? ''), ENT_QUOTES); ?>" data-barcode="<?= htmlspecialchars((string)($item['codigo_barras'] ?? ''), ENT_QUOTES); ?>" data-has-sku="<?= !empty(trim((string)($item['codigo'] ?? ''))) ? 1 : 0; ?>" data-has-barcode="<?= !empty(trim((string)($item['codigo_barras'] ?? ''))) ? 1 : 0; ?>" data-stock="<?= $stockActual; ?>" data-stockmin="<?= $stockMinimo; ?>" data-vendidos="<?= (int)($item['ventas_count'] ?? 0); ?>" data-activo="<?= $isActivoProd ? 1 : 0; ?>" style="border-bottom: 1px solid #f1f5f9;">
                                     <!-- Columna Producto: SOLO nombre y SKU -->
                                     <td style="padding: 14px 20px;">
                                         <div class="inv-producto" style="display: flex; align-items: center; gap: 12px;">
@@ -324,11 +327,20 @@ require_once 'Core/ajaxHelper.php';
                                     <td style="padding: 14px 16px; color: #475569; font-weight: 650; white-space: nowrap;">
                                         S/ <?= number_format((float)($item['precio_costo'] ?? 0), 2); ?>
                                     </td>
-                                    <td style="padding: 14px 16px; color: #14532d; font-weight: 800; white-space: nowrap;">
-                                        S/ <?= number_format((float)($item['precio'] ?? 0), 2); ?>
+                                    <td class="inv-number-value" style="padding: 14px 16px; white-space: nowrap;">
+                                        <div class="inv-price-block">
+                                            <?php if ($tieneDescuento): ?>
+                                                <span class="inv-old-price">S/ <?= number_format($precioAnterior, 2); ?></span>
+                                            <?php endif; ?>
+                                            <span class="inv-current-price">S/ <?= number_format($precioVenta, 2); ?></span>
+                                            <?php if ($tieneDescuento): ?>
+                                                <span class="inv-discount-badge">-<?= $pctDescuento; ?>%</span>
+                                            <?php endif; ?>
+                                        </div>
                                     </td>
+
                                     <td style="padding: 14px 16px;">
-                                        <span class="inv-stock-pill" style="color: <?= $stockActual <= $stockMinimo ? '#dc2626' : '#0f172a'; ?>;">
+                                        <span class="inv-stock-pill">
                                             <?php echo number_format($stockActual, 2); ?> <?php echo $unidad; ?>
                                         </span>
                                     </td>
@@ -336,13 +348,7 @@ require_once 'Core/ajaxHelper.php';
                                         <?php echo number_format($stockMinimo, 2); ?> <?php echo $unidad; ?>
                                     </td>
                                     <td style="padding: 14px 16px;">
-                                        <span class="ubicacion-tag">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                                            <span><?php echo htmlspecialchars($item['ubicacion']); ?></span>
-                                        </span>
-                                    </td>
-                                    <td style="padding: 14px 16px;">
-                                        <span class="status-pill <?= $isActivoProd ? 'activo' : 'inactivo'; ?>">
+                                        <span class="badge-deliv <?= $isActivoProd ? 'disponible' : 'inactivo'; ?>">
                                             <?= $isActivoProd ? 'Activo' : 'Inactivo'; ?>
                                         </span>
                                     </td>
@@ -389,7 +395,7 @@ require_once 'Core/ajaxHelper.php';
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="9" class="text-center" style="padding: 40px; color: #64748b; text-align: center;">
+                                <td colspan="8" class="text-center" style="padding: 40px; color: #64748b; text-align: center;">
                                     No hay productos registrados en el inventario.
                                 </td>
                             </tr>
@@ -398,12 +404,8 @@ require_once 'Core/ajaxHelper.php';
                 </table>
             </div>
 
-            <!-- Controles de Paginación (Ubicados ABAJO de la tabla) -->
-            <div class="pagination-container" id="paginationControls" style="display: flex; align-items: center; justify-content: center; padding: 16px 24px; border-top: 1px solid #e2e8f0; background: #ffffff; gap: 14px;">
-                <div style="display: flex; align-items: center; gap: 6px;" id="paginationPagesList">
-                    <!-- JS renderiza: < 1 2 3 ... > -->
-                </div>
-            </div>
+            <!-- Controles de Paginación unificada -->
+            <div class="pg-footer" id="paginationPagesList"></div>
         </section>
     </main>
 
@@ -475,8 +477,8 @@ require_once 'Core/ajaxHelper.php';
     </div>
 
     <?php
-        // Mapa auxiliar subcategoría (N3) -> nombre de la categoría padre (N2),
-        // para mostrarlo en el combobox de búsqueda de subcategorías.
+ // Mapa auxiliar subcategoría (N3) -> nombre de la categoría padre (N2),
+ // para mostrarlo en el combobox de búsqueda de subcategorías.
         $__subcatGrupoNombres = [];
         if (!empty($grupos)) {
             foreach ($grupos as $__g) {
@@ -564,20 +566,16 @@ require_once 'Core/ajaxHelper.php';
                         </div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
+                    <div style="margin-bottom: 16px;">
                         <div class="grupo">
                             <label class="label" style="display: block; font-weight: 700; font-size: 0.78rem; color: #334155; text-transform: uppercase; margin-bottom: 6px;">STOCK MÍNIMO ALERTA</label>
                             <input type="number" step="0.01" name="stock_minimo" value="5" class="input-modern" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box;">
-                        </div>
-                        <div class="grupo">
-                            <label class="label" style="display: block; font-weight: 700; font-size: 0.78rem; color: #334155; text-transform: uppercase; margin-bottom: 6px;">UBICACIÓN EN ALMACÉN</label>
-                            <input type="text" name="ubicacion" class="input-modern" placeholder="Ej. Pasillo 2 - Estante A" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box;">
                         </div>
                     </div>
 
                     <!-- SUBCATEGORÍA (N3) con búsqueda en vivo -->
                     <div class="grupo" style="margin-bottom: 16px;">
-                        <label class="label" style="display: block; font-weight: 700; font-size: 0.78rem; color: #334155; text-transform: uppercase; margin-bottom: 6px;">SUBCATEGORÍA (N3) *</label>
+                        <label class="label" style="display: block; font-weight: 700; font-size: 0.78rem; color: #334155; text-transform: uppercase; margin-bottom: 6px;">SUBCATEGORÍA *</label>
                         <div class="subcat-combo">
                             <input type="text" class="subcat-input" id="nuevoSubcatInput" placeholder="Escribe para buscar la subcategoría..." autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" required>
                             <input type="hidden" name="id_categoria" id="nuevoSubcatId">
@@ -587,8 +585,9 @@ require_once 'Core/ajaxHelper.php';
                                     <?php foreach ($categorias as $cat): ?>
                                         <div class="subcat-option" role="option" data-id="<?= htmlspecialchars($cat['id_categoria']); ?>" data-grupo="<?= htmlspecialchars($cat['id_grupo']); ?>" data-nombre="<?= htmlspecialchars($cat['nombre']); ?>">
                                             <span class="subcat-opt-name"><?= htmlspecialchars($cat['nombre']); ?></span>
-                                            <?php $__grpNom = $__subcatGrupoNombres[(string)$cat['id_grupo']] ?? ''; ?>
-                                            <?php if ($__grpNom !== ''): ?><span class="subcat-opt-path"><?= htmlspecialchars($__grpNom); ?></span><?php endif; ?>
+                                            <?php $__grpNom = $cat['grupo_nombre'] ?? ($__subcatGrupoNombres[(string)$cat['id_grupo']] ?? ''); ?>
+                                            <?php $__macroNom = $cat['momento_nombre'] ?? ''; ?>
+                                            <?php if ($__grpNom !== ''): ?><span class="subcat-opt-path"><?= htmlspecialchars(($__macroNom !== '' ? $__macroNom . ' › ' : '') . $__grpNom); ?></span><?php endif; ?>
                                         </div>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
@@ -746,22 +745,18 @@ require_once 'Core/ajaxHelper.php';
                         </div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
+                    <div style="margin-bottom: 16px;">
                         <div class="grupo">
                             <label class="label" style="display: block; font-weight: 700; font-size: 0.78rem; color: #334155; text-transform: uppercase; margin-bottom: 6px;">Stock Mínimo de Alerta</label>
                             <input type="number" step="0.01" name="stock_minimo" id="editProdStockMinimo" class="input-modern" placeholder="Ej. 10" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box;">
                         </div>
-                        <div class="grupo">
-                            <label class="label" style="display: block; font-weight: 700; font-size: 0.78rem; color: #334155; text-transform: uppercase; margin-bottom: 6px;">Ubicación Física en Tienda</label>
-                            <input type="text" name="ubicacion" id="editProdUbicacion" class="input-modern" placeholder="Ej. Pasillo 1 - Estante B" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box;">
-                        </div>
                     </div>
 
-                    <!-- SUBCATEGORÍA (N3) con búsqueda en vivo -->
-                    <div class="grupo" style="margin-bottom: 16px;">
-                        <label class="label" style="display: block; font-weight: 700; font-size: 0.78rem; color: #334155; text-transform: uppercase; margin-bottom: 6px;">SUBCATEGORÍA (N3) *</label>
-                        <div class="subcat-combo">
-                            <input type="text" class="subcat-input" id="editSubcatInput" placeholder="Escribe para buscar la subcategoría..." autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" required>
+                <!-- SUBCATEGORÍA (N3) con búsqueda en vivo -->
+                <div class="grupo" style="margin-bottom: 16px;">
+                    <label class="label" style="display: block; font-weight: 700; font-size: 0.78rem; color: #334155; text-transform: uppercase; margin-bottom: 6px;">SUBCATEGORÍA *</label>
+                    <div class="subcat-combo">
+                        <input type="text" class="subcat-input" id="editSubcatInput" placeholder="Escribe para buscar la subcategoría..." autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" required>
                             <input type="hidden" name="id_categoria" id="editSubcatId">
                             <input type="hidden" name="id_grupo" id="editSubcatGrupo">
                             <div class="subcat-dropdown" id="editSubcatDropdown" role="listbox">
@@ -769,8 +764,9 @@ require_once 'Core/ajaxHelper.php';
                                     <?php foreach ($categorias as $cat): ?>
                                         <div class="subcat-option" role="option" data-id="<?= htmlspecialchars($cat['id_categoria']); ?>" data-grupo="<?= htmlspecialchars($cat['id_grupo']); ?>" data-nombre="<?= htmlspecialchars($cat['nombre']); ?>">
                                             <span class="subcat-opt-name"><?= htmlspecialchars($cat['nombre']); ?></span>
-                                            <?php $__grpNom = $__subcatGrupoNombres[(string)$cat['id_grupo']] ?? ''; ?>
-                                            <?php if ($__grpNom !== ''): ?><span class="subcat-opt-path"><?= htmlspecialchars($__grpNom); ?></span><?php endif; ?>
+                                            <?php $__grpNom = $cat['grupo_nombre'] ?? ($__subcatGrupoNombres[(string)$cat['id_grupo']] ?? ''); ?>
+                                            <?php $__macroNom = $cat['momento_nombre'] ?? ''; ?>
+                                            <?php if ($__grpNom !== ''): ?><span class="subcat-opt-path"><?= htmlspecialchars(($__macroNom !== '' ? $__macroNom . ' › ' : '') . $__grpNom); ?></span><?php endif; ?>
                                         </div>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
@@ -874,7 +870,7 @@ require_once 'Core/ajaxHelper.php';
     <script src="Scripts/Vistas/Inventario/inventario.js?v=<?= time(); ?>"></script>
     <script src="Scripts/inventario.js?v=<?php echo time(); ?>"></script>
     <!-- Librerías de escáner cámara y celular siempre incluidas en el contenedor SPA -->
-    <script src="Scripts/scanner-camara.js"></script>
+    <script src="Scripts/scanner-camara.js?v=<?= filemtime(__DIR__ . '/../../Scripts/scanner-camara.js') ?>"></script>
 
 <?php if (!AjaxHelper::isAjax()): ?>
             </div> 

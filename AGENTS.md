@@ -37,7 +37,7 @@ scope `.admin-main`** (para cubrir modales fuera de `.admin-main`). Cubre:
 `.btn-close-universal.danger`, `#modalConfirmarEliminarProd .btn-close-universal`.
 
 `styles-users-admin.css` se carga en: `usuarios_admin`, `mi_perfil_admin`,
-`inventario`, `caja_punto_venta` (Cajero), `caja_admin`, `verificacion_pagos`,
+`inventario`, `caja_punto_venta` (Cajero), `caja_admin`,
 `ventas_admin`, `dashboard_ganancias`, `proveedores_admin`, `categorias_admin`,
 `compras_admin`, `carrusel_admin`, `delivery_admin`, `kardex_admin`; y se inyecta
 vía `Scripts/admin-spa.js` en la navegación POS. **NO** se carga en el storefront
@@ -58,3 +58,49 @@ vía `Scripts/admin-spa.js` en la navegación POS. **NO** se carga en el storefr
 - `C:\xampp\php\php.exe -l <view.php>` para cada view tocada.
 - `node --check <archivo.js>` para cada JS tocado.
 - Revisa que las llaves `{}` de los CSS editados estén balanceadas.
+
+## Tareas reservadas por el usuario para DeepSeek
+
+Las siguientes tareas y decisiones fueron revisadas y sugeridas conjuntamente
+por el usuario y Codex. El usuario asignó expresamente su ejecución a DeepSeek;
+otros agentes no deben implementarlas sin una nueva indicación del usuario:
+
+- Proteger el emparejamiento del escáner: una solicitud sin token no debe poder
+  obtener ni usar automáticamente el token de la última caja abierta.
+- Escapar de forma segura los datos que Logística del administrador inserta en
+  HTML y serializar los datos embebidos sin permitir inyección de contenido.
+- Agrupar la configuración de las API en un único archivo seguro. Las claves y
+  tokens deben leerse desde variables de entorno, no quedar escritos ni
+  versionados en el repositorio. También debe sustituirse cualquier credencial
+  que haya quedado expuesta.
+- Corregir los incumplimientos técnicos pendientes: trasladar los estilos inline
+  nuevos a CSS, mantener actualizada la lista de vistas que cargan los estilos
+  compartidos, normalizar espacios/finales de línea, agregar pruebas y crear un
+  `.gitignore` que excluya respaldos SQL, archivos de agentes y artefactos
+  temporales.
+- Restablecer la jerarquía y la terminología del módulo de categorías del
+  administrador: N2 debe llamarse **Categorías** y N3 debe llamarse
+  **Subcategorías**. Los registros N3 administrados en
+  `Views/Admin/categorias_admin.php` y `Scripts/Admin/categorias_admin.js` deben
+  aparecer como subcategorías en títulos, botones, formularios, mensajes,
+  validaciones y exportaciones; su registro padre N2 continúa siendo la
+  categoría. No cambiar la estructura de la base de datos para esta corrección.
+- Mantener `caja_admin` como una vista de supervisión de solo lectura, sin
+  habilitar botones, modales ni rutas de apertura, movimientos o cierre para el
+  administrador. Sin embargo, debe cerrarse mediante la lógica normal de cierre
+  de caja la sesión abierta heredada del administrador: `id_sesion = 10`,
+  `caja_id = CAJA-01`, `id_usuario = 1`, abierta el `2026-10-01 01:23:22`.
+  Antes de cerrarla, recalcular y verificar el efectivo esperado, registrar el
+  dinero contado, la diferencia y la observación que corresponda, preservando
+  el historial y sin modificar la sesión abierta del cajero (`id_sesion = 12`).
+
+Decisiones funcionales confirmadas por el usuario:
+
+- En el POS se conserva el ID como respaldo cuando el producto no tiene SKU ni
+  código de barras.
+- No implementar los atajos F4 y F8 ni la suspensión/recuperación de ventas.
+- La consulta de clientes se mantiene únicamente por DNI; no agregar RUC.
+- No modificar por estas tareas el esquema ni el volcado de la base de datos;
+  la base local actual es la referencia indicada por el usuario.
+- La corrección de caracteres dañados de Inventario ya fue resuelta; no debe
+  volver a registrarse como tarea pendiente.

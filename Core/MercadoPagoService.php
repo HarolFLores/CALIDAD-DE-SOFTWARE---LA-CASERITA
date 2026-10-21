@@ -13,18 +13,12 @@ class MercadoPagoService
     public function __construct()
     {
         $configFile = __DIR__ . '/../Config/mercadopago.php';
-        if (file_exists($configFile)) {
-            $config = require $configFile;
-            $this->publicKey   = $config['public_key'] ?? '';
-            $this->accessToken = $config['access_token'] ?? '';
-            $this->sandbox     = !empty($config['sandbox']);
-            $this->currencyId  = $config['currency_id'] ?? 'PEN';
-        } else {
-            $this->publicKey   = 'APP_USR-3fd11a03-526f-4416-89c9-dc7f160ba809';
-            $this->accessToken = 'APP_USR-5355592679688774-101520-2fcf0788bb3d34caa467574e3343688e-3766231487';
-            $this->sandbox     = true;
-            $this->currencyId  = 'PEN';
-        }
+        $config = is_file($configFile) ? require $configFile : [];
+
+        $this->publicKey   = $config['public_key'] ?? '';
+        $this->accessToken = $config['access_token'] ?? '';
+        $this->sandbox     = !empty($config['sandbox']);
+        $this->currencyId  = $config['currency_id'] ?? 'PEN';
     }
 
     public function getPublicKey(): string

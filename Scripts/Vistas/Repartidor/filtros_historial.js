@@ -10,13 +10,25 @@
     if (!list || !search || !status || !dateFrom || !dateTo) return;
 
     const items = Array.from(list.querySelectorAll('.history-item'));
+    const pageContainer = document.getElementById('deliveryHistoryPag');
+    let matched = [];
+    let paginator = null;
+
+    if (pageContainer && window.TblPagination) {
+        paginator = window.TblPagination.create(pageContainer, {
+            size: 5,
+            rows: () => matched,
+            show: (el) => { el.hidden = false; },
+            hide: (el) => { el.hidden = true; }
+        });
+    }
 
     function aplicarFiltros() {
         const query = search.value.trim().toLocaleLowerCase();
         const selectedStatus = status.value;
         const from = dateFrom.value;
         const to = dateTo.value;
-        let visibleCount = 0;
+        matched = [];
 
         items.forEach((item) => {
             const matchesText = !query || (item.dataset.search || '').toLocaleLowerCase().includes(query);
@@ -24,9 +36,12 @@
             const itemDate = item.dataset.date || '';
             const matchesDate = (!from || (itemDate && itemDate >= from)) && (!to || (itemDate && itemDate <= to));
             const visible = matchesText && matchesStatus && matchesDate;
-            item.hidden = !visible;
-            if (visible) visibleCount += 1;
+            if (visible) matched.push(item);
+            else item.hidden = true;
         });
+
+        const visibleCount = matched.length;
+        if (paginator) paginator.update(true);
 
         count.textContent = `${visibleCount} de ${items.length} entregas`;
         if (empty) empty.hidden = visibleCount > 0;

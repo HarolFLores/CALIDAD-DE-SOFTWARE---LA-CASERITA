@@ -52,14 +52,15 @@ if (!empty($categorias_bd)) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gestion de Categorias - ERP La Caserita</title>
+<title>Gestión de Subcategorías - ERP La Caserita</title>
 <link rel="icon" type="image/png" href="Images/logo_backup.png">
 <link rel="stylesheet" href="Styles/global.css?v=<?= time(); ?>">
 <link rel="stylesheet" href="Styles/styles-home.css?v=<?= time(); ?>">
 <link rel="stylesheet" href="Styles/styles-users-admin.css?v=<?= time(); ?>">
 <link rel="stylesheet" href="Styles/admin-spa.css?v=<?= time(); ?>">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="Scripts/admin-spa.js?v=<?= time(); ?>" defer></script>
+    <script src="Scripts/admin-spa.js?v=<?= time(); ?>" defer></script>
+    <script src="Scripts/pagination.js?v=<?= time(); ?>"></script>
 <link rel="stylesheet" href="Styles/Vistas/Admin/categorias_admin.css?v=<?= filemtime(__DIR__ . '/../../Styles/Vistas/Admin/categorias_admin.css'); ?>">
 </head>
 <body>
@@ -73,7 +74,7 @@ if (!empty($categorias_bd)) {
 </button>
 <div class="admin-topbar-brand">
 <span class="brand-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span>
-<span class="brand-title">Categorías</span>
+<span class="brand-title">Subcategorías</span>
 </div>
 </div>
 <div class="admin-topbar-actions"><?php include __DIR__ . '/partials/admin_topbar_actions.php'; ?></div>
@@ -149,169 +150,28 @@ if (!empty($categorias_bd)) {
 </script>
 <?php endif; ?>
 
-<!-- TARJETAS CUADRADAS DE MÉTRICAS (ORDEN SOLICITADO: SUBCATEGORÍAS, CATEGORÍAS, MACROCATEGORÍAS, CAT ACTIVAS/INACTIVAS, SUBCAT ACTIVAS/INACTIVAS) -->
+<!-- TARJETAS CUADRADAS DE MÉTRICAS (SOLO SUBCATEGORÍAS N3) -->
 <div class="stats-grid-square">
     <div class="stat-card-square active-tab" id="tabCardSubcategorias" onclick="window.switchTab('subcategorias', 'all')">
-        <span class="stat-title">SUBCATEGORÍAS (N3)</span>
+        <span class="stat-title">SUBCATEGORÍAS</span>
         <span class="stat-val"><?= $countSubcats; ?></span>
     </div>
-    <div class="stat-card-square" id="tabCardCategorias" onclick="window.switchTab('categorias', 'all')">
-        <span class="stat-title">CATEGORÍAS (N2)</span>
-        <span class="stat-val"><?= $countGrupos; ?></span>
-    </div>
-    <div class="stat-card-square" id="tabCardMacrocategorias" onclick="window.switchTab('macrocategorias', 'all')">
-        <span class="stat-title">MACROCATEGORÍAS (N1)</span>
-        <span class="stat-val"><?= $countMoments; ?></span>
-    </div>
-    <div class="stat-card-square" id="tabCardCatActivas" onclick="window.switchTab('categorias', 'activas')">
-        <span class="stat-title">CAT. ACTIVAS</span>
-        <span class="stat-val"><?= $countGruposActivos; ?></span>
-    </div>
-    <div class="stat-card-square" id="tabCardCatInactivas" onclick="window.switchTab('categorias', 'inactivas')">
-        <span class="stat-title">CAT. INACTIVAS</span>
-        <span class="stat-val"><?= $countGruposInactivos; ?></span>
-    </div>
     <div class="stat-card-square" id="tabCardSubActivas" onclick="window.switchTab('subcategorias', 'activas')">
-        <span class="stat-title">SUBCAT. ACTIVAS</span>
+        <span class="stat-title">SUBCATEGORÍAS ACTIVAS</span>
         <span class="stat-val"><?= $countSubcatsActivas; ?></span>
     </div>
     <div class="stat-card-square" id="tabCardSubInactivas" onclick="window.switchTab('subcategorias', 'inactivas')">
-        <span class="stat-title">SUBCAT. INACTIVAS</span>
+        <span class="stat-title">SUBCATEGORÍAS INACTIVAS</span>
         <span class="stat-val"><?= $countSubcatsInactivas; ?></span>
     </div>
 </div>
 
-<!-- TAB 1: MACROCATEGORIAS (NIVEL 1) -->
-<div id="tabViewMacrocategorias" style="display:none;background:#fff;border-radius:14px;border:1px solid #e2e8f0;box-shadow:0 4px 12px rgba(0,0,0,.03);overflow:hidden;margin-bottom:30px;">
-<div class="cat-panel-head">
-<div><h3 style="margin:0;font-size:1.15rem;font-weight:800;color:#0f172a;">Listado de Macrocategorias (Nivel 1)</h3><p style="margin:3px 0 0;font-size:.82rem;color:#64748b;">Las familias maestras de la barra de navegacion superior.</p></div>
-<input type="text" id="filtroMom" onkeyup="window.filtrarTabla('tablaMom','filtroMom',1)" placeholder="Buscar macrocategoria..." style="padding:8px 14px;border:1px solid #cbd5e1;border-radius:8px;font-size:.88rem;min-width:240px;">
-</div>
-<div style="overflow-x:auto;">
-<table style="width:100%;border-collapse:collapse;text-align:left;" id="tablaMom">
-<thead><tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
-<th style="padding:12px 18px;font-size:.76rem;font-weight:800;color:#475569;text-transform:uppercase;">ID</th>
-<th style="padding:12px 18px;font-size:.76rem;font-weight:800;color:#475569;text-transform:uppercase;">Macrocategoria (Nivel 1)</th>
-<th style="padding:12px 18px;font-size:.76rem;font-weight:800;color:#475569;text-transform:uppercase;">Descripcion</th>
-<th style="padding:12px 18px;font-size:.76rem;font-weight:800;color:#475569;text-transform:uppercase;">Estado</th>
-</tr></thead>
-<tbody>
-<?php foreach ($moments_bd as $m): ?>
-<tr style="border-bottom:1px solid #f1f5f9;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
-<td style="padding:14px 18px;font-weight:700;color:#64748b;font-size:.85rem;">#<?= (int)$m['id_momento']; ?></td>
-<td style="padding:14px 18px;"><strong style="font-size:.95rem;color:#0f172a;"><?= htmlspecialchars($m['nombre'] ?? ($m['titulo'] ?? '')); ?></strong></td>
-<td style="padding:14px 18px;color:#64748b;font-size:.88rem;max-width:300px;"><?= !empty($m['descripcion']) ? htmlspecialchars($m['descripcion']) : '<span style="color:#94a3b8;font-style:italic;">Sin descripcion</span>'; ?></td>
-<td style="padding:14px 18px;">
-    <span class="badge-status-activo"><svg width="8" height="8" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4"/></svg>Activo</span>
-</td>
-</tr>
-<?php endforeach; ?>
-</tbody>
-</table>
-</div>
-<div style="display:flex;align-items:center;justify-content:center;padding:14px 20px;border-top:1px solid #e2e8f0;background:#fff;" id="paginationControlsMom">
-    <div style="display:flex;align-items:center;gap:6px;" id="paginationListMom"></div>
-</div>
-</div>
-
-<!-- TAB 2: CATEGORIAS (NIVEL 2) -->
-<div id="tabViewCategorias" style="display:none;background:#fff;border-radius:14px;border:1px solid #e2e8f0;box-shadow:0 4px 12px rgba(0,0,0,.03);overflow:hidden;margin-bottom:30px;">
-<div class="cat-panel-head">
-<div class="cat-panel-heading"><div><h3 style="margin:0;font-size:1.15rem;font-weight:800;color:#0f172a;">Listado de Categorias (Nivel 2)</h3><p style="margin:3px 0 0;font-size:.82rem;color:#64748b;">Categorias que agrupan los productos bajo cada macrocategoria.</p></div><div class="cat-heading-actions"><button type="button" id="btnNuevoGrupo" class="cat-primary-action" onclick="window.abrirModalGrupo()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg><span>Nueva Categoría</span></button></div></div>
-<div class="cat-panel-actions">
-    <input type="text" id="filtroGrupos" onkeyup="window.filtrarTabla('tablaGrupos','filtroGrupos',2)" placeholder="Buscar categoria..." style="padding:8px 14px;border:1px solid #cbd5e1;border-radius:8px;font-size:.88rem;min-width:220px;">
-    <div class="cat-filter-wrap">
-        <button type="button" class="cat-filter-action" id="btnFiltroGrupos" onclick="window.toggleFiltroCategorias('tablaGrupos')" title="Filtrar por estado" aria-haspopup="true" aria-expanded="false">
-            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-            <span>Filtrar</span>
-        </button>
-        <div class="cat-filter-menu" id="filtroMenuGrupos" role="menu">
-            <button type="button" class="cat-filter-option is-active" data-filtro="all" onclick="window.setFiltroEstadoCategoria('tablaGrupos','all')">Todos</button>
-            <button type="button" class="cat-filter-option" data-filtro="activas" onclick="window.setFiltroEstadoCategoria('tablaGrupos','activas')">Solo activas</button>
-            <button type="button" class="cat-filter-option" data-filtro="inactivas" onclick="window.setFiltroEstadoCategoria('tablaGrupos','inactivas')">Solo inactivas</button>
-        </div>
-    </div>
-</div>
-</div>
-<div style="overflow-x:auto;">
-<table style="width:100%;border-collapse:collapse;text-align:left;" id="tablaGrupos">
-<thead><tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
-<th style="padding:12px 18px;font-size:.76rem;font-weight:800;color:#475569;text-transform:uppercase;">ID</th>
-<th style="padding:12px 18px;font-size:.76rem;font-weight:800;color:#475569;text-transform:uppercase;">Imagen</th>
-<th style="padding:12px 18px;font-size:.76rem;font-weight:800;color:#475569;text-transform:uppercase;">Categoria (Nivel 2)</th>
-<th style="padding:12px 18px;font-size:.76rem;font-weight:800;color:#475569;text-transform:uppercase;">Macrocategoria (Nivel 1)</th>
-<th style="padding:12px 18px;font-size:.76rem;font-weight:800;color:#475569;text-transform:uppercase;">Descripcion</th>
-<th style="padding:12px 18px;font-size:.76rem;font-weight:800;color:#475569;text-transform:uppercase;">Estado</th>
-<th style="width: 48px; text-align: center;"></th>
-</tr></thead>
-<tbody>
-<?php if (!empty($grupMomento_bd)): ?>
-<?php foreach ($grupMomento_bd as $g): 
-    $gImg = !empty($g['imagen']) ? $g['imagen'] : 'Images/icono.png'; 
-    $esActivo = !isset($g['activo']) || $g['activo'] == 1;
-?>
-<tr data-activo="<?= $esActivo ? 1 : 0; ?>" style="border-bottom:1px solid #f1f5f9;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
-<td style="padding:14px 18px;font-weight:700;color:#64748b;font-size:.85rem;">#<?= (int)$g['id_grupo']; ?></td>
-<td style="padding:14px 18px;"><img src="<?= htmlspecialchars($gImg); ?>" alt="" class="cat-thumb-img" onerror="this.onerror=null;this.src='Images/icono.png';"></td>
-<td style="padding:14px 18px;"><strong style="font-size:.95rem;color:#0f172a;"><?= htmlspecialchars($g['nombre']); ?></strong></td>
-<td style="padding:14px 18px;">
-    <?php if (!empty($g['momento_nombre'])): ?>
-        <span class="cat-hierarchy-pill cat-macro-pill"><?= htmlspecialchars($g['momento_nombre']); ?></span>
-    <?php else: ?>
-        <span style="color:#94a3b8;font-size:.82rem;font-style:italic;">Sin asignar</span>
-    <?php endif; ?>
-</td>
-<td style="padding:14px 18px;color:#64748b;font-size:.88rem;max-width:240px;"><?= !empty($g['descripcion']) ? htmlspecialchars($g['descripcion']) : '<span style="color:#94a3b8;font-style:italic;">Sin descripcion</span>'; ?></td>
-<td style="padding:14px 18px;">
-    <?php if ($esActivo): ?>
-        <span class="badge-status-activo"><svg width="8" height="8" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4"/></svg>Activo</span>
-    <?php else: ?>
-        <span class="badge-status-inactivo"><svg width="8" height="8" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4"/></svg>Inactivo</span>
-    <?php endif; ?>
-</td>
-<td style="padding:14px 18px;text-align:right;white-space:nowrap;">
-<div class="table-kebab-container">
-    <button type="button" class="table-kebab-btn" aria-label="Acciones de categoria" title="Opciones">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
-    </button>
-    <div class="table-kebab-menu">
-        <button type="button" class="table-kebab-item" onclick='window.editarGrupo(<?= json_encode($g,JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP); ?>)'>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-            Editar
-        </button>
-        <?php if ($esActivo): ?>
-        <button type="button" class="table-kebab-item" onclick='window.confirmarCambioEstadoCategoria("grupo", <?= (int)$g['id_grupo']; ?>, 0, <?= json_encode($g['nombre'], JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP); ?>)'>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
-            Desactivar
-        </button>
-        <?php else: ?>
-        <button type="button" class="table-kebab-item" onclick='window.confirmarCambioEstadoCategoria("grupo", <?= (int)$g['id_grupo']; ?>, 1, <?= json_encode($g['nombre'], JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP); ?>)'>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg>
-            Activar
-        </button>
-        <?php endif; ?>
-    </div>
-</div>
-</td>
-</tr>
-<?php endforeach; ?>
-<?php else: ?>
-<tr><td colspan="7" style="text-align:center;padding:40px;color:#64748b;">No hay categorias registradas.</td></tr>
-<?php endif; ?>
-</tbody>
-</table>
-</div>
-<div style="display:flex;align-items:center;justify-content:center;padding:14px 20px;border-top:1px solid #e2e8f0;background:#fff;" id="paginationControlsGrupos">
-    <div style="display:flex;align-items:center;gap:6px;" id="paginationListGrupos"></div>
-</div>
-</div>
-
-<!-- TAB 3: SUBCATEGORIAS (NIVEL 3) -->
+<!-- TAB 3: SUBCATEGORÍAS (NIVEL 3) -->
 <div id="tabViewSubcategorias" style="background:#fff;border-radius:14px;border:1px solid #e2e8f0;box-shadow:0 4px 12px rgba(0,0,0,.03);overflow:hidden;margin-bottom:30px;">
 <div class="cat-panel-head">
-<div class="cat-panel-heading"><div><h3 style="margin:0;font-size:1.15rem;font-weight:800;color:#0f172a;">Listado de Subcategorias (Nivel 3)</h3><p style="margin:3px 0 0;font-size:.82rem;color:#64748b;">Subcategorias de productos asociadas a una Categoria y Macrocategoria.</p></div><div class="cat-heading-actions"><button type="button" id="btnNuevaCategoria" class="cat-primary-action" onclick="window.abrirModalCategoria()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg><span>Nueva Subcategoría</span></button><button type="button" class="cat-primary-action" onclick="window.abrirModalGrupo()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg><span>Nueva Categoría</span></button><button type="button" class="cat-export-action" onclick="window.exportarSubcategoriasPDF()" title="Exportar el listado completo de subcategorías a PDF"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><polyline points="9 15 12 18 15 15"></polyline></svg><span>Exportar PDF</span></button></div></div>
+<div class="cat-panel-heading"><div><h3 style="margin:0;font-size:1.15rem;font-weight:800;color:#0f172a;">Listado de Subcategorías</h3><p style="margin:3px 0 0;font-size:.82rem;color:#64748b;">Subcategorías de productos; cada una pertenece a una categoría.</p></div><div class="cat-heading-actions"><button type="button" id="btnNuevaCategoria" class="cat-primary-action" onclick="window.abrirModalCategoria()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg><span>Nueva Subcategoría</span></button><button type="button" class="cat-export-action" onclick="window.exportarSubcategoriasPDF()" title="Exportar el listado completo de subcategorías a PDF"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><polyline points="9 15 12 18 15 15"></polyline></svg><span>Exportar PDF</span></button></div></div>
 <div class="cat-panel-actions">
-    <input type="text" id="filtroCategorias" onkeyup="window.filtrarTabla('tablaCategorias','filtroCategorias',2)" placeholder="Buscar subcategoria..." style="padding:8px 14px;border:1px solid #cbd5e1;border-radius:8px;font-size:.88rem;min-width:220px;">
+    <input type="text" id="filtroCategorias" onkeyup="window.filtrarTabla('tablaCategorias','filtroCategorias',2)" placeholder="Buscar subcategoría..." style="padding:8px 14px;border:1px solid #cbd5e1;border-radius:8px;font-size:.88rem;min-width:220px;">
     <div class="cat-filter-wrap">
         <button type="button" class="cat-filter-action" id="btnFiltroCategorias" onclick="window.toggleFiltroCategorias('tablaCategorias')" title="Filtrar por estado" aria-haspopup="true" aria-expanded="false">
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
@@ -330,8 +190,8 @@ if (!empty($categorias_bd)) {
 <thead><tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
 <th style="padding:12px 18px;font-size:.76rem;font-weight:800;color:#475569;text-transform:uppercase;">ID</th>
 <th style="padding:12px 18px;font-size:.76rem;font-weight:800;color:#475569;text-transform:uppercase;">Imagen</th>
-<th style="padding:12px 18px;font-size:.76rem;font-weight:800;color:#475569;text-transform:uppercase;">Subcategoria (Nivel 3)</th>
-<th style="padding:12px 18px;font-size:.76rem;font-weight:800;color:#475569;text-transform:uppercase;">Macrocategoria / Categoria</th>
+<th style="padding:12px 18px;font-size:.76rem;font-weight:800;color:#475569;text-transform:uppercase;">Subcategoría</th>
+<th style="padding:12px 18px;font-size:.76rem;font-weight:800;color:#475569;text-transform:uppercase;">Categoría</th>
 <th style="padding:12px 18px;font-size:.76rem;font-weight:800;color:#475569;text-transform:uppercase;">Descripcion</th>
 <th style="padding:12px 18px;font-size:.76rem;font-weight:800;color:#475569;text-transform:uppercase;">Estado</th>
 <th style="width: 48px; text-align: center;"></th>
@@ -348,13 +208,9 @@ if (!empty($categorias_bd)) {
 <td style="padding:14px 18px;"><strong style="font-size:.95rem;color:#0f172a;"><?= htmlspecialchars($cat['nombre']); ?></strong></td>
 <td style="padding:14px 18px;">
     <div class="cat-hierarchy-list">
-    <?php if (!empty($cat['momento_nombre'])): ?>
-        <span class="cat-hierarchy-pill cat-macro-pill"><?= htmlspecialchars($cat['momento_nombre']); ?></span>
-    <?php endif; ?>
     <?php if (!empty($cat['grupo_nombre'])): ?>
         <span class="cat-hierarchy-pill cat-group-pill"><?= htmlspecialchars($cat['grupo_nombre']); ?></span>
-    <?php endif; ?>
-    <?php if (empty($cat['momento_nombre']) && empty($cat['grupo_nombre'])): ?>
+    <?php else: ?>
         <span style="color:#94a3b8;font-size:.82rem;font-style:italic;">Sin asignar</span>
     <?php endif; ?>
     </div>
@@ -367,7 +223,7 @@ if (!empty($categorias_bd)) {
 </td>
 <td style="padding:14px 18px;text-align:right;white-space:nowrap;">
 <div class="table-kebab-container">
-    <button type="button" class="table-kebab-btn" aria-label="Acciones de categoría" title="Opciones">
+    <button type="button" class="table-kebab-btn" aria-label="Acciones de subcategoría" title="Opciones">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
     </button>
     <div class="table-kebab-menu">
@@ -392,75 +248,19 @@ if (!empty($categorias_bd)) {
 </tr>
 <?php endforeach; ?>
 <?php else: ?>
-<tr><td colspan="7" style="text-align:center;padding:40px;color:#64748b;">No hay subcategorias registradas.</td></tr>
+<tr><td colspan="7" style="text-align:center;padding:40px;color:#64748b;">No hay subcategorías registradas.</td></tr>
 <?php endif; ?>
 </tbody>
 </table>
 </div>
-<div style="display:flex;align-items:center;justify-content:center;padding:14px 20px;border-top:1px solid #e2e8f0;background:#fff;" id="paginationControlsCat">
-    <div style="display:flex;align-items:center;gap:6px;" id="paginationListCat"></div>
-</div>
+            <div class="pg-footer" id="paginationListCat"></div>
 </div>
 
-<!-- MODAL CATEGORIA (NIVEL 2) -->
-<div class="cat-modal-overlay" id="modalGrupoAdmin" onclick="if(event.target===this)window.cerrarModalId('modalGrupoAdmin')">
-<div class="cat-modal-card">
-<div style="padding-bottom:16px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
-<h3 id="tituloModalGrupo" style="margin:0;font-size:1.25rem;font-weight:800;color:#0f172a;">Nueva Categoria</h3>
-<button type="button" onclick="window.cerrarModalId('modalGrupoAdmin')" class="cat-modal-close-btn" aria-label="Cerrar modal" title="Cerrar">
-<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-</button>
-</div>
-<form method="POST" action="index.php?action=agregar_grupo" enctype="multipart/form-data" id="formGrupoAdmin">
-<input type="hidden" name="id_grupo" id="grpId">
-<input type="hidden" name="redirect_to" value="categorias_admin">
-<div style="margin-bottom:16px;">
-<label style="display:block;font-weight:700;font-size:.82rem;color:#334155;text-transform:uppercase;margin-bottom:6px;">Nombre de la Categoria (Nivel 2) *</label>
-<input type="text" name="nombre" id="grpNombre" required placeholder="Ej. Frutas, Verduras, Carnes y Aves, Mascotas..." style="width:100%;padding:10px 14px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:.95rem;box-sizing:border-box;outline:none;">
-</div>
-<div style="margin-bottom:16px;">
-<label style="display:block;font-weight:700;font-size:.82rem;color:#334155;text-transform:uppercase;margin-bottom:6px;">Macrocategoria (Nivel 1) *</label>
-<select name="id_momento" id="grpMomentoSelect" required style="width:100%;padding:10px 14px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:.9rem;box-sizing:border-box;background:#fff;outline:none;">
-<option value="">-- Seleccionar Macrocategoria --</option>
-<?php foreach ($moments_bd as $m): ?>
-<option value="<?= (int)$m['id_momento']; ?>"><?= htmlspecialchars($m['nombre'] ?? ($m['titulo'] ?? 'Macrocategoria')); ?></option>
-<?php endforeach; ?>
-</select>
-</div>
-<div style="margin-bottom:16px;">
-<label style="display:block;font-weight:700;font-size:.82rem;color:#334155;text-transform:uppercase;margin-bottom:6px;">Descripcion (Opcional)</label>
-<textarea name="descripcion" id="grpDescripcion" rows="2" placeholder="Breve detalle..." style="width:100%;padding:10px 14px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:.95rem;box-sizing:border-box;resize:vertical;outline:none;"></textarea>
-</div>
-<div style="margin-bottom:20px;">
-<label style="display:block;font-weight:700;font-size:.82rem;color:#334155;text-transform:uppercase;margin-bottom:8px;">Imagen de Categoria (Opcional)</label>
-<div style="display:flex;gap:14px;align-items:center;background:#f8fafc;padding:12px;border:1.5px solid #e2e8f0;border-radius:12px;">
-    <div style="width:52px;height:52px;border-radius:10px;border:1.5px dashed #cbd5e1;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
-        <img id="grpImgPreview" src="Images/icono.png" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null;this.src='Images/icono.png';">
-    </div>
-    <div style="flex:1;">
-        <label for="grpFileInput" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;background:#fff;border:1px solid #cbd5e1;border-radius:8px;font-size:.82rem;font-weight:700;color:#334155;cursor:pointer;transition:all .2s ease;box-shadow:0 1px 3px rgba(0,0,0,.04);" onmouseover="this.style.background='#f1f5f9';this.style.borderColor='#94a3b8';" onmouseout="this.style.background='#fff';this.style.borderColor='#cbd5e1';">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-            <span id="grpFileName">Seleccionar archivo PC...</span>
-        </label>
-        <input type="file" name="imagen" id="grpFileInput" accept="image/*" style="display:none;" onchange="window.previewGrupoFileImage(this)">
-        <div style="margin-top:8px;">
-            <input type="text" name="imagen_url" id="grpImagenUrl" placeholder="O pega enlace / ruta: Images/..." style="width:100%;padding:7px 12px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:.84rem;box-sizing:border-box;outline:none;background:#fff;" oninput="document.getElementById('grpImgPreview').src = this.value || 'Images/icono.png'">
-        </div>
-    </div>
-</div>
-</div>
-<div style="display:flex;justify-content:flex-end;gap:10px;">
-<button type="submit" id="btnGuardarGrp" style="padding:10px 22px;border-radius:8px;border:none;background:#15803d;color:#fff;font-weight:700;cursor:pointer;">Guardar Categoria</button>
-</div>
-</form>
-</div>
-</div>
-
-<!-- MODAL SUBCATEGORIA (NIVEL 3) -->
+<!-- MODAL SUBCATEGORÍA (NIVEL 3) -->
 <div class="cat-modal-overlay" id="modalCategoriaAdmin" onclick="if(event.target===this)window.cerrarModalId('modalCategoriaAdmin')">
 <div class="cat-modal-card">
 <div style="padding-bottom:16px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
-<h3 id="tituloModalCat" style="margin:0;font-size:1.25rem;font-weight:800;color:#0f172a;">Nueva Subcategoria</h3>
+<h3 id="tituloModalCat" style="margin:0;font-size:1.25rem;font-weight:800;color:#0f172a;">Nueva Subcategoría</h3>
 <button type="button" onclick="window.cerrarModalId('modalCategoriaAdmin')" class="cat-modal-close-btn" aria-label="Cerrar modal" title="Cerrar">
 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
 <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -472,35 +272,26 @@ if (!empty($categorias_bd)) {
 <input type="hidden" name="id_categoria" id="catId">
 <input type="hidden" name="redirect_to" value="categorias_admin">
 <div style="margin-bottom:16px;">
-<label style="display:block;font-weight:700;font-size:.82rem;color:#334155;text-transform:uppercase;margin-bottom:6px;">Nombre de la Subcategoria *</label>
+<label style="display:block;font-weight:700;font-size:.82rem;color:#334155;text-transform:uppercase;margin-bottom:6px;">Nombre de la Subcategoría *</label>
 <input type="text" name="nombre" id="catNombre" required placeholder="Ej. Pollo, Res, Cerdo, Alimento para Perros..." style="width:100%;padding:10px 14px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:.95rem;box-sizing:border-box;outline:none;">
 </div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
-<div>
-<label style="display:block;font-weight:700;font-size:.82rem;color:#334155;text-transform:uppercase;margin-bottom:6px;">Macrocategoria *</label>
-<select name="id_momento" id="catMomentoSelect" required onchange="window.filtrarSubcats()" style="width:100%;padding:10px 14px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:.9rem;box-sizing:border-box;background:#fff;outline:none;">
-<option value="">-- Seleccionar --</option>
-<?php foreach ($moments_bd as $m): ?>
-<option value="<?= (int)$m['id_momento']; ?>"><?= htmlspecialchars($m['nombre'] ?? ($m['titulo'] ?? 'Macrocategoria')); ?></option>
-<?php endforeach; ?>
-</select>
-</div>
-<div>
-<label style="display:block;font-weight:700;font-size:.82rem;color:#334155;text-transform:uppercase;margin-bottom:6px;">Categoria</label>
-<select name="id_grupo" id="catGrupoSelect" disabled style="width:100%;padding:10px 14px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:.9rem;box-sizing:border-box;background:#f1f5f9;outline:none;cursor:not-allowed;color:#94a3b8;">
-<option value="">-- Seleccionar --</option>
+<div class="cat-combo-field">
+<label class="cat-combo-label" for="catGrupoSelect">Categoría *</label>
+<input type="hidden" name="id_momento" id="catMomentoId" value="">
+<select name="id_grupo" id="catGrupoSelect" class="cat-select" required>
+<option value="">Selecciona una categoría</option>
 <?php foreach ($grupMomento_bd as $g): ?>
 <option value="<?= (int)$g['id_grupo']; ?>" data-momento="<?= (int)$g['id_momento']; ?>"><?= htmlspecialchars($g['nombre']); ?></option>
 <?php endforeach; ?>
 </select>
-</div>
+<p class="cat-combo-help">La subcategoría se guardará dentro de la categoría seleccionada.</p>
 </div>
 <div style="margin-bottom:16px;">
 <label style="display:block;font-weight:700;font-size:.82rem;color:#334155;text-transform:uppercase;margin-bottom:6px;">Descripcion (Opcional)</label>
 <textarea name="descripcion" id="catDescripcion" rows="2" placeholder="Breve detalle..." style="width:100%;padding:10px 14px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:.95rem;box-sizing:border-box;resize:vertical;outline:none;"></textarea>
 </div>
 <div style="margin-bottom:20px;">
-<label style="display:block;font-weight:700;font-size:.82rem;color:#334155;text-transform:uppercase;margin-bottom:8px;">Imagen de Subcategoria (Opcional)</label>
+<label style="display:block;font-weight:700;font-size:.82rem;color:#334155;text-transform:uppercase;margin-bottom:8px;">Imagen de Subcategoría (Opcional)</label>
 <div style="display:flex;gap:14px;align-items:center;background:#f8fafc;padding:12px;border:1.5px solid #e2e8f0;border-radius:12px;">
     <div style="width:52px;height:52px;border-radius:10px;border:1.5px dashed #cbd5e1;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
         <img id="catImgPreview" src="Images/icono.png" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null;this.src='Images/icono.png';">
@@ -518,7 +309,7 @@ if (!empty($categorias_bd)) {
 </div>
 </div>
 <div style="display:flex;justify-content:flex-end;gap:10px;">
-<button type="submit" id="btnGuardarCat" style="padding:10px 22px;border-radius:8px;border:none;background:#15803d;color:#fff;font-weight:700;cursor:pointer;">Guardar Subcategoria</button>
+<button type="submit" id="btnGuardarCat" style="padding:10px 22px;border-radius:8px;border:none;background:#15803d;color:#fff;font-weight:700;cursor:pointer;">Guardar Subcategoría</button>
 </div>
 </form>
 </div>

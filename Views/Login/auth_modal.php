@@ -6,6 +6,11 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 $csrf_token = $_SESSION['csrf_token'];
+$authApisConfig = [];
+if (is_file(__DIR__ . '/../../Config/apis.php')) {
+    $authApisConfig = require __DIR__ . '/../../Config/apis.php';
+}
+$authGoogleClientId = $authApisConfig['google']['client_id'] ?? '';
 ?>
 
 <!-- Estilos del Modal de Autenticación -->
@@ -66,8 +71,8 @@ $csrf_token = $_SESSION['csrf_token'];
                         </button>
                     </div>
 
-                    <div style="text-align: right; margin-bottom: 14px;">
-                        <a href="index.php?action=recuperar" style="font-size: 0.8rem; color: #15803D; text-decoration: none; font-weight: 600;">¿Olvidaste tu contraseña?</a>
+                    <div class="auth-forgot-row">
+                        <a href="index.php?action=recuperar" class="auth-forgot-link">¿Olvidaste tu contraseña?</a>
                     </div>
 
                     <button type="submit" id="btnModalLoginSubmit" class="auth-btn">Iniciar Sesión</button>
@@ -89,7 +94,7 @@ $csrf_token = $_SESSION['csrf_token'];
                         <span>Iniciar sesión con Google</span>
                     </button>
                     <!-- Google Identity Hidden Render Target -->
-                    <div id="modalGoogleTarget" style="display: none;"></div>
+                    <div id="modalGoogleTarget" style="display: none;" data-client-id="<?= htmlspecialchars($authGoogleClientId, ENT_QUOTES, 'UTF-8') ?>"></div>
                 </div>
 
                 <p class="auth-switch-text">

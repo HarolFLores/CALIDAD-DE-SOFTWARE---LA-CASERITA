@@ -123,6 +123,10 @@ body.pos-body .btn-menu-mobile {
   color: #ffffff;
 }
 
+.pos-header .pos-brand {
+  margin-inline: auto;
+}
+
 .pos-brand i {
   color: var(--pos-accent-light);
 }
@@ -208,20 +212,47 @@ body.pos-body .btn-menu-mobile {
 .pos-container {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr));
-  gap: clamp(1rem, 2vw, 1.5rem);
-  padding: clamp(1rem, 2vw, 1.5rem);
+  grid-template-columns: minmax(0, 1fr) 420px;
+  align-items: start;
+  gap: clamp(1rem, 1.5vw, 1.5rem);
+  padding: clamp(1rem, 1.5vw, 1.5rem);
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.pos-left-panel,
-.pos-right-panel {
+.pos-left-panel {
+  min-width: 0;
   background: var(--pos-card);
   border-radius: 16px;
   border: 1px solid var(--pos-border);
-  padding: clamp(1rem, 2vw, 1.5rem);
+  padding: clamp(1rem, 1.5vw, 1.5rem);
   display: flex;
   flex-direction: column;
   box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+}
+
+.pos-right-panel {
+  width: 100%;
+  max-width: 420px;
+  background: var(--pos-card);
+  border-radius: 16px;
+  border: 1px solid var(--pos-border);
+  padding: clamp(1rem, 1.5vw, 1.25rem);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+  position: sticky;
+  top: 1rem;
+}
+
+@media (max-width: 992px) {
+  .pos-container {
+    grid-template-columns: 1fr;
+  }
+  .pos-right-panel {
+    max-width: 100%;
+    position: static;
+  }
 }
 
 
@@ -400,6 +431,23 @@ body.pos-body .btn-menu-mobile {
   color: var(--pos-primary);
 }
 
+.pos-search-item-old-price {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-decoration: line-through;
+}
+
+.pos-search-discount-badge {
+  display: inline-flex;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
 .pos-stock-badge {
   font-size: 0.72rem;
   font-weight: 700;
@@ -460,49 +508,116 @@ body.pos-body .btn-menu-mobile {
   color: var(--pos-text);
 }
 
-.pos-qty-control {
+/* Celda de Producto con Miniatura e Info */
+.pos-product-item-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pos-product-img-box {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2px;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  flex-shrink: 0;
+}
+
+.pos-product-img-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
+}
+
+.pos-product-img-box img.pos-img-fallback {
+  object-fit: contain;
+  padding: 4px;
+  opacity: 0.65;
+}
+
+.pos-product-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pos-product-name {
+  color: #0f172a;
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+/* Control de Cantidad estilo Carrito (Píldora segmentada con hover verde) */
+html body .pos-qty-control {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  overflow: hidden;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 9999px;
   background: #ffffff;
-  border: 1px solid #cfe3d4;
-  padding: 4px;
-  border-radius: 999px;
-  box-shadow: 0 2px 6px rgba(21, 128, 61, 0.08);
+  height: 32px;
+  padding: 0;
+  gap: 0;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  vertical-align: middle;
 }
 
 html body .btn-qty {
-  background: #eef7f0;
-  border: 1px solid transparent;
-  color: var(--pos-primary);
-  font-size: 1rem;
+  width: 32px;
+  height: 100%;
+  min-width: 32px;
+  min-height: 32px;
+  border: none;
+  background: #ffffff;
+  color: var(--pos-primary, #15803d);
+  font-size: 1.15rem;
   font-weight: 800;
   cursor: pointer;
-  width: 30px;
-  height: 30px;
-  min-width: 30px;
-  min-height: 30px;
-  padding: 0;
-  border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+  transition: background-color 0.18s ease, color 0.18s ease;
+  border-radius: 0;
+  flex-shrink: 0;
+  padding: 0;
+  line-height: 1;
 }
 
-.btn-qty:hover {
-  background: var(--pos-primary);
+html body .btn-qty:hover {
+  background: var(--pos-primary, #15803d);
   color: #ffffff;
-  border-color: var(--pos-primary);
-  transform: scale(1.06);
+  border-color: transparent;
+  transform: none;
+}
+
+html body .btn-qty:active {
+  background: #166534;
+  color: #ffffff;
 }
 
 html body .pos-qty-control > span {
-  min-width: 22px;
-  padding: 0 2px;
-  color: var(--pos-text);
+  min-width: 26px;
+  padding: 0 4px;
+  color: var(--pos-text, #0f172a);
+  font-size: 0.88rem;
+  font-weight: 800;
   text-align: center;
   font-variant-numeric: tabular-nums;
+  line-height: 1;
 }
 
 .pos-validation-overlay {

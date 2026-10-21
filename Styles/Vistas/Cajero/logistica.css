@@ -1,0 +1,401 @@
+/* ============================================================
+   LOGÍSTICA Y DESPACHO (CAJERO) - HU33
+   ============================================================ */
+
+.logistica-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.logistica-heading h1 {
+    margin: 2px 0;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.logistica-heading p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.logistica-kicker {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: #15803d;
+}
+
+.cl-board {
+    overflow: visible;
+    background: transparent;
+}
+
+.cl-summary {
+    display: grid;
+    grid-template-columns: repeat(9, minmax(112px, 1fr));
+    gap: 8px;
+    margin-bottom: 20px;
+    background: transparent;
+    overflow-x: auto;
+}
+
+.cl-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-height: 68px;
+    padding: 9px 8px;
+    border: 1px solid #dbe4ef;
+    border-radius: 9px;
+    background: #ffffff;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+}
+
+.cl-stat:hover { border-color: #86efac; background: #f8fffa; }
+.cl-stat.is-active { border-color: #16a34a; background: #f7fff9; box-shadow: 0 0 0 1px rgba(22, 163, 74, 0.08); }
+
+.cl-stat span {
+    color: #64748b;
+    font-size: 0.62rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.cl-stat strong {
+    color: #0f172a;
+    font-size: 1.12rem;
+    font-weight: 850;
+    white-space: nowrap;
+}
+
+.cl-stat.is-active strong { color: #15803d; }
+
+.cl-toolbar {
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border: 1px solid #e2e8f0;
+    border-bottom: 0;
+    border-radius: 14px 14px 0 0;
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+.cl-toolbar h2 { margin: 0; color: #0f172a; font-size: 0.95rem; font-weight: 850; white-space: nowrap; }
+.cl-toolbar h2 span { font-weight: 700; }
+.cl-toolbar-filters { display: flex; align-items: center; justify-content: flex-end; gap: 9px; }
+
+.cl-search {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: min(480px, 100%);
+    min-height: 42px;
+    padding: 0 13px;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    background: #ffffff;
+}
+
+.cl-search:focus-within { border-color: #15803d; box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.1); }
+.cl-search svg { width: 18px; color: #64748b; flex: 0 0 18px; }
+.cl-search input { width: 100%; border: 0; outline: 0; background: transparent; color: #0f172a; font: inherit; font-size: 0.84rem; }
+
+.cl-filter,
+.cl-state-select {
+    min-height: 42px;
+    padding: 0 38px 0 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #334155;
+    font: inherit;
+    font-size: 0.84rem;
+}
+
+.cl-filter { min-width: 180px; }
+.cl-clear-button { min-height: 42px; padding: 0 16px; border: 1px solid #cbd5e1; border-radius: 9px; background: #ffffff; color: #334155; font: inherit; font-size: 0.82rem; font-weight: 700; cursor: pointer; }
+.cl-clear-button:hover { border-color: #15803d; color: #15803d; background: #f0fdf4; }
+
+.cl-table-wrap { overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 0 0 14px 14px; background: #ffffff; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05); }
+.cl-table { width: 100%; min-width: 1050px; border-collapse: collapse; }
+.cl-table th { padding: 11px 12px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; color: #475569; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.04em; text-align: left; text-transform: uppercase; white-space: nowrap; }
+.cl-table td { padding: 12px; border-bottom: 1px solid #edf2f7; color: #334155; font-size: 0.81rem; vertical-align: middle; }
+.cl-table tbody tr:last-child td { border-bottom: 0; }
+.cl-order-row:hover { background: #f8fafc; }
+.cl-order-row.is-alert { background: #fff8f8; }
+.cl-order-row.is-alert td:first-child { box-shadow: inset 3px 0 #dc2626; }
+.cl-order-id,
+.cl-total { color: #0f172a; font-weight: 800; }
+.cl-client { max-width: 185px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+.cl-payment { max-width: 165px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cl-nowrap { white-space: nowrap; }
+.cl-align-center { text-align: center; }
+.cl-align-right { text-align: right; }
+.cl-actions-head,
+.cl-actions-cell { width: 72px; text-align: center; }
+
+.cl-time { display: inline-flex; padding: 3px 8px; border-radius: 999px; background: #f1f5f9; color: #475569; font-size: 0.73rem; font-weight: 800; white-space: nowrap; }
+.cl-time.is-alert { background: #fee2e2; color: #dc2626; }
+
+.cl-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #0f172a;
+    font-size: 0.78rem;
+    font-weight: 750;
+    white-space: nowrap;
+}
+
+.cl-status::before { content: ''; width: 8px; height: 8px; flex: 0 0 8px; border-radius: 50%; background: #f59e0b; }
+.cl-status--en_preparacion::before { background: #2563eb; }
+.cl-status--en_camino::before { background: #8b5cf6; }
+.cl-status--listo_recojo::before { background: #0891b2; }
+.cl-status--entregado::before { background: #16a34a; }
+.cl-status--cancelado::before { background: #ef4444; }
+
+.cl-kebab { position: relative; display: inline-flex; }
+.cl-kebab-button { width: 34px; height: 34px; display: inline-grid; place-items: center; padding: 0; border: 1px solid #e2e8f0; border-radius: 8px; background: #ffffff; color: #64748b; cursor: pointer; }
+.cl-kebab-button:hover,
+.cl-kebab.is-open .cl-kebab-button { border-color: #86efac; background: #f0fdf4; color: #15803d; }
+.cl-kebab-button svg { width: 17px; height: 17px; }
+.cl-kebab-menu { position: absolute; top: calc(100% + 6px); right: 0; z-index: 30; display: none; width: 168px; padding: 6px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; box-shadow: 0 14px 30px rgba(15, 23, 42, 0.16); gap: 3px; }
+.cl-kebab.is-open .cl-kebab-menu { display: grid; }
+.cl-action { width: 100%; padding: 9px 12px; border: 0; border-radius: 8px; background: transparent; color: #334155; font: inherit; font-size: 0.81rem; font-weight: 700; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 9px; box-sizing: border-box; transition: background 0.15s ease, color 0.15s ease; }
+.cl-action svg { flex-shrink: 0; color: inherit; }
+.cl-action:hover { background: #f0fdf4; color: #15803d; }
+
+.cl-empty { padding: 46px 20px; color: #94a3b8; text-align: center; }
+.cl-empty[hidden] { display: none; }
+
+.cl-modal { position: fixed; inset: 0; z-index: 10000; display: none; place-items: center; padding: 20px; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(3px); }
+.cl-modal.is-open { display: grid; }
+.cl-modal-card { width: min(720px, 96vw); max-height: 90vh; overflow: hidden; border-radius: 18px; background: #ffffff; box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28); }
+.cl-modal-small { width: min(470px, 96vw); }
+.cl-modal-header { display: flex; align-items: center; justify-content: space-between; gap: 18px; min-height: 78px; padding: 16px 22px; border-bottom: 1px solid #e2e8f0; }
+.cl-modal-header h2 { margin: 2px 0 0; color: #0f172a; font-size: 1.15rem; }
+.cl-modal-kicker { color: #15803d; font-size: 0.68rem; font-weight: 850; letter-spacing: 0.06em; text-transform: uppercase; }
+.cl-modal-close { position: static; }
+.cl-modal-body { max-height: calc(90vh - 150px); overflow-y: auto; padding: 20px 22px; }
+.cl-modal-body > label { display: block; margin-bottom: 7px; color: #475569; font-size: 0.78rem; font-weight: 800; text-transform: uppercase; }
+.cl-modal-body > p { margin: 9px 0 0; color: #94a3b8; font-size: 0.78rem; }
+.cl-state-select { width: 100%; }
+
+html body #clStateModal .cl-modal-card,
+html body #clStateModal .cl-modal-body {
+    overflow: visible;
+}
+.cl-modal-footer { display: flex; justify-content: flex-end; padding: 14px 22px 18px; border-top: 1px solid #e2e8f0; }
+.cl-primary-button { min-height: 42px; padding: 0 18px; border: 0; border-radius: 9px; background: #15803d; color: #ffffff; font: inherit; font-size: 0.84rem; font-weight: 800; cursor: pointer; }
+.cl-primary-button:hover { background: #166534; }
+.cl-primary-button:disabled { cursor: wait; opacity: 0.65; }
+
+.cl-info-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.cl-info-card { min-width: 0; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; }
+.cl-info-card > span { display: block; margin-bottom: 5px; color: #94a3b8; font-size: 0.67rem; font-weight: 800; text-transform: uppercase; }
+.cl-info-card > strong { display: block; overflow-wrap: anywhere; color: #0f172a; font-size: 0.84rem; }
+.cl-detail-total { color: #15803d; font-size: 1rem; }
+.cl-address { margin-top: 12px; padding: 12px 14px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; }
+.cl-address span { color: #94a3b8; font-size: 0.67rem; font-weight: 800; text-transform: uppercase; }
+.cl-address p { margin: 5px 0 0; color: #334155; font-size: 0.83rem; }
+.cl-products-title { margin: 20px 0 9px; color: #475569; font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase; }
+.cl-products { overflow: hidden; border: 1px solid #e2e8f0; border-radius: 10px; }
+.cl-product { display: grid; grid-template-columns: 46px minmax(0, 1fr) auto; align-items: center; gap: 11px; padding: 10px 12px; border-bottom: 1px solid #edf2f7; }
+.cl-product:last-child { border-bottom: 0; }
+.cl-product img { width: 46px; height: 46px; object-fit: cover; border: 1px solid #e2e8f0; border-radius: 8px; background: #ffffff; }
+.cl-product strong { display: block; color: #0f172a; font-size: 0.82rem; }
+.cl-product span { display: block; margin-top: 3px; color: #64748b; font-size: 0.74rem; }
+.cl-product b { color: #15803d; font-size: 0.82rem; white-space: nowrap; }
+.cl-loading { padding: 25px 0; color: #94a3b8; text-align: center; }
+.cl-error-message { padding: 25px 0; color: #dc2626; text-align: center; }
+
+.cl-toast { position: fixed; right: 22px; bottom: 22px; z-index: 11000; max-width: 360px; padding: 12px 16px; border-radius: 10px; background: #166534; color: #ffffff; font-size: 0.83rem; font-weight: 750; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.2); opacity: 0; visibility: hidden; transform: translateY(10px); transition: opacity .2s ease, visibility .2s ease, transform .2s ease; }
+.cl-toast.is-visible { opacity: 1; visibility: visible; transform: translateY(0); }
+.cl-toast.is-error { background: #b91c1c; }
+
+@media (max-width: 640px) {
+    .logistica-heading h1 { font-size: 1.15rem; }
+    .cl-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); overflow-x: visible; }
+    .cl-summary-card:last-child { grid-column: 1 / -1; }
+    .cl-toolbar { flex-direction: column; }
+    .cl-toolbar h2 { width: 100%; white-space: normal; }
+    .cl-toolbar-filters { width: 100%; flex-direction: column; }
+    .cl-filter { width: 100%; }
+    .cl-clear-button,
+    .cl-search { width: 100%; }
+    .cl-info-grid { grid-template-columns: 1fr; }
+    .cl-modal { padding: 10px; }
+    .cl-modal-header,
+    .cl-modal-body { padding-left: 16px; padding-right: 16px; }
+}
+
+@media (max-width: 390px) {
+    .cl-summary { grid-template-columns: 1fr; }
+    .cl-summary-card:last-child { grid-column: auto; }
+}
+
+
+/* ===== MODAL DE COMPROBANTE / TICKET TÉRMICO ===== */
+.cl-ticket-modal-card {
+    width: min(440px, 95vw);
+    max-height: 94vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin: auto;
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 28px 80px rgba(15, 23, 42, 0.28);
+}
+
+.cl-ticket-modal-body {
+    padding: 12px;
+    background: #f8fafc;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.cl-ticket-box {
+    background: #ffffff;
+    padding: 18px 16px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 11.5px;
+    color: #000000;
+    line-height: 1.35;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 330px;
+    margin: 0 auto;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    box-sizing: border-box;
+}
+
+.cl-ticket-header { text-align: center; margin-bottom: 8px; }
+.cl-ticket-brand { font-size: 15px; display: block; font-weight: 900; letter-spacing: 0.5px; }
+.cl-ticket-sub { font-size: 10px; color: #333; margin-top: 1px; }
+.cl-ticket-dash { margin: 6px 0; border-bottom: 1px dashed #000000; }
+.cl-ticket-doctitle { font-weight: 800; font-size: 12.5px; }
+.cl-ticket-doccode { font-weight: 900; font-size: 13.5px; margin-top: 1px; color: #000; }
+.cl-ticket-numint { font-size: 10px; color: #555; }
+
+.cl-ticket-client-info { margin-bottom: 8px; font-size: 10.5px; line-height: 1.4; text-align: left; }
+.cl-ticket-client-info strong { color: #000; }
+
+.cl-ticket-items { width: 100%; border-collapse: collapse; font-size: 10.5px; }
+.cl-ticket-items th { border-bottom: 1px solid #000; text-align: left; padding-bottom: 3px; font-weight: 800; }
+
+.cl-ticket-totals { font-size: 11px; text-align: right; line-height: 1.45; }
+.cl-ticket-grand-total { font-size: 13.5px; margin-top: 4px; font-weight: 900; border-top: 1px dashed #000; padding-top: 3px; }
+
+.cl-ticket-cash { font-size: 10.5px; margin-top: 6px; border-top: 1px dashed #000; padding-top: 4px; text-align: right; }
+.cl-ticket-obs { font-size: 10px; margin-top: 6px; border-top: 1px dashed #000; padding-top: 4px; color: #475569; text-align: left; }
+.cl-ticket-footer { text-align: center; font-size: 10px; line-height: 1.35; margin-top: 4px; }
+
+.cl-ticket-btn-group { display: flex; gap: 10px; width: 100%; }
+.cl-btn-print {
+    flex: 1;
+    padding: 10px 14px;
+    background: #15803d;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    transition: background 0.15s ease;
+}
+.cl-btn-print:hover { background: #166534; }
+
+.cl-btn-pdf {
+    flex: 1;
+    padding: 10px 14px;
+    background: #0284c7;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    transition: background 0.15s ease;
+}
+.cl-btn-pdf:hover { background: #0369a1; }
+
+.cl-btn-close-footer {
+    width: 100%;
+    padding: 8px 14px;
+    background: #ffffff;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.84rem;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s ease;
+}
+.cl-btn-close-footer:hover { background: #f8fafc; color: #0f172a; }
+
+/* ===== Impresión del Ticket en Logística ===== */
+@media print {
+    html body * { visibility: hidden; }
+    html body #clDetailModal {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: auto;
+        background: #fff;
+        padding: 0;
+        margin: 0;
+        display: block;
+        opacity: 1;
+        pointer-events: all;
+        backdrop-filter: none;
+    }
+    html body #clDetailModal > section,
+    html body #clDetailModal > section > div {
+        box-shadow: none;
+        border-radius: 0;
+        max-width: 80mm;
+        width: 80mm;
+        max-height: none;
+        margin: 0;
+        overflow: visible;
+    }
+    html body #clTicketImprimible,
+    html body #clTicketImprimible * {
+        visibility: visible;
+    }
+    html body #clTicketImprimible {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        width: 80mm;
+        max-width: 80mm;
+    }
+    html body .cl-ticket-no-print { display: none; }
+}

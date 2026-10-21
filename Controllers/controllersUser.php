@@ -32,7 +32,9 @@ class UserController{
 
     public function createUser(): void{
         if($_SERVER['REQUEST_METHOD'] == 'POST'){
-            if(!isset($_SESSION['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']){
+            $tokenPost = (string)($_POST['csrf_token'] ?? '');
+            if (empty($_SESSION['csrf_token']) || empty($tokenPost) || !hash_equals($_SESSION['csrf_token'], $tokenPost)) {
+                http_response_code(403);
                 die("Token CSRF invalido");
             }
 
@@ -568,14 +570,6 @@ class UserController{
                              . "Reply-To: no-reply@lacaserita.com\r\n";
                     require_once __DIR__ . '/../Models/MailHelper.php';
                     $enviado = MailHelper::sendEmail($correo, $asunto, $mensaje, false);
-                    
-                    // Guardar copia local para pruebas en XAMPP
-                    $backupDir = __DIR__ . '/../scratch/emails_enviados';
-                    if (!is_dir($backupDir)) {
-                        @mkdir($backupDir, 0777, true);
-                    }
-                    $backupFile = $backupDir . '/pin_' . time() . '.txt';
-                    @file_put_contents($backupFile, "Para: $correo\nAsunto: $asunto\n\n$mensaje");
 
                     $_SESSION['auth_success'] = "Hemos enviado un código PIN de 6 dígitos a su correo electrónico.";
                     header('Location: index.php?action=verificar_pin');
@@ -683,13 +677,6 @@ class UserController{
 
         require_once __DIR__ . '/../Models/MailHelper.php';
         $enviado = MailHelper::sendEmail($correo, $asunto, $mensaje, false);
-        
-        $backupDir = __DIR__ . '/../scratch/emails_enviados';
-        if (!is_dir($backupDir)) {
-            @mkdir($backupDir, 0777, true);
-        }
-        $backupFile = $backupDir . '/pin_' . time() . '.txt';
-        @file_put_contents($backupFile, "Para: $correo\nAsunto: $asunto\n\n$mensaje");
 
         $_SESSION['auth_success'] = "¡Se ha enviado un nuevo código PIN a tu correo!";
         header('Location: index.php?action=verificar_pin');

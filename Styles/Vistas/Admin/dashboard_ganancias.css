@@ -415,3 +415,20 @@ html body .fin-empty {
         display: none;
     }
 }
+
+html body .fin-products-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+html body .fin-products-card .fin-card-heading {
+    padding: 21px 21px 16px;
+    margin-bottom: 0;
+    border-bottom: 1px solid var(--fin-line);
+}
+
+@media (max-width: 768px) {
+    html body .fin-products-card .fin-card-heading {
+        padding: 17px 17px 14px;
+    }
+}

@@ -78,11 +78,15 @@ class ModeloPuntoVenta {
     }
 
     public function listarProductosCatalogo($limite = 200) {
-        $stmt = $this->conn->prepare("SELECT p.*, COALESCE(i.stock_actual, p.stock, 0) AS stock
+        $stmt = $this->conn->prepare("SELECT p.*, COALESCE(i.stock_actual, p.stock, 0) AS stock, COALESCE(i.stock_minimo, 5) AS stock_minimo,
+                c.nombre AS categoria_nombre, COALESCE(gm.nombre, 'Sin categoría') AS grupo_nombre
             FROM producto p
             LEFT JOIN inventario i ON p.id_producto = i.id_producto
+            LEFT JOIN categoria c ON p.id_categoria = c.id_categoria
+            LEFT JOIN grupo_momento gm ON p.id_grupo = gm.id_grupo
             WHERE p.activo = 1 OR p.activo IS NULL
-            ORDER BY COALESCE(NULLIF(p.nombre, ''), p.titulo) ASC
+            ORDER BY (COALESCE(i.stock_actual, p.stock, 0) <= COALESCE(i.stock_minimo, 5)) DESC,
+                     COALESCE(NULLIF(p.nombre, ''), p.titulo) ASC
             LIMIT :limite");
         $stmt->bindValue(':limite', max(1, min(500, (int)$limite)), PDO::PARAM_INT);
         $stmt->execute();
@@ -144,7 +148,7 @@ class ModeloPuntoVenta {
         $ventas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         if (!empty($ventas)) {
-            $stmtDet = $this->conn->prepare("SELECT dp.id_producto, dp.cantidad, dp.precio_unitario, dp.subtotal, pr.nombre AS producto_nombre FROM detalle_pedido dp JOIN producto pr ON dp.id_producto = pr.id_producto WHERE dp.id_pedido = :id_ped");
+            $stmtDet = $this->conn->prepare("SELECT dp.id_producto, dp.cantidad, dp.precio_unitario, dp.subtotal, COALESCE(NULLIF(pr.nombre, ''), pr.titulo) AS producto_nombre FROM detalle_pedido dp JOIN producto pr ON dp.id_producto = pr.id_producto WHERE dp.id_pedido = :id_ped");
             foreach ($ventas as &$v) {
                 $stmtDet->bindValue(':id_ped', (int)$v['id_pedido'], PDO::PARAM_INT);
                 $stmtDet->execute();
@@ -233,8 +237,15 @@ class ModeloPuntoVenta {
         }
 
         $stockDisponible = (int)($producto['stock_disponible'] ?? $producto['stock'] ?? 0);
+        $nombreProducto = trim((string)($producto['nombre'] ?? ''));
+        if ($nombreProducto === '') {
+            $nombreProducto = trim((string)($producto['titulo'] ?? ''));
+        }
+        if ($nombreProducto === '') {
+            $nombreProducto = 'Producto #' . (int)$producto['id_producto'];
+        }
         if ($stockDisponible <= 0) {
-            return ['status' => 'error', 'message' => "El producto '{$producto['nombre']}' no cuenta con stock disponible"];
+            return ['status' => 'error', 'message' => "El producto '{$nombreProducto}' no cuenta con stock disponible"];
         }
 
         $items = json_decode($sesion['items_json'] ?? '[]', true);
@@ -243,13 +254,24 @@ class ModeloPuntoVenta {
         }
 
         $encontrado = false;
+        $imgProd = !empty($producto['imagen']) ? $producto['imagen'] : (!empty($producto['imagen_url']) ? $producto['imagen_url'] : '');
         foreach ($items as &$item) {
             if ($item['id_producto'] == $producto['id_producto']) {
                 if ($item['cantidad'] + 1 > $stockDisponible) {
-                    return ['status' => 'error', 'message' => "Stock insuficiente para agregar más unidades de '{$producto['nombre']}'"];
+                    return ['status' => 'error', 'message' => "Stock insuficiente para agregar mǭs unidades de '{$nombreProducto}'"];
                 }
                 $item['cantidad']++;
                 $item['subtotal'] = round($item['cantidad'] * $item['precio'], 2);
+                if (trim((string)($item['nombre'] ?? '')) === '') {
+                    $item['nombre'] = $nombreProducto;
+                }
+                if (empty($item['imagen']) && empty($item['imagen_url']) && !empty($imgProd)) {
+                    $item['imagen'] = $imgProd;
+                    $item['imagen_url'] = $imgProd;
+                }
+                if (!array_key_exists('precio_anterior', $item)) {
+                    $item['precio_anterior'] = isset($producto['precio_anterior']) ? (float)$producto['precio_anterior'] : null;
+                }
                 $encontrado = true;
                 break;
             }
@@ -261,11 +283,13 @@ class ModeloPuntoVenta {
             $items[] = [
                 'id_producto'   => (int)$producto['id_producto'],
                 'codigo'        => $producto['codigo_barras'] ?: $producto['codigo'],
-                'nombre'        => $producto['nombre'],
+                'nombre'        => $nombreProducto,
                 'precio'        => $precio,
+                'precio_anterior' => isset($producto['precio_anterior']) ? (float)$producto['precio_anterior'] : null,
                 'cantidad'      => 1,
                 'subtotal'      => $precio,
-                'imagen_url'    => $producto['imagen_url'] ?? ''
+                'imagen'        => $imgProd,
+                'imagen_url'    => $imgProd
             ];
         }
 
@@ -287,10 +311,10 @@ class ModeloPuntoVenta {
 
         return [
             'status' => 'success',
-            'message' => "Producto '{$producto['nombre']}' agregado a la venta",
+            'message' => "Producto '{$nombreProducto}' agregado a la venta",
             'items'   => $items,
             'total'   => $totalGeneral,
-            'producto_reciente' => $producto['nombre']
+            'producto_reciente' => $nombreProducto
         ];
     }
 
@@ -300,15 +324,22 @@ class ModeloPuntoVenta {
         if (($sesion['estado'] ?? '') !== 'abierta') return false;
 
         $nuevaCantidad = (int)$nuevaCantidad;
+        $nombreProd = '';
         if ($nuevaCantidad > 0) {
-            $stmtStk = $this->conn->prepare("SELECT p.nombre, COALESCE(i.stock_actual, p.stock, 0) AS stock_disponible
+            $stmtStk = $this->conn->prepare("SELECT p.nombre, p.titulo, COALESCE(i.stock_actual, p.stock, 0) AS stock_disponible
                 FROM producto p LEFT JOIN inventario i ON p.id_producto = i.id_producto
                 WHERE p.id_producto = :id LIMIT 1");
             $stmtStk->bindValue(':id', (int)$idProducto, PDO::PARAM_INT);
             $stmtStk->execute();
             $prodRow = $stmtStk->fetch(PDO::FETCH_ASSOC);
             $stk = (int)($prodRow['stock_disponible'] ?? 0);
-            $nombreProd = $prodRow['nombre'] ?? 'Producto';
+            $nombreProd = trim((string)($prodRow['nombre'] ?? ''));
+            if ($nombreProd === '') {
+                $nombreProd = trim((string)($prodRow['titulo'] ?? ''));
+            }
+            if ($nombreProd === '') {
+                $nombreProd = 'Producto';
+            }
 
             if ($nuevaCantidad > $stk) {
                 return [
@@ -329,6 +360,9 @@ class ModeloPuntoVenta {
                 if ($nuevaCantidad > 0) {
                     $item['cantidad'] = $nuevaCantidad;
                     $item['subtotal'] = round($item['cantidad'] * $item['precio'], 2);
+                    if (trim((string)($item['nombre'] ?? '')) === '' && $nombreProd !== '') {
+                        $item['nombre'] = $nombreProd;
+                    }
                     $nuevosItems[] = $item;
                     $totalGeneral += $item['subtotal'];
                 }
@@ -349,7 +383,7 @@ class ModeloPuntoVenta {
         return ['items' => $nuevosItems, 'total' => round($totalGeneral, 2)];
     }
 
-    public function finalizarVenta($token, $metodoPago = 'efectivo', $montoRecibido = 0, $clienteDni = '00000000', $clienteNombre = 'Público General') {
+    public function finalizarVenta($token, $metodoPago = 'efectivo', $montoRecibido = 0, $clienteDni = '00000000', $clienteNombre = 'Público General', $pagos = []) {
         $sesion = $this->obtenerSesionPorToken($token);
         if (!$sesion) {
             return ['status' => 'error', 'message' => 'Sesión de caja no encontrada'];
@@ -365,29 +399,73 @@ class ModeloPuntoVenta {
 
         $clienteDni = trim($clienteDni ?: '00000000');
         $clienteNombre = trim($clienteNombre ?: 'Público General');
-        $metodoPago = strtolower(trim((string)$metodoPago));
-        if ($metodoPago === 'yape_plin') {
-            $metodoPago = 'yape';
-        }
-        if (!in_array($metodoPago, ['efectivo', 'tarjeta', 'yape', 'plin'], true)) {
-            return ['status' => 'error', 'message' => 'Selecciona un método de pago válido.'];
-        }
 
         $totalVenta = (float)$sesion['total_venta'];
         $montoRecibido = (float)$montoRecibido;
-        if ($metodoPago !== 'efectivo') {
-            $montoRecibido = $totalVenta;
-        } elseif ($montoRecibido < $totalVenta) {
-            return ['status' => 'error', 'message' => 'El monto recibido no cubre el total de la venta.'];
+        $metodosPermitidos = ['efectivo', 'tarjeta', 'yape'];
+
+        // Pagos divididos: normalizar la lista de pagos recibida del POS
+        $pagosLimpios = [];
+        if (is_array($pagos)) {
+            foreach ($pagos as $p) {
+                $m = strtolower(trim((string)($p['metodo'] ?? '')));
+                $monto = round((float)($p['monto'] ?? 0), 2);
+                if ($m === 'yape_plin') {
+                    $m = 'yape';
+                }
+                if ($m === '' || $monto <= 0) {
+                    continue;
+                }
+                if (!in_array($m, $metodosPermitidos, true)) {
+                    return ['status' => 'error', 'message' => 'Método de pago no permitido: ' . $m];
+                }
+                $pagosLimpios[] = ['metodo' => $m, 'monto' => $monto];
+            }
         }
-        $vueltas = ($montoRecibido > 0 && $montoRecibido >= $totalVenta) ? round($montoRecibido - $totalVenta, 2) : 0;
+
+        // Compatibilidad: si no llega desglose, se arma un único pago con metodo_pago
+        if (empty($pagosLimpios)) {
+            $metodoPago = strtolower(trim((string)$metodoPago));
+            if ($metodoPago === 'yape_plin') {
+                $metodoPago = 'yape';
+            }
+            if (!in_array($metodoPago, $metodosPermitidos, true)) {
+                return ['status' => 'error', 'message' => 'Selecciona un método de pago válido.'];
+            }
+            $pagosLimpios[] = ['metodo' => $metodoPago, 'monto' => round($totalVenta, 2)];
+        }
+
+        // Totales por método y validación de la suma
+        $totalesPorMetodo = [];
+        foreach ($pagosLimpios as $p) {
+            $totalesPorMetodo[$p['metodo']] = round(($totalesPorMetodo[$p['metodo']] ?? 0) + $p['monto'], 2);
+        }
+        $sumaPagos = round(array_sum($totalesPorMetodo), 2);
+        if (abs($sumaPagos - round($totalVenta, 2)) > 0.05) {
+            return ['status' => 'error', 'message' => 'La suma de los pagos (S/ ' . number_format($sumaPagos, 2) . ') no coincide con el total de la venta (S/ ' . number_format($totalVenta, 2) . ').'];
+        }
+
+        // Vueltos: solo aplican a la porción pagada en efectivo
+        $efectivoAplicado = round($totalesPorMetodo['efectivo'] ?? 0, 2);
+        if ($efectivoAplicado > 0) {
+            if ($montoRecibido < $efectivoAplicado) {
+                return ['status' => 'error', 'message' => 'El monto recibido en efectivo no cubre la parte en efectivo de la venta.'];
+            }
+            $vueltas = round($montoRecibido - $efectivoAplicado, 2);
+        } else {
+            $montoRecibido = round($totalVenta, 2);
+            $vueltas = 0;
+        }
+
+        $metodosUsados = array_keys($totalesPorMetodo);
+        $metodoPago = (count($metodosUsados) === 1) ? $metodosUsados[0] : 'mixto';
 
         try {
             $this->conn->beginTransaction();
 
             // Bloquear filas de productos y verificar existencias disponibles antes de proceder
             foreach ($items as $item) {
-                $stLock = $this->conn->prepare("SELECT p.nombre, p.stock, p.precio_costo, COALESCE(i.stock_actual, p.stock, 0) AS stock_inv
+                $stLock = $this->conn->prepare("SELECT p.nombre, p.titulo, p.stock, p.precio_costo, COALESCE(i.stock_actual, p.stock, 0) AS stock_inv
                     FROM producto p
                     LEFT JOIN inventario i ON p.id_producto = i.id_producto
                     WHERE p.id_producto = :id FOR UPDATE");
@@ -396,8 +474,20 @@ class ModeloPuntoVenta {
                 $prodData = $stLock->fetch(PDO::FETCH_ASSOC);
 
                 if (!$prodData) {
+                    $nombreItem = trim((string)($item['nombre'] ?? ''));
+                    if ($nombreItem === '') {
+                        $nombreItem = 'Producto #' . (int)$item['id_producto'];
+                    }
                     $this->conn->rollBack();
-                    return ['status' => 'error', 'message' => "El producto '{$item['nombre']}' ya no existe en el catálogo."];
+                    return ['status' => 'error', 'message' => "El producto '{$nombreItem}' ya no existe en el catálogo."];
+                }
+
+                $nombreProdData = trim((string)($prodData['nombre'] ?? ''));
+                if ($nombreProdData === '') {
+                    $nombreProdData = trim((string)($prodData['titulo'] ?? ''));
+                }
+                if ($nombreProdData === '') {
+                    $nombreProdData = 'Producto #' . (int)$item['id_producto'];
                 }
 
                 $stockActual = (int)min($prodData['stock'], $prodData['stock_inv']);
@@ -405,7 +495,7 @@ class ModeloPuntoVenta {
                     $this->conn->rollBack();
                     return [
                         'status' => 'error',
-                        'message' => "Stock insuficiente para '{$prodData['nombre']}'. Disponible: {$stockActual}, solicitado: {$item['cantidad']}."
+                        'message' => "Stock insuficiente para '{$nombreProdData}'. Disponible: {$stockActual}, solicitado: {$item['cantidad']}."
                     ];
                 }
             }
@@ -483,23 +573,37 @@ class ModeloPuntoVenta {
                 $stmtKardex->execute();
             }
 
-            // Actualizar acumuladores en la sesión de caja
+            // Guardar el desglose de pagos (uno o varios métodos por pedido)
+            $stmtPago = $this->conn->prepare("INSERT INTO pedido_pago (id_pedido, metodo, monto) VALUES (:id_pedido, :metodo, :monto)");
+            foreach ($pagosLimpios as $p) {
+                $stmtPago->bindValue(':id_pedido', $idPedido, PDO::PARAM_INT);
+                $stmtPago->bindValue(':metodo', $p['metodo']);
+                $stmtPago->bindValue(':monto', $p['monto']);
+                $stmtPago->execute();
+            }
+
+            // Actualizar acumuladores en la sesión de caja (reparte el monto por método)
             $columnasMetodo = [
                 'efectivo' => 'total_ventas_efectivo',
                 'yape' => 'total_ventas_yape',
-                'plin' => 'total_ventas_plin',
                 'tarjeta' => 'total_ventas_tarjeta'
             ];
-            $colMetodo = $columnasMetodo[$metodoPago];
-
-            $queryCaja = "UPDATE sesion_caja SET 
-                            items_json = '[]', 
-                            total_venta = 0.00,
-                            {$colMetodo} = {$colMetodo} + :total
-                          WHERE token_emparejamiento = :token";
+            $setParts = ["items_json = '[]'", "total_venta = 0.00"];
+            $bindCaja = [':token' => $token];
+            foreach ($totalesPorMetodo as $metodo => $montoMetodo) {
+                if (!isset($columnasMetodo[$metodo])) {
+                    continue;
+                }
+                $col = $columnasMetodo[$metodo];
+                $ph = ':m_' . $metodo;
+                $setParts[] = "{$col} = {$col} + {$ph}";
+                $bindCaja[$ph] = $montoMetodo;
+            }
+            $queryCaja = "UPDATE sesion_caja SET " . implode(', ', $setParts) . " WHERE token_emparejamiento = :token";
             $stmtCaja = $this->conn->prepare($queryCaja);
-            $stmtCaja->bindParam(':total', $totalVenta);
-            $stmtCaja->bindParam(':token', $token);
+            foreach ($bindCaja as $ph => $valor) {
+                $stmtCaja->bindValue($ph, $valor);
+            }
             $stmtCaja->execute();
 
             $this->conn->commit();
@@ -516,7 +620,8 @@ class ModeloPuntoVenta {
                 'igv' => round($totalVenta - ($totalVenta / 1.18), 2),
                 'vueltas' => max(0, $vueltas),
                 'monto_recibido' => $montoRecibido,
-                'metodo_pago' => strtoupper($metodoPago),
+                'metodo_pago' => implode(' + ', array_map('strtoupper', $metodosUsados)),
+                'pagos' => $pagosLimpios,
                 'fecha' => date('d/m/Y H:i:s'),
                 'cajero' => ($sesion['nombre'] ?? 'Cajero') . ' ' . ($sesion['apellido'] ?? ''),
                 'items' => $items

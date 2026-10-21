@@ -1,5 +1,5 @@
 (function() {
-    const ITEMS_PER_PAGE = 5;
+    let kardexPageSize = 5;
     let currentPage = 1;
     let allRows = [];
     let filteredRows = [];
@@ -121,7 +121,8 @@
                 const mot = row.getAttribute('data-motivo') || '';
                 const resp = row.getAttribute('data-responsable') || '';
                 const tipo = (row.getAttribute('data-tipo') || '').toLowerCase();
-                const textContent = (prod + ' ' + mot + ' ' + resp + ' ' + tipo).toLowerCase();
+                const canal = (row.getAttribute('data-canal') || '').toLowerCase();
+                const textContent = (prod + ' ' + mot + ' ' + resp + ' ' + tipo + ' ' + canal).toLowerCase();
                 if (!textContent.includes(currentSearchText)) return false;
             }
 
@@ -164,7 +165,7 @@
         if (existingEmpty) existingEmpty.remove();
 
         const totalItems = filteredRows.length;
-        const totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE));
+        const totalPages = Math.max(1, Math.ceil(totalItems / kardexPageSize));
 
         if (currentPage > totalPages) currentPage = totalPages;
         if (currentPage < 1) currentPage = 1;
@@ -181,8 +182,8 @@
             `;
             tbody.appendChild(emptyRow);
         } else {
-            const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-            const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
+            const startIndex = (currentPage - 1) * kardexPageSize;
+            const endIndex = Math.min(startIndex + kardexPageSize, totalItems);
 
             for (let i = startIndex; i < endIndex; i++) {
                 const row = filteredRows[i];
@@ -203,8 +204,8 @@
             if (totalItems === 0) {
                 pagInfo.textContent = '0 movimientos';
             } else {
-                const start = (currentPage - 1) * ITEMS_PER_PAGE + 1;
-                const end = Math.min(currentPage * ITEMS_PER_PAGE, totalItems);
+                const start = (currentPage - 1) * kardexPageSize + 1;
+                const end = Math.min(currentPage * kardexPageSize, totalItems);
                 pagInfo.textContent = `Mostrando ${start} - ${end} de ${totalItems} movimientos`;
             }
         }
@@ -214,66 +215,23 @@
     }
 
     function construirPaginador(totalPages) {
+        if (!window.TblPagination) return;
         const pagNav = document.getElementById('kardexPagNav');
-        if (!pagNav) return;
-        pagNav.innerHTML = '';
-
-        if (totalPages <= 1) {
-            pagNav.style.display = 'none';
-            return;
-        }
-        pagNav.style.display = 'flex';
-
-        // Flecha Anterior < (estilo inventario)
-        const btnPrev = document.createElement('button');
-        btnPrev.type = 'button';
-        btnPrev.className = 'kardex-pag-btn';
-        btnPrev.innerHTML = '&lsaquo;';
-        btnPrev.setAttribute('aria-label', 'Página anterior');
-        if (currentPage === 1) {
-            btnPrev.disabled = true;
-        } else {
-            btnPrev.onclick = () => cambiarPagina(currentPage - 1);
-        }
-        pagNav.appendChild(btnPrev);
-
-        // Botones de página numerados
-        for (let p = 1; p <= totalPages; p++) {
-            if (totalPages > 7 && p > 2 && p < totalPages - 1 && Math.abs(p - currentPage) > 1) {
-                if (p === 3 || p === totalPages - 2) {
-                    const dots = document.createElement('span');
-                    dots.textContent = '...';
-                    dots.style.cssText = 'color:#94a3b8; padding:0 4px; font-weight:700; font-size:0.9rem;';
-                    pagNav.appendChild(dots);
-                }
-                continue;
+        const topNav = document.getElementById('kardexTopPagNav');
+        const base = {
+            pages: totalPages,
+            page: currentPage,
+            size: kardexPageSize,
+            top: false,
+            onPage: cambiarPagina,
+            onSize: function (size) {
+                kardexPageSize = size;
+                currentPage = 1;
+                renderTablaYPaginacion();
             }
-
-            const pageBtn = document.createElement('button');
-            pageBtn.type = 'button';
-            pageBtn.textContent = p;
-            pageBtn.className = 'kardex-pag-btn' + (p === currentPage ? ' active' : '');
-            pageBtn.setAttribute('aria-label', 'Página ' + p);
-            if (p === currentPage) {
-                pageBtn.setAttribute('aria-current', 'page');
-            } else {
-                pageBtn.onclick = () => cambiarPagina(p);
-            }
-            pagNav.appendChild(pageBtn);
-        }
-
-        // Flecha Siguiente > (estilo inventario)
-        const btnNext = document.createElement('button');
-        btnNext.type = 'button';
-        btnNext.className = 'kardex-pag-btn';
-        btnNext.innerHTML = '&rsaquo;';
-        btnNext.setAttribute('aria-label', 'Página siguiente');
-        if (currentPage >= totalPages) {
-            btnNext.disabled = true;
-        } else {
-            btnNext.onclick = () => cambiarPagina(currentPage + 1);
-        }
-        pagNav.appendChild(btnNext);
+        };
+        if (pagNav) window.TblPagination.render(pagNav, base);
+        if (topNav) window.TblPagination.render(topNav, base);
     }
 
     function cambiarPagina(newPage) {
@@ -340,21 +298,21 @@
         if (tipo === 'entrada') {
             if (contCant) contCant.style.display = 'block';
             if (contNuevo) contNuevo.style.display = 'none';
-            if (lblCant) lblCant.textContent = 'Cantidad a Ingresar (+):';
+            if (lblCant) lblCant.textContent = 'Cantidad a ingresar:';
             if (inputCant) { inputCant.required = true; inputCant.focus(); }
             if (inputNuevo) inputNuevo.required = false;
             if (btnSubmit) {
-                btnSubmit.textContent = 'Guardar Ingreso (+)';
+                btnSubmit.textContent = 'Guardar ingreso';
                 btnSubmit.style.background = '#15803d';
             }
         } else if (tipo === 'salida') {
             if (contCant) contCant.style.display = 'block';
             if (contNuevo) contNuevo.style.display = 'none';
-            if (lblCant) lblCant.textContent = 'Cantidad a Retirar / Salida (-):';
+            if (lblCant) lblCant.textContent = 'Cantidad a retirar:';
             if (inputCant) { inputCant.required = true; inputCant.focus(); }
             if (inputNuevo) inputNuevo.required = false;
             if (btnSubmit) {
-                btnSubmit.textContent = 'Guardar Salida (-)';
+                btnSubmit.textContent = 'Guardar salida';
                 btnSubmit.style.background = '#dc2626';
             }
         } else {
@@ -363,7 +321,7 @@
             if (inputCant) inputCant.required = false;
             if (inputNuevo) { inputNuevo.required = true; inputNuevo.focus(); }
             if (btnSubmit) {
-                btnSubmit.textContent = 'Guardar Ajuste Físico';
+                btnSubmit.textContent = 'Guardar ajuste';
                 btnSubmit.style.background = '#15803d';
             }
         }
@@ -372,7 +330,7 @@
     };
 
     // Selección de Producto en Tiempo Real en Modal
-    window.seleccionarProductoModal = function(id, nombre, stock, sku) {
+    window.seleccionarProductoModal = function(id, nombre, stock, sku, imagen) {
         const hiddenId = document.getElementById('modalIdProducto');
         const hiddenStock = document.getElementById('modalStockActualProd');
         const searchInput = document.getElementById('buscarProductoAjuste');
@@ -380,6 +338,7 @@
         const selectedBadge = document.getElementById('selectedProdCard');
         const badgeName = document.getElementById('selectedProdNameText');
         const badgeStock = document.getElementById('selectedProdStockText');
+        const badgeImg = document.getElementById('selectedProdThumb');
         const clearBtn = document.getElementById('btnClearSelectedProd');
 
         if (hiddenId) hiddenId.value = id;
@@ -390,6 +349,14 @@
         }
         if (dropdown) dropdown.style.display = 'none';
         if (clearBtn) clearBtn.style.display = 'block';
+
+        if (badgeImg) {
+            badgeImg.onerror = function() {
+                this.onerror = null;
+                this.src = 'Images/logo.png';
+            };
+            badgeImg.src = imagen || 'Images/logo.png';
+        }
 
         if (selectedBadge && badgeName && badgeStock) {
             badgeName.textContent = nombre + (sku && sku !== '-' ? ' (SKU: ' + sku + ')' : '');
@@ -438,7 +405,8 @@
             items.forEach(item => {
                 const nombre = (item.getAttribute('data-nombre') || '').toLowerCase();
                 const sku = (item.getAttribute('data-sku') || '').toLowerCase();
-                const match = !text || nombre.includes(text) || sku.includes(text);
+                const barcode = (item.getAttribute('data-barcode') || '').toLowerCase();
+                const match = !text || nombre.includes(text) || sku.includes(text) || barcode.includes(text);
                 item.style.display = match ? 'flex' : 'none';
                 if (match) visibleCount++;
             });
@@ -451,6 +419,8 @@
                 if (hiddenStock) hiddenStock.value = '0';
                 if (selectedBadge) selectedBadge.style.display = 'none';
                 clearBtn.style.display = 'none';
+                const badgeImgReset = document.getElementById('selectedProdThumb');
+                if (badgeImgReset) badgeImgReset.src = 'Images/logo.png';
                 input.style.borderColor = '#cbd5e1';
                 dropdown.style.display = 'block';
                 filtrarItems('');

@@ -36,8 +36,9 @@ $stats        = $stats ?? ($estadisticas ?? [
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="Scripts/admin-spa.js?v=<?= time(); ?>" defer></script>
+    <script src="Scripts/pagination.js?v=<?= time(); ?>"></script>
     <!-- Lector remoto desde el celular vinculado -->
-    <script src="Scripts/scanner-camara.js"></script>
+    <script src="Scripts/scanner-camara.js?v=<?= filemtime(__DIR__ . '/../../Scripts/scanner-camara.js') ?>"></script>
 <link rel="stylesheet" href="Styles/Vistas/Admin/proveedores_admin.css?v=<?= filemtime(__DIR__ . '/../../Styles/Vistas/Admin/proveedores_admin.css'); ?>">
 </head>
 <body>
@@ -171,10 +172,8 @@ $stats        = $stats ?? ($estadisticas ?? [
             </table>
         </div>
 
-        <!-- Barra Paginación Centrada estilo Inventario / Kardex -->
-        <div class="prov-pagination-bar" id="paginacionProveedoresBar">
-            <div class="prov-pag-nav" id="paginacionProveedores"></div>
-        </div>
+        <!-- Barra Paginación unificada -->
+        <div class="pg-footer" id="paginacionProveedores"></div>
     </div>
 
     <!-- SECCIÓN HISTORIAL DE COMPRAS -->
@@ -207,10 +206,8 @@ $stats        = $stats ?? ($estadisticas ?? [
             </table>
         </div>
 
-        <!-- Barra Paginación Centrada estilo Inventario / Kardex -->
-        <div class="prov-pagination-bar" id="paginacionHistorialBar">
-            <div class="prov-pag-nav" id="paginacionHistorial"></div>
-        </div>
+        <!-- Barra Paginación unificada -->
+        <div class="pg-footer" id="paginacionHistorial"></div>
     </div>
 </main>
 
@@ -473,7 +470,8 @@ $stats        = $stats ?? ($estadisticas ?? [
     const listaProductos   = <?= json_encode($productos) ?>;
     const listaHistorial   = <?= json_encode($historial) ?>;
 
-    const ITEMS_PER_PAGE = 5;
+    let provPageSize = 5;
+    let histPageSize = 5;
     let paginaActualProv = 1;
     let paginaActualHist = 1;
     let filtroEstadoProv = 'todos';
@@ -557,11 +555,11 @@ $stats        = $stats ?? ($estadisticas ?? [
         });
 
         const total = filtrados.length;
-        const totalPaginas = Math.ceil(total / ITEMS_PER_PAGE) || 1;
+        const totalPaginas = Math.ceil(total / provPageSize) || 1;
         if (paginaActualProv > totalPaginas) paginaActualProv = totalPaginas;
 
-        const inicio = (paginaActualProv - 1) * ITEMS_PER_PAGE;
-        const fin = Math.min(inicio + ITEMS_PER_PAGE, total);
+        const inicio = (paginaActualProv - 1) * provPageSize;
+        const fin = Math.min(inicio + provPageSize, total);
         const itemsPagina = filtrados.slice(inicio, fin);
 
         if (itemsPagina.length === 0) {
@@ -615,11 +613,23 @@ $stats        = $stats ?? ($estadisticas ?? [
             }).join('');
         }
 
-        renderPaginadorCentrado(paginacion, totalPaginas, paginaActualProv, (p) => {
-            paginaActualProv = p;
-            renderizarProveedores();
-            document.getElementById('seccionProveedores')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
+        if (paginacion && window.TblPagination) {
+            window.TblPagination.render(paginacion, {
+                pages: totalPaginas,
+                page: paginaActualProv,
+                size: provPageSize,
+                onPage: (p) => {
+                    paginaActualProv = p;
+                    renderizarProveedores();
+                    document.getElementById('seccionProveedores')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                },
+                onSize: (size) => {
+                    provPageSize = size;
+                    paginaActualProv = 1;
+                    renderizarProveedores();
+                }
+            });
+        }
     }
 
     window.filtrarHistorialEnVivo = function() {
@@ -647,11 +657,11 @@ $stats        = $stats ?? ($estadisticas ?? [
         });
 
         const total = filtrados.length;
-        const totalPaginas = Math.ceil(total / ITEMS_PER_PAGE) || 1;
+        const totalPaginas = Math.ceil(total / histPageSize) || 1;
         if (paginaActualHist > totalPaginas) paginaActualHist = totalPaginas;
 
-        const inicio = (paginaActualHist - 1) * ITEMS_PER_PAGE;
-        const fin = Math.min(inicio + ITEMS_PER_PAGE, total);
+        const inicio = (paginaActualHist - 1) * histPageSize;
+        const fin = Math.min(inicio + histPageSize, total);
         const itemsPagina = filtrados.slice(inicio, fin);
 
         if (itemsPagina.length === 0) {
@@ -673,57 +683,23 @@ $stats        = $stats ?? ($estadisticas ?? [
             }).join('');
         }
 
-        renderPaginadorCentrado(paginacion, totalPaginas, paginaActualHist, (p) => {
-            paginaActualHist = p;
-            renderizarHistorial();
-            document.getElementById('seccionHistorial')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-    }
-
-    // GENERADOR DE PAGINACIÓN CENTRADA EXACTAMENTE IGUAL A INVENTARIO / KARDEX
-    function renderPaginadorCentrado(container, totalPaginas, actual, onPageClick) {
-        if (!container) return;
-        container.innerHTML = '';
-        if (totalPaginas <= 1) return;
-
-        // Flecha <
-        const prevBtn = document.createElement('button');
-        prevBtn.type = 'button';
-        prevBtn.className = 'prov-pag-btn';
-        prevBtn.innerHTML = '&lsaquo;';
-        prevBtn.disabled = (actual === 1);
-        prevBtn.onclick = () => onPageClick(actual - 1);
-        container.appendChild(prevBtn);
-
-        for (let p = 1; p <= totalPaginas; p++) {
-            if (totalPaginas > 7 && p > 2 && p < totalPaginas - 1 && Math.abs(p - actual) > 1) {
-                if (p === 3 || p === totalPaginas - 2) {
-                    const dots = document.createElement('span');
-                    dots.textContent = '...';
-                    dots.style.cssText = 'color:#94a3b8; padding:0 4px; font-weight:700; font-size:0.9rem;';
-                    container.appendChild(dots);
+        if (paginacion && window.TblPagination) {
+            window.TblPagination.render(paginacion, {
+                pages: totalPaginas,
+                page: paginaActualHist,
+                size: histPageSize,
+                onPage: (p) => {
+                    paginaActualHist = p;
+                    renderizarHistorial();
+                    document.getElementById('seccionHistorial')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                },
+                onSize: (size) => {
+                    histPageSize = size;
+                    paginaActualHist = 1;
+                    renderizarHistorial();
                 }
-                continue;
-            }
-
-            const pageBtn = document.createElement('button');
-            pageBtn.type = 'button';
-            pageBtn.className = 'prov-pag-btn' + (p === actual ? ' active' : '');
-            pageBtn.textContent = p;
-            if (p !== actual) {
-                pageBtn.onclick = () => onPageClick(p);
-            }
-            container.appendChild(pageBtn);
+            });
         }
-
-        // Flecha >
-        const nextBtn = document.createElement('button');
-        nextBtn.type = 'button';
-        nextBtn.className = 'prov-pag-btn';
-        nextBtn.innerHTML = '&rsaquo;';
-        nextBtn.disabled = (actual >= totalPaginas);
-        nextBtn.onclick = () => onPageClick(actual + 1);
-        container.appendChild(nextBtn);
     }
 
     // MODAL CONTROL
@@ -1045,7 +1021,7 @@ $stats        = $stats ?? ($estadisticas ?? [
 })();
 </script>
 <!-- Librerías de escáner cámara y celular siempre incluidas en el contenedor SPA -->
-<script src="Scripts/scanner-camara.js"></script>
+<script src="Scripts/scanner-camara.js?v=<?= filemtime(__DIR__ . '/../../Scripts/scanner-camara.js') ?>"></script>
 
 <?php if (!AjaxHelper::isAjax()): ?>
             </div> 

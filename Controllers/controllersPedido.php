@@ -737,9 +737,42 @@ class ControllerPedido{
             AjaxHelper::jsonError('Datos incompletos.', 422);
         }
 
+        $pedido = $this->pedidoModel->getPedidoByIdAdmin($idPedido);
+        if (!$pedido) {
+            AjaxHelper::jsonError('Pedido no encontrado.', 404);
+        }
+
+        $estadoAnterior = (string)($pedido['estado'] ?? '');
+        $esDelivery = strtolower((string)($pedido['tipo_entrega'] ?? '')) === 'delivery';
+        if ($esDelivery) {
+            $estadoNormalizado = strtolower(trim(str_replace(['_', '-'], ' ', $nuevoEstado)));
+            if (strpos($estadoNormalizado, 'entreg') !== false) {
+                AjaxHelper::jsonError('Solo el repartidor puede marcar un delivery como entregado.', 422);
+            }
+
+            require_once 'Models/deliveryModel.php';
+            $deliveryModel = new DeliveryModel();
+
+            if ((strpos($estadoNormalizado, 'camino') !== false || strpos($estadoNormalizado, 'ruta') !== false)
+                && !$deliveryModel->pedidoTieneRepartidor($idPedido)) {
+                AjaxHelper::jsonError('Asigna un repartidor antes de marcar el pedido En Ruta.', 422);
+            }
+        }
+
         $ok = $this->pedidoModel->updateEstadoPedido($idPedido, $nuevoEstado);
 
         if ($ok) {
+            if ($esDelivery) {
+                $deliveryModel->sincronizarEstadoPorPedido($idPedido, $nuevoEstado);
+            }
+
+            try {
+                require_once __DIR__ . '/../Models/notificacionEmailModel.php';
+                (new NotificacionEmailModel())->enviarActualizacionEstado($idPedido, $nuevoEstado, '', $estadoAnterior);
+            } catch (Throwable $e) {
+                error_log('No se pudo enviar el aviso de estado del pedido ' . $idPedido . ': ' . $e->getMessage());
+            }
+
             AjaxHelper::jsonResponse(true, 'Estado actualizado correctamente.', [
                 'id_pedido' => $idPedido,
                 'estado'    => $nuevoEstado

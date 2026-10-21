@@ -51,6 +51,10 @@
     z-index: 50;
     width: clamp(36px, 8vw, 44px);
     height: clamp(36px, 8vw, 44px);
+    min-width: clamp(36px, 8vw, 44px);
+    min-height: clamp(36px, 8vw, 44px);
+    aspect-ratio: 1 / 1;
+    box-sizing: border-box;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -78,6 +82,14 @@
     color: #15803d;
     border-color: #15803d;
     transform: rotate(90deg);
+}
+
+.auth-modal-close-btn:active,
+.auth-container-redesign .btn-close-universal:active,
+.auth-container-redesign .btn-close-cart:active {
+    background: #f0fdf4;
+    color: #15803d;
+    border-color: #15803d;
 }
 
 /* Columna Izquierda: Identidad de Marca "La Caserita" (Panel Verde Petróleo / Teal) */
@@ -490,6 +502,23 @@ html body .auth-input:-webkit-autofill:active {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
+/* Enlace de recuperación */
+.auth-forgot-row {
+    text-align: right;
+    margin-bottom: 14px;
+}
+
+.auth-forgot-link {
+    font-size: 0.8rem;
+    color: #15803D;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-forgot-link:hover {
+    text-decoration: underline;
+}
+
 /* Footer / Switch link */
 .auth-switch-text {
     text-align: center;
@@ -526,10 +555,6 @@ html body .auth-input:-webkit-autofill:active {
 
     .auth-visual {
         display: none;
-    }
-
-    .auth-brand-badge {
-        display: flex;
     }
 
     .auth-panel {

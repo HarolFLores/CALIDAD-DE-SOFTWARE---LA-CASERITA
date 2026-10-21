@@ -72,8 +72,9 @@ class ControllerCategory {
         $categoriaActual = null;
         $tituloCategoria = 'Categoría';
         $descripcionCategoria = '';
-        $iconoCategoria = '📦';
+        $iconoCategoria = '??';
         $productosFiltrados = [];
+        $busquedaJerarquia = null;
 
         if ($esOfertas || ($nombre && in_array(mb_strtolower($nombre), ['ofertas', 'descuentos', 'oferta', 'descuento']))) {
             $tituloCategoria = 'Ofertas del Día';
@@ -97,8 +98,9 @@ class ControllerCategory {
             });
         } elseif (!empty($buscar)) {
             $term = mb_strtolower(trim($buscar));
+            $tituloCategoria = $buscar;
 
-            // 1. Filtrar productos que contengan el término en el título (exactamente como en el dropdown de búsqueda)
+            // 1. Mostrar todos los productos que coincidan con el término escrito
             $productosFiltrados = array_filter($todosProductos, function($p) use ($term) {
                 $tit = mb_strtolower(trim($p['titulo'] ?? ''));
                 return strpos($tit, $term) !== false;
@@ -122,23 +124,55 @@ class ControllerCategory {
                 });
             }
 
-            // 4. Determinar título y jerarquía para mostrar la navegación limpia idéntica a la Imagen 3
-            $catNames = array_unique(array_filter(array_map(function($p) { return trim($p['categoria_nombre'] ?? ''); }, $productosFiltrados)));
-            $grupoNames = array_unique(array_filter(array_map(function($p) { return trim($p['grupo_nombre'] ?? ''); }, $productosFiltrados)));
+            // 4. Si todos los resultados comparten jerarquía, se usa esa ruta; si no, se usa el término buscado
+            if (!empty($productosFiltrados)) {
+                $macros = [];
+                $grupos = [];
+                $subcategorias = [];
 
-            if (count($catNames) === 1) {
-                $tituloCategoria = reset($catNames);
-            } elseif (count($grupoNames) === 1) {
-                $tituloCategoria = reset($grupoNames);
-            } else {
-                $subcatMatch = null;
-                foreach ($catNames as $sc) {
-                    if (strpos(mb_strtolower($sc), $term) !== false || strpos($term, mb_strtolower($sc)) !== false) {
-                        $subcatMatch = $sc;
-                        break;
+                foreach ($productosFiltrados as $p) {
+                    $macroId = (int)($p['id_momento'] ?? 0);
+                    $macroNombre = trim((string)($p['momento_nombre'] ?? ''));
+                    if ($macroNombre !== '') {
+                        $macros[$macroId . '|' . mb_strtolower($macroNombre)] = ['id' => $macroId, 'nombre' => $macroNombre];
+                    }
+
+                    $grupoId = (int)($p['id_grupo'] ?? 0);
+                    $grupoNombre = trim((string)($p['grupo_nombre'] ?? ''));
+                    if ($grupoNombre !== '') {
+                        $grupos[$grupoId . '|' . mb_strtolower($grupoNombre)] = ['id' => $grupoId, 'nombre' => $grupoNombre];
+                    }
+
+                    $subId = (int)($p['id_categoria'] ?? 0);
+                    $subNombre = trim((string)($p['categoria_nombre'] ?? ''));
+                    if ($subNombre !== '') {
+                        $subcategorias[$subId . '|' . mb_strtolower($subNombre)] = ['id' => $subId, 'nombre' => $subNombre];
                     }
                 }
-                $tituloCategoria = $subcatMatch ?: ucfirst($buscar);
+
+                $macro = count($macros) === 1 ? reset($macros) : null;
+                $grupo = count($grupos) === 1 ? reset($grupos) : null;
+                $subcategoria = count($subcategorias) === 1 ? reset($subcategorias) : null;
+
+                if ($subcategoria !== null) {
+                    $busquedaJerarquia = [
+                        'nivel' => 'subcategoria',
+                        'macro' => $macro,
+                        'grupo' => $grupo,
+                        'subcategoria' => $subcategoria
+                    ];
+                } elseif ($grupo !== null) {
+                    $busquedaJerarquia = [
+                        'nivel' => 'categoria',
+                        'macro' => $macro,
+                        'grupo' => $grupo
+                    ];
+                } elseif ($macro !== null) {
+                    $busquedaJerarquia = [
+                        'nivel' => 'macro',
+                        'macro' => $macro
+                    ];
+                }
             }
         } elseif ($id_momento) {
             $momentoActual = $momentModel->getMomentoById($id_momento);
@@ -316,15 +350,15 @@ class ControllerCategory {
         if ($nombre !== '') {
             $result = $this->model->createCategory($nombre, $descripcion, $imagen, $id_momento, $id_grupo);
             if ($result) {
-                if (AjaxHelper::isAjax()) AjaxHelper::jsonResponse(true, "Categoría \"$nombre\" registrada correctamente.");
-                $_SESSION['flash_success'] = "Categoría \"$nombre\" registrada correctamente.";
+                if (AjaxHelper::isAjax()) AjaxHelper::jsonResponse(true, "Subcategoría \"$nombre\" registrada correctamente.");
+                $_SESSION['flash_success'] = "Subcategoría \"$nombre\" registrada correctamente.";
             } else {
-                if (AjaxHelper::isAjax()) AjaxHelper::jsonError("Error al registrar la categoría.", 500);
-                $_SESSION['flash_error'] = "Error al registrar la categoría. Inténtalo de nuevo.";
+                if (AjaxHelper::isAjax()) AjaxHelper::jsonError("Error al registrar la subcategoría.", 500);
+                $_SESSION['flash_error'] = "Error al registrar la subcategoría. Inténtalo de nuevo.";
             }
         } else {
-            if (AjaxHelper::isAjax()) AjaxHelper::jsonError("El nombre de la categoría es obligatorio.", 422);
-            $_SESSION['flash_error'] = "El nombre de la categoría es obligatorio.";
+            if (AjaxHelper::isAjax()) AjaxHelper::jsonError("El nombre de la subcategoría es obligatorio.", 422);
+            $_SESSION['flash_error'] = "El nombre de la subcategoría es obligatorio.";
         }
 
         header("Location: index.php?action=$redirectTo");
@@ -435,15 +469,15 @@ class ControllerCategory {
         if ($id && $nombre !== '') {
             $result = $this->model->updateCategory($id, $nombre, $descripcion, $imagen, $id_momento, $id_grupo);
             if ($result) {
-                if (AjaxHelper::isAjax()) AjaxHelper::jsonResponse(true, "Categoría \"$nombre\" actualizada correctamente.");
-                $_SESSION['flash_success'] = "Categoría \"$nombre\" actualizada correctamente.";
+                if (AjaxHelper::isAjax()) AjaxHelper::jsonResponse(true, "Subcategoría \"$nombre\" actualizada correctamente.");
+                $_SESSION['flash_success'] = "Subcategoría \"$nombre\" actualizada correctamente.";
             } else {
-                if (AjaxHelper::isAjax()) AjaxHelper::jsonError("Error al actualizar la categoría.", 500);
-                $_SESSION['flash_error'] = "Error al actualizar la categoría.";
+                if (AjaxHelper::isAjax()) AjaxHelper::jsonError("Error al actualizar la subcategoría.", 500);
+                $_SESSION['flash_error'] = "Error al actualizar la subcategoría.";
             }
         } else {
-            if (AjaxHelper::isAjax()) AjaxHelper::jsonError("Datos inválidos para actualizar la categoría.", 422);
-            $_SESSION['flash_error'] = "Datos inválidos para actualizar la categoría.";
+            if (AjaxHelper::isAjax()) AjaxHelper::jsonError("Datos inválidos para actualizar la subcategoría.", 422);
+            $_SESSION['flash_error'] = "Datos inválidos para actualizar la subcategoría.";
         }
 
         header("Location: index.php?action=$redirectTo");

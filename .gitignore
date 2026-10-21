@@ -1,0 +1,30 @@
+# Entorno y secretos
+.env
+.env.*
+!.env.example
+
+# Respaldos y artefactos de agentes
+/backups/
+/.agents/
+/database/backups/
+/database/database.sql
+/database/local_*.sql
+*.sql
+!database/schema.sql
+!database/migracion_*.sql
+
+# Temporales y correos de prueba
+/scratch/*
+!/scratch/.gitkeep
+*.log
+*.token
+*.timestamp
+*.zip
+*.rar
+*.7z
+
+# Sistema
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

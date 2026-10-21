@@ -195,11 +195,14 @@
 
 .admin-main-transition {
   opacity: 0;
-  transition: opacity 0.2s ease;
+  visibility: hidden;
+  transition: opacity 0.12s ease, visibility 0s linear 0.12s;
 }
 
 .admin-main-visible {
   opacity: 1;
+  visibility: visible;
+  transition: opacity 0.12s ease;
 }
 
 

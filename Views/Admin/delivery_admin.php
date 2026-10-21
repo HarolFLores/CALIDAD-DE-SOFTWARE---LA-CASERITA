@@ -10,6 +10,14 @@ $envios = $envios ?? [];
 $repartidores = $repartidores ?? [];
 $filtroActual = $_GET['estado'] ?? 'todos';
 
+$estadosFiltroDeliv = ['Pendiente', 'En Preparacion', 'En Ruta', 'Entregado', 'Fallido', 'Cancelado'];
+$estadoSelectActual = 'todos';
+if (in_array($filtroActual, $estadosFiltroDeliv, true)) {
+    $estadoSelectActual = $filtroActual;
+} elseif ($filtroActual === 'En Preparación') {
+    $estadoSelectActual = 'En Preparacion';
+}
+
 // Cálculo de métricas
 $totalEnvios = count($envios);
 $deliveryCount = 0;
@@ -24,6 +32,10 @@ $totalPorCobrar = 0.00;
 foreach ($envios as $env) {
     $est = $env['estado_delivery'] ?? 'Pendiente';
     $isRec = ($env['tipo_entrega_norm'] ?? '') === 'recojo';
+    $metodoPago = mb_strtolower((string)($env['metodo_pago'] ?? ''));
+    $esContraEntrega = strpos($metodoPago, 'efectivo') !== false
+        || strpos($metodoPago, 'contraentrega') !== false
+        || strpos($metodoPago, 'contra entrega') !== false;
     
     if ($isRec) {
         $recojoCount++;
@@ -39,13 +51,13 @@ foreach ($envios as $env) {
         $pendientesCount++;
     } elseif ($est === 'En Preparacion' || $est === 'En Preparación') {
         $enPrepCount++;
-    } elseif ($est === 'En Ruta' || $est === 'Asignado') {
+    } elseif ($est === 'En Ruta') {
         $enRutaCount++;
     } elseif ($est === 'Entregado') {
         $entregadosCount++;
     }
 
-    if (empty($env['cobrado_por_repartidor']) && $est !== 'Fallido' && $est !== 'Cancelado') {
+    if (!$isRec && $esContraEntrega && empty($env['cobrado_por_repartidor']) && $est !== 'Fallido' && $est !== 'Cancelado') {
         $totalPorCobrar += (float)($env['pedido_total'] ?? 0);
     }
 }
@@ -64,8 +76,8 @@ foreach ($envios as $env) {
     <link rel="stylesheet" href="Styles/admin-spa.css?v=<?= time(); ?>">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="Scripts/admin-spa.js?v=<?= time(); ?>" defer></script>
+    <script src="Scripts/pagination.js?v=<?= time(); ?>"></script>
 <link rel="stylesheet" href="Styles/Vistas/Admin/delivery_admin.css?v=<?= filemtime(__DIR__ . '/../../Styles/Vistas/Admin/delivery_admin.css'); ?>">
-<link rel="stylesheet" href="Styles/Vistas/Admin/bandeja_pedidos.css?v=<?= filemtime(__DIR__ . '/../../Styles/Vistas/Admin/bandeja_pedidos.css'); ?>">
 </head>
 <body>
     <div class="admin-layout">
@@ -125,26 +137,6 @@ foreach ($envios as $env) {
 
 <main class="main-content container-admin admin-fullwidth" style="padding-top: 25px; padding-bottom: 50px;">
 
-    <!-- Selector de vista: Bandeja de Pedidos (HU33) / Despachos y Entregas -->
-    <div class="dlv-view-switch" id="dlvViewSwitch">
-        <button type="button" class="dlv-view-btn active" data-view="bandeja" onclick="window.dlvSetView('bandeja')">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H4z"></path><path d="M4 12h4l2 3h4l2-3h4"></path></svg>
-            Bandeja de Pedidos
-        </button>
-        <button type="button" class="dlv-view-btn" data-view="despachos" onclick="window.dlvSetView('despachos')">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="17" r="2"></circle><circle cx="17" cy="17" r="2"></circle><path d="M5 17h-2v-4l2-5h9l4 5h1v4h-2"></path></svg>
-            Despachos y Entregas
-        </button>
-    </div>
-
-    <!-- VISTA 1: BANDEJA DE PEDIDOS PENDIENTES (HU33) -->
-    <div id="dlvViewBandeja">
-        <?php include __DIR__ . '/partials/bandeja_pedidos_section.php'; ?>
-    </div>
-
-    <!-- VISTA 2: DESPACHOS Y ENTREGAS -->
-    <div id="dlvViewDespachos" class="is-hidden">
-
     <!-- TARJETAS CUADRADAS COMPACTAS (IMAGEN 2) -->
     <div class="deliv-stats-grid">
         <div class="deliv-stat-card <?= $filtroActual === 'todos' ? 'active-card' : ''; ?>" id="cardDelivTodos" onclick="window.filtrarEstadoDeliv('todos')">
@@ -167,8 +159,8 @@ foreach ($envios as $env) {
             <span class="deliv-stat-title">EN PREPARACIÓN</span>
             <span class="deliv-stat-number" id="lblEnPrepCount"><?= $enPrepCount; ?></span>
         </div>
-        <div class="deliv-stat-card <?= ($filtroActual === 'Asignado' || $filtroActual === 'En Ruta') ? 'active-card' : ''; ?>" id="cardDelivRuta" onclick="window.filtrarEstadoDeliv('En Ruta')">
-            <span class="deliv-stat-title">EN RUTA / ASIGNADOS</span>
+        <div class="deliv-stat-card <?= ($filtroActual === 'En Ruta') ? 'active-card' : ''; ?>" id="cardDelivRuta" onclick="window.filtrarEstadoDeliv('En Ruta')">
+            <span class="deliv-stat-title">EN RUTA</span>
             <span class="deliv-stat-number" id="lblEnRutaCount"><?= $enRutaCount; ?></span>
         </div>
         <div class="deliv-stat-card <?= $filtroActual === 'recojo' ? 'active-card' : ''; ?>" id="cardDelivRecojo" onclick="window.filtrarEstadoDeliv('recojo')">
@@ -188,8 +180,17 @@ foreach ($envios as $env) {
     <!-- PANEL PRINCIPAL CON TABLA -->
     <div class="deliv-card-panel">
         <div class="deliv-card-header">
-            <div class="deliv-card-title">Despachos y Entregas (Delivery & Recojo en Tienda)</div>
+            <div class="deliv-card-title">Despachos y Entregas</div>
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <select id="filtroEstadoDelivSelect" class="deliv-search-input deliv-filter-select" onchange="window.filtrarEstadoDeliv(this.value)" aria-label="Filtrar por estado del despacho">
+                    <option value="todos" <?= $estadoSelectActual === 'todos' ? 'selected' : ''; ?>>Todos los Estados</option>
+                    <option value="Pendiente" <?= $estadoSelectActual === 'Pendiente' ? 'selected' : ''; ?>>Pendiente</option>
+                    <option value="En Preparacion" <?= $estadoSelectActual === 'En Preparacion' ? 'selected' : ''; ?>>En Preparación</option>
+                    <option value="En Ruta" <?= $estadoSelectActual === 'En Ruta' ? 'selected' : ''; ?>>En Ruta</option>
+                    <option value="Entregado" <?= $estadoSelectActual === 'Entregado' ? 'selected' : ''; ?>>Entregado</option>
+                    <option value="Fallido" <?= $estadoSelectActual === 'Fallido' ? 'selected' : ''; ?>>Fallido</option>
+                    <option value="Cancelado" <?= $estadoSelectActual === 'Cancelado' ? 'selected' : ''; ?>>Cancelado</option>
+                </select>
                 <select id="filtroTipoSelect" class="deliv-search-input" style="min-width: 170px; padding: 9px 12px; cursor: pointer;" onchange="window.filtrarDeliveryEnVivo()">
                     <option value="todos">Todos los Tipos</option>
                     <option value="delivery">Solo Delivery</option>
@@ -202,7 +203,7 @@ foreach ($envios as $env) {
             </div>
         </div>
 
-        <div style="overflow-x: auto;">
+        <div class="deliv-table-scroll">
             <table class="deliv-table">
                 <thead>
                     <tr>
@@ -211,6 +212,7 @@ foreach ($envios as $env) {
                         <th>DIRECCIÓN DE ENTREGA</th>
                         <th style="text-align: right;">TOTAL A COBRAR</th>
                         <th>REPARTIDOR ASIGNADO</th>
+                        <th style="text-align: center;">TIEMPO</th>
                         <th style="text-align: center;">ESTADO DESPACHO</th>
                         <th style="width: 48px; text-align: center;"></th>
                     </tr>
@@ -222,10 +224,9 @@ foreach ($envios as $env) {
         </div>
 
         <!-- Paginación estilo Imagen 3 (< 1 2 3 ... >) -->
-        <div class="deliv-pagination-bar" id="paginacionDelivBar"></div>
+        <div class="pg-footer" id="paginacionDelivBar"></div>
     </div>
 
-    </div><!-- /#dlvViewDespachos -->
 </main>
 
 <!-- Modal Asignar Repartidor -->
@@ -263,16 +264,15 @@ foreach ($envios as $env) {
             <h3 id="delivModalEstadoTitulo" style="margin: 0; font-size: 1.2rem; font-weight: 800; color: #0f172a;">Actualizar Estado</h3>
             <button type="button" class="btn-close-universal" onclick="window.cerrarModalEstado()" aria-label="Cerrar modal">&times;</button>
         </div>
-        <p id="delivModalEstadoSubtitulo" style="margin: 0 0 16px; font-size: 0.85rem; color: #64748b;">Cambie el estado del pedido y registre cobro en caso aplique.</p>
+        <p id="delivModalEstadoSubtitulo" style="margin: 0 0 16px; font-size: 0.85rem; color: #64748b;">Actualice el estado logístico del pedido.</p>
         <form id="formActualizarEstado" action="index.php?action=actualizar_estado_delivery" method="POST" onsubmit="window.enviarEstadoAjax(event)">
             <input type="hidden" name="id_envio" id="idEnvioEstado">
             <input type="hidden" name="id_pedido" id="idPedidoEstado">
             <div style="margin-bottom: 14px;">
                 <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px; text-transform: uppercase;">Nuevo Estado</label>
-                <select name="nuevo_estado" id="selectNuevoEstado" required style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.90rem; box-sizing: border-box; outline: none; background: #fff;">
+                <select name="nuevo_estado" id="selectNuevoEstado" required onchange="window.actualizarCampoCancelacionDeliv()" style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.90rem; box-sizing: border-box; outline: none; background: #fff;">
                     <option value="Pendiente">Pendiente</option>
                     <option value="En Preparacion">En Preparación</option>
-                    <option value="Asignado">Asignado</option>
                     <option value="En Ruta">En Ruta</option>
                     <option value="Listo para Recojo">Listo para Recojo</option>
                     <option value="Entregado">Entregado</option>
@@ -280,16 +280,14 @@ foreach ($envios as $env) {
                 </select>
             </div>
 
-            <div style="margin-bottom: 14px;" id="grpCobrado">
-                <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem; font-weight: 700; color: #15803d; cursor: pointer;">
-                    <input type="checkbox" name="cobrado" value="1" id="chkCobrado" style="accent-color: #15803d; width: 18px; height: 18px;">
-                    <span id="lblCobradoTexto">¿Dinero cobrado / pagado?</span>
-                </label>
+            <div style="margin-bottom: 14px;">
+                <label class="deliv-note-label">Nota del cliente / sugerencias</label>
+                <div id="delivNotaCliente" class="deliv-customer-note">Sin nota del cliente.</div>
             </div>
 
-            <div style="margin-bottom: 18px;">
-                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px; text-transform: uppercase;">Notas o Incidencias</label>
-                <textarea name="notas" id="txtNotasEstado" rows="2" placeholder="Ej: Entregado a cliente / Cobro presencial completado" style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.90rem; box-sizing: border-box; outline: none;"></textarea>
+            <div id="delivCancelWrap" class="deliv-cancel-wrap">
+                <label class="deliv-cancel-label" for="txtNotasEstado">Detalle de cancelación</label>
+                <textarea name="notas" id="txtNotasEstado" rows="2" placeholder="Describe el motivo de la cancelación" class="deliv-cancel-textarea" disabled></textarea>
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 10px;">
@@ -396,22 +394,9 @@ foreach ($envios as $env) {
     let filtroEstado = '<?= $filtroActual; ?>';
     let busquedaTexto = '';
     let paginaActual = 1;
-    const ITEMS_PER_PAGE = 5;
+    let delivPageSize = 5;
     let accionDelivConfirmacion = null;
     let accionDelivCancelar = null;
-
-    // Selector de vista: Bandeja de Pedidos (HU33) / Despachos y Entregas
-    window.dlvSetView = function(vista) {
-        const esBandeja = vista !== 'despachos';
-        const bandeja = document.getElementById('dlvViewBandeja');
-        const despachos = document.getElementById('dlvViewDespachos');
-        if (!bandeja || !despachos) return;
-        bandeja.classList.toggle('is-hidden', !esBandeja);
-        despachos.classList.toggle('is-hidden', esBandeja);
-        document.querySelectorAll('#dlvViewSwitch .dlv-view-btn').forEach(function(btn) {
-            btn.classList.toggle('active', btn.getAttribute('data-view') === (esBandeja ? 'bandeja' : 'despachos'));
-        });
-    };
 
     // Modal Confirmación (Imagen 3 / Ventas)
     window.abrirDelivConfirmacion = function(titulo, mensaje, accion, esPeligro = false, onCancel = null) {
@@ -520,6 +505,8 @@ foreach ($envios as $env) {
         listaEnvios.forEach(e => {
             const est = e.estado_delivery || 'Pendiente';
             const isRec = (e.tipo_entrega_norm === 'recojo');
+            const metodo = (e.metodo_pago || '').toLowerCase();
+            const esContraEntrega = metodo.includes('efectivo') || metodo.includes('contraentrega') || metodo.includes('contra entrega');
             
             if (isRec) {
                 recojo++;
@@ -533,10 +520,10 @@ foreach ($envios as $env) {
 
             if (est === 'Pendiente') pend++;
             else if (est === 'En Preparacion' || est === 'En Preparación') enPrep++;
-            else if (est === 'En Ruta' || est === 'Asignado') enRuta++;
+            else if (est === 'En Ruta') enRuta++;
             else if (est === 'Entregado') entr++;
 
-            if (parseInt(e.cobrado_por_repartidor || 0) === 0 && est !== 'Fallido' && est !== 'Cancelado') {
+            if (!isRec && esContraEntrega && parseInt(e.cobrado_por_repartidor || 0) === 0 && est !== 'Fallido' && est !== 'Cancelado') {
                 porCobrar += parseFloat(e.pedido_total || 0);
             }
         });
@@ -580,7 +567,14 @@ foreach ($envios as $env) {
         if (selTipo) {
             if (est === 'recojo') selTipo.value = 'recojo';
             else if (est === 'delivery' || est === 'sin_repartidor') selTipo.value = 'delivery';
-            else selTipo.value = 'todos';
+            else if (est === 'por_cobrar') selTipo.value = 'todos';
+        }
+
+        const selEstado = document.getElementById('filtroEstadoDelivSelect');
+        if (selEstado) {
+            const estadosValidos = ['todos', 'Pendiente', 'En Preparacion', 'En Ruta', 'Entregado', 'Fallido', 'Cancelado'];
+            const estadoNormalizado = est === 'En Preparación' ? 'En Preparacion' : est;
+            selEstado.value = estadosValidos.includes(estadoNormalizado) ? estadoNormalizado : 'todos';
         }
 
         renderizarTabla();
@@ -595,11 +589,23 @@ foreach ($envios as $env) {
     window.limpiarFiltrosDeliv = function() {
         const selTipo = document.getElementById('filtroTipoSelect');
         if (selTipo) selTipo.value = 'todos';
+        const selEstado = document.getElementById('filtroEstadoDelivSelect');
+        if (selEstado) selEstado.value = 'todos';
         const inpBusq = document.getElementById('busquedaDelivInput');
         if (inpBusq) inpBusq.value = '';
         busquedaTexto = '';
         window.filtrarEstadoDeliv('todos');
     };
+
+    function rangoEstadoDeliv(estado) {
+        const e = String(estado || '').toLowerCase().trim();
+        if (e === 'pendiente') return 1;
+        if (e === 'en preparacion' || e === 'en preparación') return 2;
+        if (e === 'en ruta' || e === 'en camino' || e === 'listo para recojo') return 3;
+        if (e === 'fallido' || e === 'cancelado') return 4;
+        if (e === 'entregado') return 5;
+        return 6;
+    }
 
     function renderizarTabla() {
         const tbody = document.getElementById('tbodyDeliv');
@@ -624,11 +630,13 @@ foreach ($envios as $env) {
                 } else if (filtroEstado === 'sin_repartidor') {
                     if (isRec || !sinRep || est === 'Entregado' || est === 'Cancelado' || est === 'Fallido') return false;
                 } else if (filtroEstado === 'En Ruta') {
-                    if (est !== 'En Ruta' && est !== 'Asignado') return false;
+                    if (est !== 'En Ruta') return false;
                 } else if (filtroEstado === 'En Preparacion') {
                     if (est !== 'En Preparacion' && est !== 'En Preparación') return false;
                 } else if (filtroEstado === 'por_cobrar') {
-                    if (parseInt(env.cobrado_por_repartidor || 0) === 1 || est === 'Fallido' || est === 'Cancelado') return false;
+                    const metodo = (env.metodo_pago || '').toLowerCase();
+                    const esContraEntrega = metodo.includes('efectivo') || metodo.includes('contraentrega') || metodo.includes('contra entrega');
+                    if (isRec || !esContraEntrega || parseInt(env.cobrado_por_repartidor || 0) === 1 || est === 'Fallido' || est === 'Cancelado') return false;
                 } else if (est !== filtroEstado) {
                     return false;
                 }
@@ -646,18 +654,31 @@ foreach ($envios as $env) {
                 }
             }
             return true;
+        }).sort((a, b) => {
+            const ra = rangoEstadoDeliv(a.estado_delivery);
+            const rb = rangoEstadoDeliv(b.estado_delivery);
+            if (ra !== rb) return ra - rb;
+            const fa = a.pedido_fecha || '';
+            const fb = b.pedido_fecha || '';
+            if (fa !== fb) {
+                if (ra >= 4) return fa < fb ? 1 : -1;
+                return fa < fb ? -1 : 1;
+            }
+            const ia = parseInt(a.id_pedido, 10) || 0;
+            const ib = parseInt(b.id_pedido, 10) || 0;
+            return ra >= 4 ? ib - ia : ia - ib;
         });
 
         const total = filtrados.length;
-        const totalPaginas = Math.ceil(total / ITEMS_PER_PAGE) || 1;
+        const totalPaginas = Math.ceil(total / delivPageSize) || 1;
         if (paginaActual > totalPaginas) paginaActual = totalPaginas;
 
-        const inicio = (paginaActual - 1) * ITEMS_PER_PAGE;
-        const fin = Math.min(inicio + ITEMS_PER_PAGE, total);
+        const inicio = (paginaActual - 1) * delivPageSize;
+        const fin = Math.min(inicio + delivPageSize, total);
         const paginaItems = filtrados.slice(inicio, fin);
 
         if (paginaItems.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:36px; color:#94a3b8;">No se encontraron pedidos con el filtro aplicado.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:36px; color:#94a3b8;">No se encontraron pedidos con el filtro aplicado.</td></tr>';
         } else {
             tbody.innerHTML = paginaItems.map(env => {
                 const est = env.estado_delivery || 'Pendiente';
@@ -665,9 +686,17 @@ foreach ($envios as $env) {
                 const nroPed = env.codigo_pedido || ('#' + String(env.id_pedido).padStart(5, '0'));
                 const repAsignado = env.repartidor_nombre ? (env.repartidor_nombre + ' ' + (env.repartidor_apellido || '')) : null;
                 const isRec = (env.tipo_entrega_norm === 'recojo');
+                const metodoPago = (env.metodo_pago || '').toLowerCase();
+                const esContraEntrega = metodoPago.includes('efectivo') || metodoPago.includes('contraentrega') || metodoPago.includes('contra entrega');
+                const minutos = Math.max(0, parseInt(env.minutos_espera || 0, 10));
+                const finalizado = ['Entregado', 'Cancelado', 'Fallido'].includes(est);
+                const demorado = !finalizado && minutos >= 20;
+                const tiempo = minutos >= 60
+                    ? `${Math.floor(minutos / 60)}h ${minutos % 60}m`
+                    : `${minutos}m`;
 
                 return `
-                    <tr>
+                    <tr class="${demorado ? 'deliv-row-alert' : ''}">
                         <td>
                             <strong style="color:#0f172a; font-weight:800;">${nroPed}</strong>
                             <div style="font-size:0.75rem; color:#64748b;">${env.metodo_pago || 'Pago en entrega'}</div>
@@ -685,7 +714,7 @@ foreach ($envios as $env) {
                         </td>
                         <td style="text-align:right;">
                             <span style="font-weight:800; font-size:1.02rem; color:#0f172a;">S/ ${parseFloat(env.pedido_total || 0).toFixed(2)}</span>
-                            ${parseInt(env.cobrado_por_repartidor) === 1 ? '<div style="font-size:0.70rem; color:#15803d; font-weight:700;">✓ Cobrado</div>' : ''}
+                            ${!isRec && esContraEntrega && parseInt(env.cobrado_por_repartidor) === 1 ? '<div style="font-size:0.70rem; color:#15803d; font-weight:700;">✓ Cobrado</div>' : ''}
                         </td>
                         <td>
                             ${isRec ? `
@@ -696,6 +725,9 @@ foreach ($envios as $env) {
                             ` : `
                                 <span style="color:#94a3b8; font-style:italic; font-size:0.82rem;">Sin asignar</span>
                             `)}
+                        </td>
+                        <td style="text-align:center;">
+                            <span class="deliv-time ${demorado ? 'is-alert' : ''}">${finalizado ? '—' : tiempo}</span>
                         </td>
                         <td style="text-align:center;">
                             <span class="status-pill ${estClass}">
@@ -718,10 +750,12 @@ foreach ($envios as $env) {
                                         Asignar repartidor
                                     </button>
                                     ` : ''}
+                                    ${(!isRec && est === 'Entregado') ? '' : `
                                     <button type="button" class="table-kebab-item" onclick='window.abrirModalEstado(${JSON.stringify(env)})'>
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                                         Cambiar estado
                                     </button>
+                                    `}
                                 </div>
                             </div>
                         </td>
@@ -734,40 +768,19 @@ foreach ($envios as $env) {
     }
 
     function renderPaginador(container, totalPaginas, actual) {
-        if (!container) return;
-        if (totalPaginas <= 1) {
-            container.innerHTML = '';
-            return;
-        }
+        if (!container || !window.TblPagination) return;
 
-        let html = '';
-        html += `<button type="button" class="pag-btn" ${actual <= 1 ? 'disabled' : ''} onclick="window.cambiarPagina(${actual - 1})" aria-label="Anterior">&lt;</button>`;
-
-        let pages = [];
-        if (totalPaginas <= 5) {
-            for (let i = 1; i <= totalPaginas; i++) pages.push(i);
-        } else {
-            pages.push(1);
-            if (actual > 3) pages.push('...');
-            let start = Math.max(2, actual - 1);
-            let end = Math.min(totalPaginas - 1, actual + 1);
-            for (let i = start; i <= end; i++) {
-                if (!pages.includes(i)) pages.push(i);
-            }
-            if (actual < totalPaginas - 2) pages.push('...');
-            pages.push(totalPaginas);
-        }
-
-        pages.forEach(p => {
-            if (p === '...') {
-                html += `<span style="padding:0 4px; color:#94a3b8; font-weight:700;">...</span>`;
-            } else {
-                html += `<button type="button" class="pag-btn ${p === actual ? 'active' : ''}" onclick="window.cambiarPagina(${p})">${p}</button>`;
+        window.TblPagination.render(container, {
+            pages: totalPaginas,
+            page: actual,
+            size: delivPageSize,
+            onPage: window.cambiarPagina,
+            onSize: function (size) {
+                delivPageSize = size;
+                paginaActual = 1;
+                renderizarTabla();
             }
         });
-
-        html += `<button type="button" class="pag-btn" ${actual >= totalPaginas ? 'disabled' : ''} onclick="window.cambiarPagina(${actual + 1})" aria-label="Siguiente">&gt;</button>`;
-        container.innerHTML = html;
     }
 
     window.cambiarPagina = function(p) {
@@ -887,7 +900,11 @@ foreach ($envios as $env) {
 
         const rowObs = document.getElementById('rowDelivTicketObs');
         if (rowObs) {
-            const obs = p.observacion || env.notas_entrega || '';
+            let obs = limpiarNotaCliente(p.observacion || '') || limpiarNotaCliente(env.notas_entrega || '');
+            const motivoCancelacion = extraerMotivoCancelacion(env);
+            if (motivoCancelacion) {
+                obs = (obs ? obs + ' | ' : '') + 'Motivo de cancelación: ' + motivoCancelacion;
+            }
             if (obs) {
                 rowObs.style.display = 'block';
                 setTxt('lblDelivTicketObs', obs);
@@ -989,6 +1006,42 @@ foreach ($envios as $env) {
         document.getElementById('modalAsignar').style.display = 'none';
     };
 
+    function limpiarNotaCliente(texto) {
+        let limpio = String(texto || '');
+        limpio = limpio.replace(/\[(?:Tarjeta|Pago|Cancelaci[oó]n|Rechazo comprobante)[^\]]*\]/gi, ' ');
+        const partes = limpio.split(/\||\r?\n/);
+        const vistos = {};
+        const resultado = [];
+        partes.forEach(function (parte) {
+            const valor = parte.trim();
+            if (!valor) return;
+            if (/^(Horario|Programado)\s*:/i.test(valor)) return;
+            const clave = valor.toLowerCase();
+            if (vistos[clave]) return;
+            vistos[clave] = true;
+            resultado.push(valor);
+        });
+        return resultado.join(' ').trim();
+    }
+
+    function extraerMotivoCancelacion(env) {
+        const texto = String((env && (env.notas_entrega || '')) || '') + ' ' + String((env && (env.observacion || '')) || '');
+        const match = texto.match(/\[Cancelaci[oó]n:\s*([^\]]+)\]/i);
+        return match ? match[1].trim() : '';
+    }
+
+    window.actualizarCampoCancelacionDeliv = function() {
+        const sel = document.getElementById('selectNuevoEstado');
+        const wrap = document.getElementById('delivCancelWrap');
+        const txt = document.getElementById('txtNotasEstado');
+        if (!sel || !wrap || !txt) return;
+        const esCancelacion = sel.value === 'Fallido' || sel.value === 'Cancelado';
+        wrap.classList.toggle('is-visible', esCancelacion);
+        txt.required = esCancelacion;
+        txt.disabled = !esCancelacion;
+        if (!esCancelacion) txt.value = '';
+    };
+
     window.abrirModalEstado = function(env) {
         const isRec = (env.tipo_entrega_norm === 'recojo');
         document.getElementById('idEnvioEstado').value = env.id_envio || 0;
@@ -997,12 +1050,15 @@ foreach ($envios as $env) {
         const tit = document.getElementById('delivModalEstadoTitulo');
         const sub = document.getElementById('delivModalEstadoSubtitulo');
         const sel = document.getElementById('selectNuevoEstado');
-        const lblCobrado = document.getElementById('lblCobradoTexto');
 
         if (tit) tit.textContent = isRec ? 'Actualizar Estado — Recojo en Tienda' : 'Actualizar Estado — Envío Delivery';
+
+        const sinRepartidor = !isRec && (!env.id_repartidor || parseInt(env.id_repartidor) === 0);
         if (sub) sub.textContent = isRec 
             ? 'Actualice la preparación del pedido para entrega al cliente en tienda.' 
-            : 'Cambie el progreso logístico del pedido y registre cobro en caso aplique.';
+            : (sinRepartidor
+                ? 'Asigna un repartidor para poder marcar el envío como En Ruta.'
+                : 'Cambie el progreso logístico del pedido.');
 
         if (sel) {
             let options = '';
@@ -1018,22 +1074,31 @@ foreach ($envios as $env) {
                 options = `
                     <option value="Pendiente">Pendiente</option>
                     <option value="En Preparacion">En Preparación</option>
-                    <option value="Asignado">Asignado</option>
-                    <option value="En Ruta">En Ruta</option>
-                    <option value="Entregado">Entregado</option>
+                    <option value="En Ruta"${sinRepartidor ? ' disabled' : ''}>En Ruta${sinRepartidor ? ' (asigna repartidor)' : ''}</option>
                     <option value="Fallido">Fallido / No entregado</option>
                 `;
             }
             sel.innerHTML = options;
             sel.value = env.estado_delivery || 'Pendiente';
+            if (sel.selectedIndex === -1) sel.value = 'Pendiente';
+            if (sinRepartidor && sel.value === 'En Ruta') sel.value = 'Pendiente';
         }
 
-        if (lblCobrado) {
-            lblCobrado.textContent = isRec ? '¿Pago presencial completado en caja/mostrador?' : '¿Dinero cobrado por el repartidor?';
+        const notaCliente = limpiarNotaCliente(env.observacion || '');
+        const notaDiv = document.getElementById('delivNotaCliente');
+        if (notaDiv) {
+            notaDiv.textContent = notaCliente || 'Sin nota del cliente.';
+            notaDiv.classList.toggle('is-empty', notaCliente === '');
         }
 
-        document.getElementById('chkCobrado').checked = parseInt(env.cobrado_por_repartidor) === 1;
-        document.getElementById('txtNotasEstado').value = env.notas_entrega || env.observacion || '';
+        const txtNotas = document.getElementById('txtNotasEstado');
+        if (txtNotas) {
+            const estadoActual = env.estado_delivery || 'Pendiente';
+            const esCancelacionActual = estadoActual === 'Fallido' || estadoActual === 'Cancelado';
+            txtNotas.value = esCancelacionActual ? extraerMotivoCancelacion(env) : '';
+        }
+        window.actualizarCampoCancelacionDeliv();
+
         document.getElementById('modalEstado').style.display = 'flex';
     };
     window.cerrarModalEstado = function() {
@@ -1087,9 +1152,6 @@ foreach ($envios as $env) {
                             item.repartidor_nombre = repNombre;
                             item.repartidor_apellido = repApellido;
                             item.repartidor_telefono = repTelefono;
-                            if (item.estado_delivery === 'Pendiente') {
-                                item.estado_delivery = 'Asignado';
-                            }
                         }
                         window.actualizarContadoresDelivUI();
                         renderizarTabla();
@@ -1113,12 +1175,27 @@ foreach ($envios as $env) {
         e.preventDefault();
         const idEnvio = document.getElementById('idEnvioEstado')?.value || 0;
         const idPedido = document.getElementById('idPedidoEstado')?.value || 0;
+        const idEnvioNum = parseInt(idEnvio, 10) || 0;
+        const idPedidoNum = parseInt(idPedido, 10) || 0;
         const nuevoEstado = document.getElementById('selectNuevoEstado')?.value;
-        const cobrado = document.getElementById('chkCobrado')?.checked ? 1 : 0;
-        const notas = document.getElementById('txtNotasEstado')?.value || '';
+        const esCancelacion = nuevoEstado === 'Fallido' || nuevoEstado === 'Cancelado';
+        const notas = esCancelacion ? ((document.getElementById('txtNotasEstado')?.value || '').trim()) : '';
 
-        if ((!idEnvio && !idPedido) || !nuevoEstado) {
+        if ((idEnvioNum === 0 && idPedidoNum === 0) || !nuevoEstado) {
             return;
+        }
+
+        if (esCancelacion && !notas) {
+            window.mostrarDelivToast('Atención', 'Indica el motivo de la cancelación.', true);
+            return;
+        }
+
+        if (nuevoEstado === 'En Ruta' && idEnvioNum > 0) {
+            const envio = listaEnvios.find(x => parseInt(x.id_envio) === idEnvioNum);
+            if (!envio || !envio.id_repartidor || parseInt(envio.id_repartidor) === 0) {
+                window.mostrarDelivToast('Atención', 'Asigna un repartidor antes de marcar el envío como En Ruta.', true);
+                return;
+            }
         }
 
         // Cerrar modal de estados inmediatamente
@@ -1126,13 +1203,12 @@ foreach ($envios as $env) {
 
         window.abrirDelivConfirmacion(
             '¿Confirmar cambio de estado?',
-            'El estado del pedido cambiará a: ' + nuevoEstado + (cobrado ? ' (Registrado como cobrado/pagado)' : '') + '.',
+            'El estado del pedido cambiará a: ' + nuevoEstado + '.' + (esCancelacion ? '<br>Motivo: ' + notas : ''),
             function() {
                 const formData = new FormData();
                 formData.append('id_envio', idEnvio);
                 formData.append('id_pedido', idPedido);
                 formData.append('nuevo_estado', nuevoEstado);
-                formData.append('cobrado', cobrado);
                 formData.append('notas', notas);
                 formData.append('is_ajax', '1');
 
@@ -1155,8 +1231,9 @@ foreach ($envios as $env) {
                         if (item) {
                             item.estado_delivery = nuevoEstado;
                             item.pedido_estado = nuevoEstado;
-                            item.cobrado_por_repartidor = cobrado;
-                            item.notas_entrega = notas;
+                            if (esCancelacion) {
+                                item.notas_entrega = '[Cancelación: ' + notas + ']';
+                            }
                         }
                         window.actualizarContadoresDelivUI();
                         renderizarTabla();

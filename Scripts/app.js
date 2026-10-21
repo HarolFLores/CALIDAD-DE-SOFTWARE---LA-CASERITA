@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('busqueda');
     const searchClear = document.getElementById('searchClear');
     const searchDropdown = document.getElementById('searchDropdown');
-    const searchSuggestionsList = document.getElementById('searchSuggestionsList');
     const searchQuickTerm = document.getElementById('searchQuickTerm');
     const searchQuickProducts = document.getElementById('searchQuickProducts');
     const searchViewAllBtn = document.getElementById('searchViewAllBtn');
@@ -86,38 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!window.productosBD) return;
 
         const resultados = window.productosBD.filter(p => p.titulo.toLowerCase().includes(term));
-        const suggestions = new Set();
-        if (resultados.length > 0) {
-            resultados.forEach(p => {
-                const words = p.titulo.toLowerCase().split(/\s+/);
-                words.forEach(w => {
-                    if (w.includes(term)) {
-                        suggestions.add(w);
-                    }
-                });
-            });
-        }
-
-        if (searchSuggestionsList) {
-            searchSuggestionsList.innerHTML = '';
-            Array.from(suggestions).slice(0, 8).forEach(sug => {
-                const li = document.createElement('li');
-                li.innerHTML = sug.replace(new RegExp(term, 'gi'), match => `<strong>${match}</strong>`);
-                li.addEventListener('click', () => {
-                    if (searchInput) {
-                        searchInput.value = sug;
-                        currentTerm = sug;
-                        realizarBusqueda(sug);
-                        searchInput.focus();
-                    }
-                });
-                searchSuggestionsList.appendChild(li);
-            });
-
-            if (suggestions.size === 0) {
-                searchSuggestionsList.innerHTML = '<li>No se encontraron sugerencias</li>';
-            }
-        }
 
         if (searchQuickTerm) searchQuickTerm.textContent = term;
         if (searchQuickProducts) {

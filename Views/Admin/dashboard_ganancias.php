@@ -82,6 +82,7 @@ $coloresMetodo = ['#7c3aed', '#16a34a', '#2563eb'];
     <link rel="stylesheet" href="Styles/Vistas/Admin/dashboard_ganancias.css?v=<?= filemtime(__DIR__ . '/../../Styles/Vistas/Admin/dashboard_ganancias.css'); ?>">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="Scripts/admin-spa.js?v=<?= time(); ?>" defer></script>
+    <script src="Scripts/pagination.js?v=<?= time(); ?>"></script>
 </head>
 <body>
     <div class="admin-layout">
@@ -231,10 +232,10 @@ $coloresMetodo = ['#7c3aed', '#16a34a', '#2563eb'];
                             <th class="is-right">Ganancia</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="tbodyTopProductos">
                         <?php if ($topProductos): ?>
                             <?php foreach ($topProductos as $idx => $producto): ?>
-                                <tr>
+                                <tr class="fila-top-producto">
                                     <td>
                                         <div class="fin-product-name">
                                             <span><?= $idx + 1; ?></span>

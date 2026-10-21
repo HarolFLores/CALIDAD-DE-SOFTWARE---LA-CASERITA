@@ -33,6 +33,20 @@ class CajaModel {
     }
 
     /**
+     * Obtiene la sesión de caja abierta de un cajero
+     */
+    public function obtenerSesionActivaEmpleado() {
+        $sql = "SELECT s.*, u.nombre as cajero_nombre, u.apellido as cajero_apellido, u.rol as cajero_rol
+                FROM sesion_caja s
+                JOIN usuario u ON s.id_usuario = u.id_usuario
+                WHERE s.estado = 'abierta' AND u.rol = 'cajero'
+                ORDER BY s.id_sesion DESC LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    /**
      * Apertura de nueva sesión de caja
      */
     public function abrirCaja($idUsuario, $montoApertura, $cajaId = 'CAJA-01') {
@@ -120,17 +134,14 @@ class CajaModel {
         $sesion = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$sesion) return null;
 
-        $cierreCondition = !empty($sesion['fecha_cierre']) ? " AND fecha <= :fecha_cierre" : "";
+        $cierreCondition = !empty($sesion['fecha_cierre']) ? " AND p.fecha <= :fecha_cierre" : "";
+        $sesionCondition = "(p.id_sesion_caja = :id OR (p.id_sesion_caja IS NULL AND p.canal = 'POS' AND p.fecha >= :fecha_apertura {$cierreCondition})) AND p.estado NOT IN ('Cancelado')";
+
         $sqlVentas = "SELECT 
-                        COALESCE(SUM(CASE WHEN LOWER(metodo_pago) LIKE '%efectivo%' THEN total ELSE 0 END), 0) as efectivo,
-                        COALESCE(SUM(CASE WHEN LOWER(metodo_pago) LIKE '%yape%' THEN total ELSE 0 END), 0) as yape,
-                        COALESCE(SUM(CASE WHEN LOWER(metodo_pago) LIKE '%plin%' THEN total ELSE 0 END), 0) as plin,
-                        COALESCE(SUM(CASE WHEN LOWER(metodo_pago) LIKE '%tarjeta%' THEN total ELSE 0 END), 0) as tarjeta,
-                        COALESCE(SUM(total), 0) as total_ventas,
+                        COALESCE(SUM(p.total), 0) as total_ventas,
                         COUNT(*) as total_tickets
-                      FROM pedido 
-                      WHERE (id_sesion_caja = :id OR (canal = 'POS' AND fecha >= :fecha_apertura {$cierreCondition}))
-                        AND estado NOT IN ('Cancelado')";
+                      FROM pedido p 
+                      WHERE {$sesionCondition}";
         $stmtV = $this->conn->prepare($sqlVentas);
         $stmtV->bindParam(':id', $idSesion, PDO::PARAM_INT);
         $stmtV->bindParam(':fecha_apertura', $sesion['fecha_apertura']);
@@ -139,6 +150,10 @@ class CajaModel {
         }
         $stmtV->execute();
         $ventas = $stmtV->fetch(PDO::FETCH_ASSOC);
+
+        // Desglose por método: primero los montos reales de pagos divididos (pedido_pago)
+        // y, para pedidos sin desglose (previos a esta función), el método único guardado.
+        $this->aplicarDesgloseVentas($ventas, $sesionCondition, $idSesion, $sesion);
 
         // Movimientos
         $sqlMov = "SELECT 
@@ -174,9 +189,84 @@ class CajaModel {
     }
 
     /**
+     * Reparte el total de ventas de la sesión por método de pago.
+     * Usa los montos reales de pagos divididos (pedido_pago) y, para pedidos
+     * sin desglose (previos a la función), el método único de pedido.metodo_pago.
+     * Si la tabla pedido_pago no existe todavía, cae al criterio por LIKE.
+     */
+    private function aplicarDesgloseVentas(&$ventas, $sesionCondition, $idSesion, $sesion) {
+        $metodos = ['efectivo', 'yape', 'plin', 'tarjeta'];
+        $desglose = array_fill_keys($metodos, 0.0);
+
+        try {
+            $sqlDesglose = "SELECT pp.metodo AS metodo, COALESCE(SUM(pp.monto), 0) AS monto
+                            FROM pedido_pago pp
+                            JOIN pedido p ON p.id_pedido = pp.id_pedido
+                            WHERE {$sesionCondition}
+                            GROUP BY pp.metodo";
+            $stmtD = $this->conn->prepare($sqlDesglose);
+            $stmtD->bindParam(':id', $idSesion, PDO::PARAM_INT);
+            $stmtD->bindParam(':fecha_apertura', $sesion['fecha_apertura']);
+            if (!empty($sesion['fecha_cierre'])) {
+                $stmtD->bindParam(':fecha_cierre', $sesion['fecha_cierre']);
+            }
+            $stmtD->execute();
+            foreach ($stmtD->fetchAll(PDO::FETCH_ASSOC) as $fila) {
+                $m = strtolower(trim((string)$fila['metodo']));
+                if (isset($desglose[$m])) {
+                    $desglose[$m] += (float)$fila['monto'];
+                }
+            }
+
+            $sqlSinDesglose = "SELECT 
+                        COALESCE(SUM(CASE WHEN LOWER(p.metodo_pago) LIKE '%efectivo%' THEN p.total ELSE 0 END), 0) as efectivo,
+                        COALESCE(SUM(CASE WHEN LOWER(p.metodo_pago) LIKE '%yape%' THEN p.total ELSE 0 END), 0) as yape,
+                        COALESCE(SUM(CASE WHEN LOWER(p.metodo_pago) LIKE '%plin%' THEN p.total ELSE 0 END), 0) as plin,
+                        COALESCE(SUM(CASE WHEN LOWER(p.metodo_pago) LIKE '%tarjeta%' THEN p.total ELSE 0 END), 0) as tarjeta
+                      FROM pedido p 
+                      WHERE {$sesionCondition}
+                        AND NOT EXISTS (SELECT 1 FROM pedido_pago pp2 WHERE pp2.id_pedido = p.id_pedido)";
+            $stmtS = $this->conn->prepare($sqlSinDesglose);
+            $stmtS->bindParam(':id', $idSesion, PDO::PARAM_INT);
+            $stmtS->bindParam(':fecha_apertura', $sesion['fecha_apertura']);
+            if (!empty($sesion['fecha_cierre'])) {
+                $stmtS->bindParam(':fecha_cierre', $sesion['fecha_cierre']);
+            }
+            $stmtS->execute();
+            $sin = $stmtS->fetch(PDO::FETCH_ASSOC) ?: [];
+            foreach ($metodos as $m) {
+                $desglose[$m] += (float)($sin[$m] ?? 0);
+            }
+
+            foreach ($metodos as $m) {
+                $ventas[$m] = $desglose[$m];
+            }
+        } catch (Throwable $e) {
+            $sqlFallback = "SELECT 
+                        COALESCE(SUM(CASE WHEN LOWER(p.metodo_pago) LIKE '%efectivo%' THEN p.total ELSE 0 END), 0) as efectivo,
+                        COALESCE(SUM(CASE WHEN LOWER(p.metodo_pago) LIKE '%yape%' THEN p.total ELSE 0 END), 0) as yape,
+                        COALESCE(SUM(CASE WHEN LOWER(p.metodo_pago) LIKE '%plin%' THEN p.total ELSE 0 END), 0) as plin,
+                        COALESCE(SUM(CASE WHEN LOWER(p.metodo_pago) LIKE '%tarjeta%' THEN p.total ELSE 0 END), 0) as tarjeta
+                      FROM pedido p 
+                      WHERE {$sesionCondition}";
+            $stmtF = $this->conn->prepare($sqlFallback);
+            $stmtF->bindParam(':id', $idSesion, PDO::PARAM_INT);
+            $stmtF->bindParam(':fecha_apertura', $sesion['fecha_apertura']);
+            if (!empty($sesion['fecha_cierre'])) {
+                $stmtF->bindParam(':fecha_cierre', $sesion['fecha_cierre']);
+            }
+            $stmtF->execute();
+            $fb = $stmtF->fetch(PDO::FETCH_ASSOC) ?: [];
+            foreach ($metodos as $m) {
+                $ventas[$m] = (float)($fb[$m] ?? 0);
+            }
+        }
+    }
+
+    /**
      * Cierre de caja con Arqueo
      */
-    public function cerrarCaja($idSesion, $montoRealContado) {
+    public function cerrarCaja($idSesion, $montoRealContado, $observacion) {
         $resumen = $this->calcularResumenCaja($idSesion);
         if (!$resumen) {
             return ['ok' => false, 'mensaje' => 'Sesión no encontrada'];
@@ -189,6 +279,7 @@ class CajaModel {
                     monto_cierre_esperado = :esperado,
                     monto_cierre_real = :real,
                     diferencia = :diferencia,
+                    observacion_cierre = :observacion,
                     total_ventas_efectivo = :v_efectivo,
                     total_ventas_yape = :v_yape,
                     total_ventas_plin = :v_plin,
@@ -203,6 +294,7 @@ class CajaModel {
         $stmt->bindParam(':esperado', $esperado);
         $stmt->bindParam(':real', $montoRealContado);
         $stmt->bindParam(':diferencia', $diferencia);
+        $stmt->bindParam(':observacion', $observacion);
         $stmt->bindParam(':v_efectivo', $resumen['ventas_efectivo']);
         $stmt->bindParam(':v_yape', $resumen['ventas_yape']);
         $stmt->bindParam(':v_plin', $resumen['ventas_plin']);
@@ -230,6 +322,7 @@ class CajaModel {
         $sql = "SELECT s.*, u.nombre as cajero_nombre, u.apellido as cajero_apellido 
                 FROM sesion_caja s
                 JOIN usuario u ON s.id_usuario = u.id_usuario
+                WHERE u.rol = 'cajero'
                 ORDER BY s.id_sesion DESC LIMIT :limite";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':limite', (int)$limite, PDO::PARAM_INT);

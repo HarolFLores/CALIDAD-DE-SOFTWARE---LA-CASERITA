@@ -3354,7 +3354,7 @@ html body .btn-success-modal:active {
 .module-actionbar .btn-primary:hover { background: #166534; }
 
 /* X de TODOS los modales del admin = misma forma, tamaño (escala), diseño y rotación que la X
-   del login; se conserva el COLOR propio de cada modal (verde normal, rojo en modales de eliminar). */
+   del login: gris en reposo; al pasar el mouse gira y cambia a verde en todos los modales. */
 html body .modal-close,
 html body .btn-close-universal,
 html body .comp-modal-close,
@@ -3364,15 +3364,19 @@ html body .cat-modal-close-btn,
 html body .prov-modal-close {
   width: clamp(36px, 8vw, 44px);
   height: clamp(36px, 8vw, 44px);
+  min-width: clamp(36px, 8vw, 44px);
+  min-height: clamp(36px, 8vw, 44px);
+  aspect-ratio: 1 / 1;
+  box-sizing: border-box;
   padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border: 2px solid #15803d;
+  border: 2px solid transparent;
   border-radius: 50%;
   background: #f1f5f9;
-  color: #15803d;
+  color: #64748b;
   font-size: clamp(1.4rem, 4vw, 1.8rem);
   font-weight: 200;
   line-height: 1;
@@ -3393,16 +3397,4 @@ html body .prov-modal-close:hover {
   border-color: #15803d;
   transform: rotate(90deg);
 }
-html body #modalConfirmarEliminarProd .btn-close-universal,
-html body .btn-close-universal.is-danger,
-html body .btn-close-universal.danger {
-  border-color: #dc2626;
-  color: #dc2626;
-}
-html body #modalConfirmarEliminarProd .btn-close-universal:hover,
-html body .btn-close-universal.is-danger:hover,
-html body .btn-close-universal.danger:hover {
-  background: #fef2f2;
-  border-color: #b91c1c;
-  color: #b91c1c;
-}
+
