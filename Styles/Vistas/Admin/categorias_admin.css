@@ -326,3 +326,105 @@ html body #tablaGrupos tbody td:last-child,html body #tablaCategorias tbody td:l
         font-size: 1.15rem;
     }
 }
+
+/* Combo unico de categoria con ruta (Macrocategoria) */
+html body .cat-combo-field {
+    margin-bottom: 16px;
+}
+html body .cat-combo-label {
+    display: block;
+    font-weight: 700;
+    font-size: .82rem;
+    color: #334155;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+html body .cat-combo {
+    position: relative;
+}
+html body .cat-combo-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: .95rem;
+    box-sizing: border-box;
+    outline: none;
+    background: #fff;
+    color: #0f172a;
+}
+html body .cat-combo-input:focus {
+    border-color: #15803d;
+    box-shadow: 0 0 0 3px rgba(21, 128, 61, .12);
+}
+html body .cat-combo-dropdown {
+    display: none;
+    position: absolute;
+    z-index: 30;
+    left: 0;
+    right: 0;
+    top: calc(100% + 4px);
+    max-height: 240px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, .12);
+}
+html body .cat-combo.is-open .cat-combo-dropdown {
+    display: block;
+}
+html body .cat-combo-option {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 9px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+}
+html body .cat-combo-option:last-child {
+    border-bottom: 0;
+}
+html body .cat-combo-option:hover,
+html body .cat-combo-option.is-active {
+    background: #f0fdf4;
+}
+html body .cat-combo-option.is-hidden {
+    display: none;
+}
+html body .cat-combo-name {
+    font-size: .9rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+html body .cat-combo-path {
+    font-size: .75rem;
+    font-weight: 600;
+    color: #64748b;
+}
+html body .cat-combo-help {
+    margin: 6px 0 0;
+    font-size: .76rem;
+    color: #64748b;
+}
+html body .cat-combo-error {
+    margin: 6px 0 0;
+    font-size: .78rem;
+    font-weight: 700;
+    color: #b91c1c;
+}
+html body .cat-select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    background: #fff;
+    color: #0f172a;
+    font-size: .95rem;
+    box-sizing: border-box;
+    outline: none;
+}
+html body .cat-select:focus {
+    border-color: #15803d;
+    box-shadow: 0 0 0 3px rgba(21, 128, 61, .12);
+}

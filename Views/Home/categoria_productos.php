@@ -5,6 +5,7 @@ $rolUsuario = $_SESSION['usuario_rol'] ?? 'cliente';
 $esAdmin = ($rolUsuario === 'admin');
 $rutaInicio = $esAdmin ? 'index.php?action=home_admin' : 'index.php?action=home_usuario';
 $estaAutenticado = isset($_SESSION['usuario_id']);
+$esBusqueda = !empty($buscar);
 
 // Mapa de productos en carrito para estado inicial UI
 $cartUserIdCat = $_SESSION['usuario_id'] ?? 'invitado';
@@ -289,7 +290,56 @@ if (!function_exists('formatearSkuImg4')) {
 
                 $isOfertas = (isset($esOfertas) && $esOfertas) || (strtolower($tituloCategoria ?? '') === 'ofertas') || (strpos(strtolower($tituloCategoria ?? ''), 'ofertas') !== false) || (strpos(strtolower($tituloCategoria ?? ''), 'descuento') !== false);
 
-                if ($isOfertas) {
+                if ($esBusqueda) {
+                    if (!empty($busquedaJerarquia)) {
+                        $nivelBusqueda = $busquedaJerarquia['nivel'];
+                        $macroBusqueda = $busquedaJerarquia['macro'] ?? null;
+                        $grupoBusqueda = $busquedaJerarquia['grupo'] ?? null;
+                        $subBusqueda = $busquedaJerarquia['subcategoria'] ?? null;
+
+                        if ($nivelBusqueda !== 'macro' && !empty($macroBusqueda)) {
+                            $breadcrumbs[] = [
+                                'label' => $macroBusqueda['nombre'],
+                                'url'   => 'index.php?action=ver_categoria&id_momento='.$macroBusqueda['id'].'&nombre='.urlencode($macroBusqueda['nombre']),
+                                'is_current' => false
+                            ];
+                        }
+
+                        if ($nivelBusqueda === 'subcategoria' && !empty($grupoBusqueda)) {
+                            $breadcrumbs[] = [
+                                'label' => $grupoBusqueda['nombre'],
+                                'url'   => 'index.php?action=ver_categoria&id_grupo='.$grupoBusqueda['id'].'&nombre='.urlencode($grupoBusqueda['nombre']),
+                                'is_current' => false
+                            ];
+                        }
+
+                        if ($nivelBusqueda === 'subcategoria' && !empty($subBusqueda)) {
+                            $breadcrumbs[] = [
+                                'label' => $subBusqueda['nombre'],
+                                'url'   => null,
+                                'is_current' => true
+                            ];
+                        } elseif ($nivelBusqueda === 'categoria' && !empty($grupoBusqueda)) {
+                            $breadcrumbs[] = [
+                                'label' => $grupoBusqueda['nombre'],
+                                'url'   => null,
+                                'is_current' => true
+                            ];
+                        } elseif (!empty($macroBusqueda)) {
+                            $breadcrumbs[] = [
+                                'label' => $macroBusqueda['nombre'],
+                                'url'   => null,
+                                'is_current' => true
+                            ];
+                        }
+                    } else {
+                        $breadcrumbs[] = [
+                            'label' => $tituloCategoria,
+                            'url'   => null,
+                            'is_current' => true
+                        ];
+                    }
+                } elseif ($isOfertas) {
                     $breadcrumbs[] = [
                         'label' => 'Ofertas del Día',
                         'url'   => null,
@@ -423,9 +473,9 @@ if (!function_exists('formatearSkuImg4')) {
                 </aside>
 
                 <!-- TARJETA UNIFICADA DE PRODUCTOS Y ORDENAMIENTO (MISMO NIVEL DE FILTROS) -->
-                <div class="catalog-products-wrapper" style="flex:1; min-width:0; background: #fff; padding: 20px; border-radius: 16px; border: 1px solid #f0f0f0; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                <div class="catalog-products-wrapper" style="flex:1; min-width:0; background: #fff; border-radius: 16px; border: 1px solid #f0f0f0; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
                     <!-- Barra de Ordenamiento Interna -->
-                    <div class="catalog-top-bar" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; margin-bottom: 18px; border-bottom: 1px solid #f1f5f9; background: transparent; box-shadow: none; border: none; border-radius: 0;">
+                    <div class="catalog-top-bar" style="padding-bottom: 14px; margin-bottom: 18px; border-bottom: 1px solid #f1f5f9; background: transparent; box-shadow: none; border: none; border-radius: 0;">
                         <!-- Botón abrir filtros en Móvil -->
                         <button type="button" class="btn-open-mobile-filtros" id="btnOpenMobileFiltros" title="Filtrar productos">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -443,7 +493,7 @@ if (!function_exists('formatearSkuImg4')) {
                         </button>
 
                         <!-- Control Ordenar Por Estilizado (Desktop) -->
-                        <div class="sort-control-group desktop-only-sort" style="display: flex; align-items: center; gap: 12px;">
+                        <div class="sort-control-group desktop-only-sort">
                             <label for="selectOrdenCatalogo" style="font-size: 13px; font-weight: 600; color: #64748b;">Ordenar por:</label>
                             <div class="select-custom-wrapper">
                                 <select id="selectOrdenCatalogo" class="select-orden-custom">

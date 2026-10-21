@@ -144,7 +144,7 @@ class VerificacionPagoModel {
             }
 
             $this->conn->commit();
-            return ['ok' => true, 'mensaje' => 'Pago validado y aprobado con éxito. Pedido pasó a "En Preparación"'];
+            return ['ok' => true, 'mensaje' => 'Pago validado y aprobado con éxito. Pedido pasó a "En Preparación"', 'id_pedido' => (int)$idPedido];
 
         } catch (Exception $e) {
             $this->conn->rollBack();
@@ -188,7 +188,7 @@ class VerificacionPagoModel {
             $stmtUpdP->execute();
 
             $this->conn->commit();
-            return ['ok' => true, 'mensaje' => 'Pago rechazado correctamente. El pedido fue marcado como Cancelado.'];
+            return ['ok' => true, 'mensaje' => 'Pago rechazado correctamente. El pedido fue marcado como Cancelado.', 'id_pedido' => (int)$verif['id_pedido']];
 
         } catch (Exception $e) {
             $this->conn->rollBack();

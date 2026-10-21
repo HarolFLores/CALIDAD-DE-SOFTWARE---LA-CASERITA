@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="Images/logo_backup.png">
     <title>Historial de ventas - La Caserita</title>
     <link rel="stylesheet" href="Styles/global.css">
     <link rel="stylesheet" href="Styles/staff-panel.css?v=<?= time() ?>">
@@ -19,12 +20,6 @@
                 </button>
                 <span class="staff-topbar-title">Historial de ventas</span>
             </div>
-            <div class="staff-topbar-actions">
-                <a href="index.php?action=home_usuario" class="topbar-store-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                    Volver a Tienda
-                </a>
-            </div>
         </header>
 
         <main class="staff-content">
@@ -32,7 +27,6 @@
                 <header class="cashier-history-heading">
                     <div>
                         <span class="staff-section-kicker">CAJA POS</span>
-                        <h1>Historial de ventas</h1>
                         <p><?= htmlspecialchars($nombre) ?> · Comprobantes emitidos en terminal POS</p>
                     </div>
                     <div style="display:flex; gap:10px; align-items:center;">
@@ -44,17 +38,17 @@
                 <section class="history-metrics-grid">
                     <article class="h-metric-card">
                         <span class="h-metric-label">TOTAL FILTRADO</span>
-                        <strong class="h-metric-val" id="metricTotalFiltrado" style="color:#15803d;">S/ 0.00</strong>
+                        <strong class="h-metric-val" id="metricTotalFiltrado">S/ 0.00</strong>
                         <span class="h-metric-foot" id="metricCantidadTickets">0 comprobantes</span>
                     </article>
                     <article class="h-metric-card">
                         <span class="h-metric-label">TOTAL EN EFECTIVO</span>
-                        <strong class="h-metric-val" id="metricTotalEfectivo" style="color:#0f172a;">S/ 0.00</strong>
+                        <strong class="h-metric-val" id="metricTotalEfectivo">S/ 0.00</strong>
                         <span class="h-metric-foot">Cobrado en gaveta</span>
                     </article>
                     <article class="h-metric-card">
                         <span class="h-metric-label">DIGITAL Y TARJETAS</span>
-                        <strong class="h-metric-val" id="metricTotalDigital" style="color:#0284c7;">S/ 0.00</strong>
+                        <strong class="h-metric-val" id="metricTotalDigital">S/ 0.00</strong>
                         <span class="h-metric-foot">Yape, Plin y tarjetas</span>
                     </article>
                 </section>
@@ -68,18 +62,17 @@
 
                     <div class="filter-group">
                         <label for="filtroMetodo" class="filter-label">Método:</label>
-                        <select id="filtroMetodo" onchange="filtrarVentas()">
+                        <select id="filtroMetodo" class="history-select" onchange="filtrarVentas()">
                             <option value="">Todos los métodos</option>
                             <option value="efectivo">Efectivo</option>
-                            <option value="yape">Yape</option>
-                            <option value="plin">Plin</option>
                             <option value="tarjeta">Tarjeta</option>
+                            <option value="digital">Yape / Plin / Billeteras</option>
                         </select>
                     </div>
 
                     <div class="filter-group">
                         <label for="filtroRangoFecha" class="filter-label">Fecha:</label>
-                        <select id="filtroRangoFecha" onchange="cambiarRangoFecha()">
+                        <select id="filtroRangoFecha" class="history-select" onchange="cambiarRangoFecha()">
                             <option value="todos">Todo el historial</option>
                             <option value="hoy">Hoy</option>
                             <option value="7dias">Últimos 7 días</option>
@@ -177,6 +170,7 @@
                             </tr>
                         </tbody>
                     </table>
+                    <div class="pg-footer" id="histPagination"></div>
                 </section>
             </div>
         </main>
@@ -187,7 +181,7 @@
         <div class="ticket-modal-content">
             <div class="ticket-modal-header ticket-no-print">
                 <h3><i class="fa-solid fa-receipt" style="color:#15803d; margin-right:6px;"></i> Comprobante de Venta</h3>
-                <button type="button" onclick="cerrarTicketPreview()" class="ticket-modal-close" aria-label="Cerrar modal">&times;</button>
+                <button type="button" onclick="cerrarTicketPreview()" class="ticket-modal-close btn-close-universal" aria-label="Cerrar modal" title="Cerrar">&times;</button>
             </div>
 
             <div class="ticket-modal-body">
@@ -257,9 +251,6 @@
                 <button type="button" class="btn-ticket-print" onclick="ejecutarImpresion()">
                     <i class="fa-solid fa-print"></i> IMPRIMIR TICKET
                 </button>
-                <button type="button" class="btn-ticket-close" onclick="cerrarTicketPreview()">
-                    Cerrar
-                </button>
             </div>
         </div>
     </div>
@@ -269,6 +260,8 @@
         const ventasData = <?= json_encode($ventas ?? []) ?>;
         const hoyStr = '<?= date("Y-m-d") ?>';
         const hace7DiasStr = '<?= date("Y-m-d", strtotime("-7 days")) ?>';
+        let histPaginator = null;
+        let histMatched = [];
 
         function cambiarRangoFecha() {
             const val = document.getElementById('filtroRangoFecha').value;
@@ -289,6 +282,7 @@
             const fechaCustom = document.getElementById('filtroFecha').value;
 
             const filas = document.querySelectorAll('#tbodyHistorial .fila-venta');
+            histMatched = [];
             let visibles = 0;
             let totalFiltrado = 0;
             let totalEfectivo = 0;
@@ -307,7 +301,9 @@
 
                 // Filtro metodo
                 let coincideMetodo = true;
-                if (metodo) {
+                if (metodo === 'digital') {
+                    coincideMetodo = met.includes('yape') || met.includes('plin') || met.includes('billetera');
+                } else if (metodo) {
                     coincideMetodo = met.includes(metodo);
                 }
 
@@ -322,7 +318,7 @@
                 }
 
                 if (coincideTexto && coincideMetodo && coincideFecha) {
-                    fila.style.display = '';
+                    histMatched.push(fila);
                     visibles++;
                     totalFiltrado += tot;
                     if (met.includes('efectivo')) {
@@ -334,6 +330,8 @@
                     fila.style.display = 'none';
                 }
             });
+
+            if (histPaginator) histPaginator.update(true);
 
             // Actualizar métricas
             document.getElementById('metricTotalFiltrado').textContent = 'S/ ' + totalFiltrado.toFixed(2);
@@ -491,6 +489,16 @@
             if (e.target.id === 'modalTicketPreview') {
                 cerrarTicketPreview();
             }
+        }
+
+        // Paginación unificada del historial
+        if (window.TblPagination && document.getElementById('histPagination')) {
+            histPaginator = window.TblPagination.create(document.getElementById('histPagination'), {
+                size: 5,
+                rows: function () { return histMatched; },
+                show: function (row) { row.style.display = ''; },
+                hide: function (row) { row.style.display = 'none'; }
+            });
         }
 
         // Ejecutar primer filtrado al inicio para calcular tarjetas

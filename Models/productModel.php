@@ -225,12 +225,15 @@ class ProductoModel{
     }
 
     public function getProductosStockBajo(){
-        $query = "SELECT p.id_producto, p.titulo, p.imagen, p.unidad_medida, i.stock_actual, i.stock_minimo, i.ubicacion
-                FROM inventario i
-                INNER JOIN producto p ON i.id_producto = p.id_producto
+        $query = "SELECT p.id_producto, COALESCE(NULLIF(p.nombre, ''), p.titulo) AS titulo, p.imagen, p.unidad_medida,
+                         COALESCE(i.stock_actual, p.stock, 0) AS stock_actual,
+                         COALESCE(i.stock_minimo, 5) AS stock_minimo,
+                         COALESCE(i.ubicacion, 'Almacén principal') AS ubicacion
+                FROM producto p
+                LEFT JOIN inventario i ON i.id_producto = p.id_producto
                 WHERE p.activo = 1
-                AND i.stock_actual <= i.stock_minimo
-                ORDER BY i.stock_actual ASC";
+                AND COALESCE(i.stock_actual, p.stock, 0) <= COALESCE(i.stock_minimo, 5)
+                ORDER BY stock_actual ASC";
 
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
@@ -241,7 +244,7 @@ class ProductoModel{
         try {
             $this->conn->beginTransaction();
 
-            $query = "UPDATE producto SET id_categoria = :id_categoria, id_grupo = :id_grupo, titulo = :titulo,
+            $query = "UPDATE producto SET id_categoria = :id_categoria, id_grupo = :id_grupo, nombre = :nombre, titulo = :titulo,
                         descripcion = :descripcion, precio = :precio, precio_anterior = :precio_anterior, unidad_medida = :unidad_medida, stock = :stock,
                         imagen = :imagen, imagen_2 = :imagen_2, imagen_3 = :imagen_3, imagen_4 = :imagen_4, es_sugerencia = :es_sugerencia, codigo = :codigo, codigo_barras = :codigo_barras WHERE id_producto = :id_producto";
 
@@ -249,6 +252,7 @@ class ProductoModel{
 
             $stmt->bindValue(':id_categoria', $id_categoria ?: null, PDO::PARAM_INT);
             $stmt->bindValue(':id_grupo', $id_grupo ?: null, PDO::PARAM_INT);
+            $stmt->bindParam(':nombre', $titulo);
             $stmt->bindParam(':titulo', $titulo);
             $stmt->bindParam(':descripcion', $descripcion);
             $stmt->bindParam(':precio', $precio);

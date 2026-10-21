@@ -808,31 +808,45 @@ class PedidoModel{
     }
 
     /**
-     * Bandeja de Pedidos Pendientes (HU33): pedidos activos ordenados FIFO,
-     * con datos de pago, empaque y reparto para priorizar el despacho.
+     * Bandeja de pedidos ordenada FIFO con datos de pago, despacho y entrega.
+     * Puede incluir los pedidos finalizados para la vista unificada de Cajero.
      */
-    public function getPedidosBandeja(): array
+    public function getPedidosBandeja(bool $incluirFinalizados = false): array
     {
+        $filtroEstado = $incluirFinalizados ? '' : "WHERE p.estado NOT IN ('Entregado', 'Cancelado')";
+        $orden = $incluirFinalizados
+            ? "ORDER BY CASE
+                    WHEN LOWER(p.estado) LIKE '%pend%' THEN 1
+                    WHEN LOWER(p.estado) LIKE '%prep%' THEN 2
+                    WHEN LOWER(p.estado) LIKE '%camin%' OR LOWER(p.estado) LIKE '%recoj%' THEN 3
+                    WHEN LOWER(p.estado) LIKE '%cancel%' THEN 4
+                    WHEN LOWER(p.estado) LIKE '%entreg%' THEN 5
+                    ELSE 6
+                END,
+                CASE WHEN p.estado IN ('Entregado', 'Cancelado') THEN p.fecha END DESC,
+                p.fecha ASC"
+            : 'ORDER BY p.fecha ASC, p.id_pedido ASC';
+
         $sql = "SELECT
                     p.id_pedido,
                     p.codigo_pedido,
                     p.canal,
                     p.estado,
                     p.tipo_entrega,
+                    p.direccion_envio,
                     p.total,
                     p.fecha,
                     p.id_cajero,
-                    p.id_empaque,
-                    mp.nombre   AS metodo_pago,
+                    COALESCE(mp.nombre, p.metodo_pago, '—') AS metodo_pago,
+                    p.cliente_nombre AS pedido_cliente_nombre,
                     u.nombre    AS cliente_nombre,
                     u.apellido  AS cliente_apellido,
                     u.correo    AS cliente_correo,
                     u.telefono  AS cliente_telefono,
-                    emp.nombre  AS empaque_nombre,
-                    emp.apellido AS empaque_apellido,
                     ed.id_envio,
                     ed.id_repartidor,
                     ed.estado_delivery,
+                    COALESCE(ed.cobrado_por_repartidor, 0) AS cobrado_por_repartidor,
                     rep.nombre  AS repartidor_nombre,
                     rep.apellido AS repartidor_apellido,
                     TIMESTAMPDIFF(MINUTE, p.fecha, NOW()) AS minutos_espera,
@@ -844,34 +858,14 @@ class PedidoModel{
                 FROM pedido p
                 LEFT JOIN metodo_pago mp       ON mp.id_metodo = p.id_metodo
                 LEFT JOIN usuario u            ON u.id_usuario = p.id_usuario
-                LEFT JOIN usuario emp          ON emp.id_usuario = p.id_empaque
                 LEFT JOIN envio_delivery ed    ON ed.id_pedido = p.id_pedido
                 LEFT JOIN usuario rep          ON rep.id_usuario = ed.id_repartidor
-                WHERE p.estado NOT IN ('Entregado', 'Cancelado')
-                ORDER BY p.fecha ASC, p.id_pedido ASC";
+                {$filtroEstado}
+                {$orden}";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Asignación (individual o masiva) de pedidos al personal de empaque.
-     * Devuelve la cantidad de pedidos actualizados.
-     */
-    public function asignarEmpaque(array $ids, int $idEmpaque): int
-    {
-        $ids = array_values(array_filter(array_map('intval', $ids)));
-        if (empty($ids) || $idEmpaque <= 0) {
-            return 0;
-        }
-        $marcadores = implode(',', array_fill(0, count($ids), '?'));
-        $sql = "UPDATE pedido
-                   SET id_empaque = ?
-                 WHERE id_pedido IN ($marcadores)
-                   AND estado NOT IN ('Entregado', 'Cancelado')";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute(array_merge([$idEmpaque], $ids));
-        return $stmt->rowCount();
-    }
 }

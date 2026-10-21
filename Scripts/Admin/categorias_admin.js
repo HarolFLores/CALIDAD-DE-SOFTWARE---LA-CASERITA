@@ -1,6 +1,12 @@
 (function() {
 const itemsPerPageCat = 5;
 
+let sizeStateCat = {
+    tablaMom: itemsPerPageCat,
+    tablaGrupos: itemsPerPageCat,
+    tablaCategorias: itemsPerPageCat
+};
+
 let pagesStateCat = {
     tablaMom: 1,
     tablaGrupos: 1,
@@ -36,92 +42,43 @@ function paginateTableCat(tableId, listContainerId, pageKey, filterKey) {
     });
 
     const totalItems = filtered.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPageCat) || 1;
+    const perPage = sizeStateCat[pageKey] || itemsPerPageCat;
+    const totalPages = Math.ceil(totalItems / perPage) || 1;
 
     if (pagesStateCat[pageKey] > totalPages) pagesStateCat[pageKey] = totalPages;
     if (pagesStateCat[pageKey] < 1) pagesStateCat[pageKey] = 1;
 
     const curPage = pagesStateCat[pageKey];
-    const start = (curPage - 1) * itemsPerPageCat;
-    const end = start + itemsPerPageCat;
+    const start = (curPage - 1) * perPage;
+    const end = start + perPage;
 
     allRows.forEach(r => r.style.display = 'none');
     filtered.slice(start, end).forEach(r => r.style.display = '');
 
     const container = document.getElementById(listContainerId);
-    if (!container) return;
-    container.innerHTML = '';
+    if (!container || !window.TblPagination) return;
 
-    // Flecha Anterior <
-    const prevBtn = document.createElement('button');
-    prevBtn.type = 'button';
-    prevBtn.className = 'pagination-page-button';
-    prevBtn.innerHTML = '&lsaquo;';
-    prevBtn.setAttribute('aria-label', 'Pagina anterior');
-    if (curPage === 1) {
-        prevBtn.disabled = true;
-    } else {
-        prevBtn.onclick = function() {
-            pagesStateCat[pageKey]--;
+    window.TblPagination.render(container, {
+        pages: totalPages,
+        page: curPage,
+        size: perPage,
+        onPage: function (p) {
+            pagesStateCat[pageKey] = p;
             paginateTableCat(tableId, listContainerId, pageKey, filterKey);
             table.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        };
-    }
-    container.appendChild(prevBtn);
-
-    // Botones numéricos
-    for (let p = 1; p <= totalPages; p++) {
-        if (totalPages > 7 && p > 2 && p < totalPages - 1 && Math.abs(p - curPage) > 1) {
-            if (p === 3 || p === totalPages - 2) {
-                const dots = document.createElement('span');
-                dots.textContent = '...';
-                dots.style.cssText = 'color:#94a3b8; padding:0 4px; font-weight:700; font-size:0.9rem;';
-                container.appendChild(dots);
-            }
-            continue;
-        }
-
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.textContent = p;
-        btn.className = 'pagination-page-button';
-        btn.setAttribute('aria-label', 'Pagina ' + p);
-
-        if (p === curPage) {
-            btn.classList.add('is-current');
-            btn.setAttribute('aria-current', 'page');
-        } else {
-            btn.onclick = function() {
-                pagesStateCat[pageKey] = p;
-                paginateTableCat(tableId, listContainerId, pageKey, filterKey);
-                table.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            };
-        }
-        container.appendChild(btn);
-    }
-
-    // Flecha Siguiente >
-    const nextBtn = document.createElement('button');
-    nextBtn.type = 'button';
-    nextBtn.className = 'pagination-page-button';
-    nextBtn.innerHTML = '&rsaquo;';
-    nextBtn.setAttribute('aria-label', 'Pagina siguiente');
-    if (curPage >= totalPages) {
-        nextBtn.disabled = true;
-    } else {
-        nextBtn.onclick = function() {
-            pagesStateCat[pageKey]++;
+        },
+        onSize: function (size) {
+            sizeStateCat[pageKey] = size;
+            pagesStateCat[pageKey] = 1;
             paginateTableCat(tableId, listContainerId, pageKey, filterKey);
-            table.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        };
-    }
-    container.appendChild(nextBtn);
+        }
+    });
 }
 
 window.confirmarCambioEstadoCategoria = function(tipo, id, estado, nombre) {
     const activar = Number(estado) === 1;
     const esGrupo = tipo === 'grupo';
-    const entidad = esGrupo ? 'categoria' : 'subcategoria';
+    const entidad = esGrupo ? 'categoría' : 'subcategoría';
     const accion = activar ? 'Activar' : 'Inactivar';
     const modal = document.getElementById('modalConfirmarEstadoCategoria');
     const icono = document.getElementById('iconoEstadoCategoria');
@@ -147,49 +104,24 @@ window.confirmarCambioEstadoCategoria = function(tipo, id, estado, nombre) {
 
 window.switchTab = function(tab, subFilter) {
     document.querySelectorAll('.stat-card-square').forEach(function(card){ card.classList.remove('active-tab'); });
-    document.getElementById('tabViewCategorias').style.display = 'none';
-    document.getElementById('tabViewSubcategorias').style.display = 'none';
-    document.getElementById('tabViewMacrocategorias').style.display = 'none';
+    var view = document.getElementById('tabViewSubcategorias');
+    if (!view) return;
+    view.style.display = 'block';
 
     var titleEl = document.getElementById('mainTitleAdmin');
-
-    if (tab === 'categorias') {
-        if (subFilter === 'activas') {
-            document.getElementById('tabCardCatActivas')?.classList.add('active-tab');
-            filterStateCat.tablaGrupos = 'activas';
-        } else if (subFilter === 'inactivas') {
-            document.getElementById('tabCardCatInactivas')?.classList.add('active-tab');
-            filterStateCat.tablaGrupos = 'inactivas';
-        } else {
-            document.getElementById('tabCardCategorias')?.classList.add('active-tab');
-            filterStateCat.tablaGrupos = 'all';
-        }
-        document.getElementById('tabViewCategorias').style.display = 'block';
-        if(titleEl) titleEl.textContent = 'Gestion de Categorias';
-        pagesStateCat.tablaGrupos = 1;
-        paginateTableCat('tablaGrupos', 'paginationListGrupos', 'tablaGrupos', 'tablaGrupos');
-    } else if (tab === 'subcategorias') {
-        if (subFilter === 'activas') {
-            document.getElementById('tabCardSubActivas')?.classList.add('active-tab');
-            filterStateCat.tablaCategorias = 'activas';
-        } else if (subFilter === 'inactivas') {
-            document.getElementById('tabCardSubInactivas')?.classList.add('active-tab');
-            filterStateCat.tablaCategorias = 'inactivas';
-        } else {
-            document.getElementById('tabCardSubcategorias')?.classList.add('active-tab');
-            filterStateCat.tablaCategorias = 'all';
-        }
-        document.getElementById('tabViewSubcategorias').style.display = 'block';
-        if(titleEl) titleEl.textContent = 'Gestion de Subcategorias';
-        pagesStateCat.tablaCategorias = 1;
-        paginateTableCat('tablaCategorias', 'paginationListCat', 'tablaCategorias', 'tablaCategorias');
-    } else if (tab === 'macrocategorias') {
-        document.getElementById('tabCardMacrocategorias')?.classList.add('active-tab');
-        document.getElementById('tabViewMacrocategorias').style.display = 'block';
-        if(titleEl) titleEl.textContent = 'Gestion de Macrocategorias';
-        pagesStateCat.tablaMom = 1;
-        paginateTableCat('tablaMom', 'paginationListMom', 'tablaMom', null);
+    if (subFilter === 'activas') {
+        document.getElementById('tabCardSubActivas')?.classList.add('active-tab');
+        filterStateCat.tablaCategorias = 'activas';
+    } else if (subFilter === 'inactivas') {
+        document.getElementById('tabCardSubInactivas')?.classList.add('active-tab');
+        filterStateCat.tablaCategorias = 'inactivas';
+    } else {
+        document.getElementById('tabCardSubcategorias')?.classList.add('active-tab');
+        filterStateCat.tablaCategorias = 'all';
     }
+    if (titleEl) titleEl.textContent = 'Gestión de Subcategorías';
+    pagesStateCat.tablaCategorias = 1;
+    paginateTableCat('tablaCategorias', 'paginationListCat', 'tablaCategorias', 'tablaCategorias');
 };
 
 window.filtrarTabla = function(tableId, inputId, colIdx) {
@@ -261,62 +193,36 @@ window.previewCatFileImage = function(input) {
     }
 };
 
-window.filtrarSubcats = function() {
-    var midVal = document.getElementById('catMomentoSelect').value;
-    var gSel = document.getElementById('catGrupoSelect');
-    if (!gSel) return;
-    if (!midVal) {
-        gSel.disabled = true;
-        gSel.style.background = '#f1f5f9';
-        gSel.style.cursor = 'not-allowed';
-        gSel.style.color = '#94a3b8';
-        gSel.value = '';
-        Array.from(gSel.options).forEach(function(opt, i) { if (i > 0) opt.style.display = 'none'; });
-        return;
-    }
-    gSel.disabled = false;
-    gSel.style.background = '#fff';
-    gSel.style.cursor = 'pointer';
-    gSel.style.color = '#0f172a';
-    Array.from(gSel.options).forEach(function(opt, i) {
-        if (i === 0) { opt.style.display = ''; return; }
-        opt.style.display = (opt.getAttribute('data-momento') === midVal) ? '' : 'none';
-    });
-    gSel.value = '';
-};
+function catGrupoSelect() {
+    return document.getElementById('catGrupoSelect');
+}
 
-window.abrirModalGrupo = function() {
-    document.getElementById('tituloModalGrupo').textContent = 'Nueva Categoria';
-    document.getElementById('formGrupoAdmin').action = 'index.php?action=agregar_grupo';
-    document.getElementById('grpId').value = '';
-    document.getElementById('grpNombre').value = '';
-    document.getElementById('grpMomentoSelect').value = '';
-    document.getElementById('grpDescripcion').value = '';
-    document.getElementById('grpImagenUrl').value = '';
-    document.getElementById('grpFileInput').value = '';
-    document.getElementById('grpFileName').textContent = 'Seleccionar archivo PC...';
-    document.getElementById('grpImgPreview').src = 'Images/icono.png';
-    document.getElementById('btnGuardarGrp').textContent = 'Guardar Categoria';
-    document.getElementById('modalGrupoAdmin').style.display = 'flex';
-};
+function syncCategoriaMomento() {
+    var select = catGrupoSelect();
+    var hiddenMomento = document.getElementById('catMomentoId');
+    if (!select || !hiddenMomento) return;
+    var option = select.options[select.selectedIndex];
+    hiddenMomento.value = option ? (option.getAttribute('data-momento') || '') : '';
+}
 
-window.editarGrupo = function(g) {
-    document.getElementById('tituloModalGrupo').textContent = 'Editar Categoria';
-    document.getElementById('formGrupoAdmin').action = 'index.php?action=actualizar_grupo';
-    document.getElementById('grpId').value = g.id_grupo || '';
-    document.getElementById('grpNombre').value = g.nombre || '';
-    document.getElementById('grpMomentoSelect').value = g.id_momento || '';
-    document.getElementById('grpDescripcion').value = g.descripcion || '';
-    document.getElementById('grpImagenUrl').value = g.imagen || '';
-    document.getElementById('grpFileInput').value = '';
-    document.getElementById('grpFileName').textContent = 'Seleccionar archivo PC...';
-    document.getElementById('grpImgPreview').src = g.imagen || 'Images/icono.png';
-    document.getElementById('btnGuardarGrp').textContent = 'Actualizar Cambios';
-    document.getElementById('modalGrupoAdmin').style.display = 'flex';
-};
+function initCategoriaSelect() {
+    var select = catGrupoSelect();
+    if (!select || select.dataset.selectReady === '1') return;
+    select.dataset.selectReady = '1';
+    select.addEventListener('change', syncCategoriaMomento);
+    syncCategoriaMomento();
+}
+
+window.initCategoriaSelect = initCategoriaSelect;
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCategoriaSelect);
+} else {
+    initCategoriaSelect();
+}
 
 window.abrirModalCategoria = function() {
-    document.getElementById('tituloModalCat').textContent = 'Nueva Subcategoria';
+    document.getElementById('tituloModalCat').textContent = 'Nueva Subcategoría';
     document.getElementById('formCategoriaAdmin').action = 'index.php?action=crear_categoria';
     document.getElementById('catId').value = '';
     document.getElementById('catNombre').value = '';
@@ -325,15 +231,15 @@ window.abrirModalCategoria = function() {
     document.getElementById('catFileInput').value = '';
     document.getElementById('catFileName').textContent = 'Seleccionar archivo PC...';
     document.getElementById('catImgPreview').src = 'Images/icono.png';
-    document.getElementById('catMomentoSelect').value = '';
-    document.getElementById('catGrupoSelect').value = '';
-    window.filtrarSubcats();
-    document.getElementById('btnGuardarCat').textContent = 'Guardar Subcategoria';
+    var select = catGrupoSelect();
+    if (select) select.value = '';
+    syncCategoriaMomento();
+    document.getElementById('btnGuardarCat').textContent = 'Guardar Subcategoría';
     document.getElementById('modalCategoriaAdmin').style.display = 'flex';
 };
 
 window.editarCategoria = function(cat) {
-    document.getElementById('tituloModalCat').textContent = 'Editar Subcategoria';
+    document.getElementById('tituloModalCat').textContent = 'Editar Subcategoría';
     document.getElementById('formCategoriaAdmin').action = 'index.php?action=actualizar_categoria';
     document.getElementById('catId').value = cat.id_categoria || '';
     document.getElementById('catNombre').value = cat.nombre || '';
@@ -342,9 +248,9 @@ window.editarCategoria = function(cat) {
     document.getElementById('catFileInput').value = '';
     document.getElementById('catFileName').textContent = 'Seleccionar archivo PC...';
     document.getElementById('catImgPreview').src = cat.imagen || 'Images/icono.png';
-    document.getElementById('catMomentoSelect').value = cat.id_momento || '';
-    window.filtrarSubcats();
-    document.getElementById('catGrupoSelect').value = cat.id_grupo || '';
+    var select = catGrupoSelect();
+    if (select) select.value = String(cat.id_grupo || '');
+    syncCategoriaMomento();
     document.getElementById('btnGuardarCat').textContent = 'Actualizar Cambios';
     document.getElementById('modalCategoriaAdmin').style.display = 'flex';
 };
@@ -381,7 +287,6 @@ window.exportarSubcategoriasPDF = function() {
             + '<td style="padding:5px 8px;border:1px solid #cbd5e1;">' + (i + 1) + '</td>'
             + '<td style="padding:5px 8px;border:1px solid #cbd5e1;">#' + c.id + '</td>'
             + '<td style="padding:5px 8px;border:1px solid #cbd5e1;"><strong>' + escaparHtml(c.nombre) + '</strong></td>'
-            + '<td style="padding:5px 8px;border:1px solid #cbd5e1;">' + escaparHtml(c.macro || '—') + '</td>'
             + '<td style="padding:5px 8px;border:1px solid #cbd5e1;">' + escaparHtml(c.categoria || '—') + '</td>'
             + '<td style="padding:5px 8px;border:1px solid #cbd5e1;">' + escaparHtml(c.descripcion || '—') + '</td>'
             + '<td style="padding:5px 8px;border:1px solid #cbd5e1;">' + (c.activo ? 'Activo' : 'Inactivo') + '</td>'
@@ -393,7 +298,7 @@ window.exportarSubcategoriasPDF = function() {
     cont.innerHTML =
         '<div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #15803d;padding-bottom:8px;margin-bottom:12px;">'
         + '<div><div style="font-size:16px;font-weight:800;">La Caserita — ERP</div>'
-        + '<div style="font-size:12px;color:#64748b;">Listado de Subcategorías (Nivel 3)</div></div>'
+        + '<div style="font-size:12px;color:#64748b;">Listado de Subcategorías</div></div>'
         + '<div style="font-size:11px;color:#64748b;text-align:right;">Generado: ' + fecha + '<br>Total: ' + data.length + '</div>'
         + '</div>'
         + '<table style="width:100%;border-collapse:collapse;font-size:11px;">'
@@ -401,7 +306,6 @@ window.exportarSubcategoriasPDF = function() {
         + '<th style="padding:6px 8px;border:1px solid #cbd5e1;">#</th>'
         + '<th style="padding:6px 8px;border:1px solid #cbd5e1;">ID</th>'
         + '<th style="padding:6px 8px;border:1px solid #cbd5e1;">Subcategoría</th>'
-        + '<th style="padding:6px 8px;border:1px solid #cbd5e1;">Macrocategoría</th>'
         + '<th style="padding:6px 8px;border:1px solid #cbd5e1;">Categoría</th>'
         + '<th style="padding:6px 8px;border:1px solid #cbd5e1;">Descripción</th>'
         + '<th style="padding:6px 8px;border:1px solid #cbd5e1;">Estado</th>'

@@ -2,22 +2,22 @@
 require_once __DIR__ . '/../Core/AuthMiddleware.php';
 require_once __DIR__ . '/../Core/ajaxHelper.php';
 require_once __DIR__ . '/../Models/reportesModel.php';
+require_once __DIR__ . '/../Models/configuracionModel.php';
 require_once __DIR__ . '/../Models/kardexModel.php';
 require_once __DIR__ . '/../Models/proveedorModel.php';
 require_once __DIR__ . '/../Models/cajaModel.php';
 require_once __DIR__ . '/../Models/deliveryModel.php';
-require_once __DIR__ . '/../Models/verificacionPagoModel.php';
 require_once __DIR__ . '/../Models/productModel.php';
 require_once __DIR__ . '/../Models/categoryModel.php';
 require_once __DIR__ . '/../Models/pedidoModel.php';
 
 class ControllerAdminERP {
     private $reportesModel;
+    private $configuracionModel;
     private $kardexModel;
     private $proveedorModel;
     private $cajaModel;
     private $deliveryModel;
-    private $verificacionModel;
     private $productoModel;
     private $categoriaModel;
     private $pedidoModel;
@@ -27,11 +27,11 @@ class ControllerAdminERP {
             session_start();
         }
         $this->reportesModel = new ReportesModel();
+        $this->configuracionModel = new ConfiguracionModel();
         $this->kardexModel = new KardexModel();
         $this->proveedorModel = new ProveedorModel();
         $this->cajaModel = new CajaModel();
         $this->deliveryModel = new DeliveryModel();
-        $this->verificacionModel = new VerificacionPagoModel();
         $this->productoModel = new ProductoModel();
         $this->categoriaModel = new CategoryModel();
         $this->pedidoModel = new PedidoModel();
@@ -51,6 +51,141 @@ class ControllerAdminERP {
         $valorizacion = $this->kardexModel->obtenerValorizacionInventario();
 
         include __DIR__ . '/../Views/Admin/dashboard_ganancias.php';
+    }
+
+    private function filtrosReporte() {
+        $desde = trim((string)($_GET['desde'] ?? ''));
+        $hasta = trim((string)($_GET['hasta'] ?? ''));
+        $canal = strtoupper(trim((string)($_GET['canal'] ?? 'all')));
+
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $desde)) {
+            $desde = date('Y-m-01');
+        }
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $hasta)) {
+            $hasta = date('Y-m-d');
+        }
+        if (strtotime($desde) > strtotime($hasta)) {
+            $temporal = $desde;
+            $desde = $hasta;
+            $hasta = $temporal;
+        }
+        if (!in_array($canal, ['POS', 'WEB'], true)) {
+            $canal = 'all';
+        }
+
+        return [$desde, $hasta, $canal];
+    }
+
+    public function reportesAdmin() {
+        $this->verificarAdmin();
+        $nombre = htmlspecialchars($_SESSION['usuario_nombre'] ?? 'Administrador');
+        [$desde, $hasta, $canal] = $this->filtrosReporte();
+        $reporte = $this->reportesModel->obtenerReporteVentas($desde, $hasta, $canal);
+
+        include __DIR__ . '/../Views/Admin/reportes_admin.php';
+    }
+
+    public function exportarReporteVentas() {
+        $this->verificarAdmin();
+        [$desde, $hasta, $canal] = $this->filtrosReporte();
+        $reporte = $this->reportesModel->obtenerReporteVentas($desde, $hasta, $canal);
+
+        $nombreArchivo = 'reporte_ventas_' . $desde . '_' . $hasta . '.csv';
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $nombreArchivo . '"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        $salida = fopen('php://output', 'w');
+        fwrite($salida, "\xEF\xBB\xBF");
+        fputcsv($salida, ['Reporte de ventas', $desde . ' al ' . $hasta, 'Canal: ' . ($canal === 'all' ? 'Todos' : $canal)], ';');
+        fputcsv($salida, [], ';');
+        fputcsv($salida, ['Resumen'], ';');
+        fputcsv($salida, ['Ventas totales', number_format((float)$reporte['total_ventas'], 2, '.', '')], ';');
+        fputcsv($salida, ['Pedidos', (int)$reporte['total_pedidos']], ';');
+        fputcsv($salida, ['Ticket promedio', number_format((float)$reporte['ticket_promedio'], 2, '.', '')], ';');
+        fputcsv($salida, ['Costo de ventas', number_format((float)$reporte['cogs'], 2, '.', '')], ';');
+        fputcsv($salida, ['Ganancia bruta', number_format((float)$reporte['ganancia_bruta'], 2, '.', '')], ';');
+        fputcsv($salida, ['Margen bruto (%)', number_format((float)$reporte['margen_bruto'], 1, '.', '')], ';');
+        fputcsv($salida, [], ';');
+
+        fputcsv($salida, ['Ventas por día'], ';');
+        fputcsv($salida, ['Fecha', 'Pedidos', 'Ventas', 'Costo', 'Ganancia'], ';');
+        foreach ($reporte['por_dia'] as $fila) {
+            fputcsv($salida, [$fila['fecha'], $fila['pedidos'], number_format((float)$fila['total'], 2, '.', ''), number_format((float)$fila['costo'], 2, '.', ''), number_format((float)$fila['ganancia'], 2, '.', '')], ';');
+        }
+        fputcsv($salida, [], ';');
+
+        fputcsv($salida, ['Ventas por producto'], ';');
+        fputcsv($salida, ['Producto', 'Subcategoría', 'Unidades', 'Ingresos', 'Costo', 'Ganancia', 'Margen (%)'], ';');
+        foreach ($reporte['por_producto'] as $fila) {
+            fputcsv($salida, [$fila['producto'], $fila['categoria'], $fila['unidades'], number_format((float)$fila['ingresos'], 2, '.', ''), number_format((float)$fila['costo'], 2, '.', ''), number_format((float)$fila['ganancia'], 2, '.', ''), number_format((float)$fila['margen'], 1, '.', '')], ';');
+        }
+        fputcsv($salida, [], ';');
+
+        fputcsv($salida, ['Ventas por subcategoría'], ';');
+        fputcsv($salida, ['Subcategoría', 'Unidades', 'Ingresos', 'Costo', 'Ganancia'], ';');
+        foreach ($reporte['por_categoria'] as $fila) {
+            fputcsv($salida, [$fila['categoria'], $fila['unidades'], number_format((float)$fila['ingresos'], 2, '.', ''), number_format((float)$fila['costo'], 2, '.', ''),number_format((float)$fila['ganancia'], 2, '.', '')], ';');
+        }
+        fputcsv($salida, [], ';');
+
+        fputcsv($salida, ['Ventas por método de pago'], ';');
+        fputcsv($salida, ['Método', 'Pedidos', 'Total'], ';');
+        foreach ($reporte['por_metodo'] as $fila) {
+            fputcsv($salida, [$fila['metodo'], $fila['pedidos'], number_format((float)$fila['total'], 2, '.', '')], ';');
+        }
+
+        fclose($salida);
+        exit();
+    }
+
+    private function tokenConfiguracion() {
+        if (empty($_SESSION['csrf_configuracion'])) {
+            $_SESSION['csrf_configuracion'] = bin2hex(random_bytes(32));
+        }
+        return $_SESSION['csrf_configuracion'];
+    }
+
+    public function configuracionAdmin() {
+        $this->verificarAdmin();
+        $nombre = htmlspecialchars($_SESSION['usuario_nombre'] ?? 'Administrador');
+        $configTienda = $this->configuracionModel->obtenerTienda();
+        $configOperativa = $this->configuracionModel->obtenerOperativa();
+        $csrfToken = $this->tokenConfiguracion();
+        $flashSuccess = $_SESSION['flash_success'] ?? null;
+        $flashError = $_SESSION['flash_error'] ?? null;
+        unset($_SESSION['flash_success'], $_SESSION['flash_error']);
+
+        include __DIR__ . '/../Views/Admin/configuracion_admin.php';
+    }
+
+    public function guardarConfiguracion() {
+        $this->verificarAdmin();
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: index.php?action=configuracion_admin');
+            exit();
+        }
+
+        $token = (string)($_POST['csrf_token'] ?? '');
+        if (!hash_equals((string)($_SESSION['csrf_configuracion'] ?? ''), $token)) {
+            $_SESSION['flash_error'] = 'La sesión expiró. Vuelve a intentarlo.';
+            header('Location: index.php?action=configuracion_admin');
+            exit();
+        }
+
+        $guardadoTienda = $this->configuracionModel->guardarTienda($_POST);
+        $datosOperativa = array_merge($this->configuracionModel->obtenerOperativa(), $_POST);
+        $guardadoOperativa = $this->configuracionModel->guardarOperativa($datosOperativa);
+
+        if ($guardadoTienda && $guardadoOperativa) {
+            $_SESSION['flash_success'] = 'Configuración actualizada correctamente.';
+        } else {
+            $_SESSION['flash_error'] = 'No se pudo guardar la configuración. Revisa los datos e inténtalo de nuevo.';
+        }
+
+        header('Location: index.php?action=configuracion_admin');
+        exit();
     }
 
     // =========================================================================
@@ -297,7 +432,7 @@ class ControllerAdminERP {
         $nombre = htmlspecialchars($_SESSION['usuario_nombre'] ?? 'Administrador');
         $idUsuario = (int)$_SESSION['usuario_id'];
         
-        $sesionActiva = $this->cajaModel->obtenerSesionActiva();
+        $sesionActiva = $this->cajaModel->obtenerSesionActivaEmpleado();
         $resumen = null;
         $movimientos = [];
 
@@ -307,6 +442,7 @@ class ControllerAdminERP {
         }
 
         $historialSesiones = $this->cajaModel->listarHistorialSesiones(50);
+        $soloLectura = true;
 
         include __DIR__ . '/../Views/Admin/caja_admin.php';
     }
@@ -360,11 +496,12 @@ class ControllerAdminERP {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $idSesion = (int)($_POST['id_sesion'] ?? 0);
             $montoReal = (float)($_POST['monto_cierre_real'] ?? 0);
+            $observacion = trim($_POST['observacion_cierre'] ?? '');
 
-            if ($idSesion <= 0) {
-                $_SESSION['flash_error'] = 'Sesión no especificada';
+            if ($idSesion <= 0 || $observacion === '') {
+                $_SESSION['flash_error'] = 'Indica la sesión y una observación para cerrar la caja';
             } else {
-                $res = $this->cajaModel->cerrarCaja($idSesion, $montoReal);
+                $res = $this->cajaModel->cerrarCaja($idSesion, $montoReal, mb_substr($observacion, 0, 500));
                 if ($res['ok']) {
                     $_SESSION['flash_success'] = $res['mensaje'] . '. Esperado: S/ ' . number_format($res['esperado'], 2) . ' | Contado: S/ ' . number_format($res['real'], 2) . ' | Diferencia: S/ ' . number_format($res['diferencia'], 2);
                 } else {
@@ -387,10 +524,6 @@ class ControllerAdminERP {
         $repartidores = $this->deliveryModel->listarRepartidores();
 
         // HU33: Bandeja de Pedidos Pendientes (dentro de Logística y Despacho)
-        $bandejaPedidos = $this->pedidoModel->getPedidosBandeja();
-        $bandejaEmpaque = $this->deliveryModel->listarPersonalEmpaque();
-        $bandejaRepartidores = $this->deliveryModel->listarRepartidoresActivos();
-
         include __DIR__ . '/../Views/Admin/delivery_admin.php';
     }
 
@@ -429,8 +562,60 @@ class ControllerAdminERP {
             $notas = trim($_POST['notas'] ?? '');
             $esAjax = AjaxHelper::isAjax() || !empty($_POST['is_ajax']) || (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
 
+            $estadosPermitidos = $idEnvio > 0
+                ? ['Pendiente', 'En Preparacion', 'En Ruta', 'Fallido']
+                : ['Pendiente', 'En Preparacion', 'Listo para Recojo', 'Entregado', 'Cancelado'];
+            if (!in_array($nuevoEstado, $estadosPermitidos, true)) {
+                if ($esAjax) {
+                    AjaxHelper::jsonError('El estado seleccionado no es válido para este pedido.', 422);
+                }
+                $_SESSION['flash_error'] = 'El estado seleccionado no es válido para este pedido.';
+                header('Location: index.php?action=delivery_admin');
+                exit();
+            }
+
+            if ($nuevoEstado === 'En Ruta' && $idEnvio > 0 && !$this->deliveryModel->envioTieneRepartidor($idEnvio)) {
+                if ($esAjax) {
+                    AjaxHelper::jsonError('Asigna un repartidor antes de marcar el envío como En Ruta.', 422);
+                }
+                $_SESSION['flash_error'] = 'Asigna un repartidor antes de marcar el envío como En Ruta.';
+                header('Location: index.php?action=delivery_admin');
+                exit();
+            }
+
+            $esCancelacion = in_array($nuevoEstado, ['Fallido', 'Cancelado'], true);
+            if ($esCancelacion) {
+                if ($notas === '') {
+                    if ($esAjax) {
+                        AjaxHelper::jsonError('Indica el motivo de la cancelación.', 422);
+                    }
+                    $_SESSION['flash_error'] = 'Indica el motivo de la cancelación.';
+                    header('Location: index.php?action=delivery_admin');
+                    exit();
+                }
+                $notas = '[Cancelación: ' . $notas . ']';
+            } else {
+                $notas = '';
+            }
+
             if (($idEnvio > 0 || $idPedido > 0) && !empty($nuevoEstado)) {
+                $estadoAnterior = '';
+                if ($idPedido > 0) {
+                    $pedidoAntes = $this->pedidoModel->getPedidoByIdAdmin($idPedido);
+                    $estadoAnterior = (string)($pedidoAntes['estado'] ?? '');
+                }
+
                 $this->deliveryModel->actualizarEstadoDelivery($idEnvio, $nuevoEstado, $cobrado, $liquidado, $notas, $idPedido);
+
+                if ($idPedido > 0) {
+                    try {
+                        require_once __DIR__ . '/../Models/notificacionEmailModel.php';
+                        (new NotificacionEmailModel())->enviarActualizacionEstado($idPedido, $nuevoEstado, $notas, $estadoAnterior);
+                    } catch (Throwable $e) {
+                        error_log('No se pudo enviar el aviso de estado del pedido ' . $idPedido . ': ' . $e->getMessage());
+                    }
+                }
+
                 if ($esAjax) {
                     AjaxHelper::jsonResponse(true, 'Estado actualizado a: ' . $nuevoEstado);
                 }
@@ -443,122 +628,6 @@ class ControllerAdminERP {
             }
         }
         header('Location: index.php?action=delivery_admin');
-        exit();
-    }
-
-    // =========================================================================
-    // 5b. BANDEJA DE PEDIDOS PENDIENTES - ASIGNACIÓN (HU33)
-    // =========================================================================
-    public function bandejaAsignar() {
-        $this->verificarAdmin();
-        $esAjax = AjaxHelper::isAjax() || !empty($_POST['is_ajax']) || (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
-
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            if ($esAjax) AjaxHelper::jsonError('Método no permitido.', 405);
-            header('Location: index.php?action=delivery_admin');
-            exit();
-        }
-
-        $ids = $_POST['ids'] ?? [];
-        if (is_string($ids)) {
-            $ids = explode(',', $ids);
-        }
-        $ids = array_values(array_filter(array_map('intval', (array)$ids)));
-        $tipo = trim($_POST['tipo'] ?? '');
-        $idUsuario = (int)($_POST['id_usuario'] ?? 0);
-
-        if (empty($ids)) {
-            if ($esAjax) AjaxHelper::jsonError('Seleccione al menos un pedido.', 422);
-            $_SESSION['flash_error'] = 'Seleccione al menos un pedido.';
-            header('Location: index.php?action=delivery_admin');
-            exit();
-        }
-
-        if ($tipo === 'empaque') {
-            if ($idUsuario <= 0) {
-                if ($esAjax) AjaxHelper::jsonError('Seleccione el personal de empaque.', 422);
-                $_SESSION['flash_error'] = 'Seleccione el personal de empaque.';
-                header('Location: index.php?action=delivery_admin');
-                exit();
-            }
-            $afectados = $this->pedidoModel->asignarEmpaque($ids, $idUsuario);
-            $mensaje = $afectados . ' pedido(s) asignado(s) a empaque.';
-        } elseif ($tipo === 'reparto') {
-            if ($idUsuario <= 0) {
-                if ($esAjax) AjaxHelper::jsonError('Seleccione el motorizado.', 422);
-                $_SESSION['flash_error'] = 'Seleccione el motorizado.';
-                header('Location: index.php?action=delivery_admin');
-                exit();
-            }
-            $afectados = $this->deliveryModel->asignarRepartidorPedidos($ids, $idUsuario);
-            $mensaje = $afectados . ' pedido(s) asignado(s) a reparto.';
-        } else {
-            if ($esAjax) AjaxHelper::jsonError('Tipo de asignación inválido.', 422);
-            $_SESSION['flash_error'] = 'Tipo de asignación inválido.';
-            header('Location: index.php?action=delivery_admin');
-            exit();
-        }
-
-        if ($esAjax) {
-            AjaxHelper::jsonResponse(true, $mensaje, ['afectados' => $afectados]);
-        }
-        $_SESSION['flash_success'] = $mensaje;
-        header('Location: index.php?action=delivery_admin');
-        exit();
-    }
-
-    // =========================================================================
-    // 6. VERIFICACIÓN DE PAGOS YAPE / PLIN
-    // =========================================================================
-    public function verificacionPagos() {
-        $this->verificarAdmin();
-        $nombre = htmlspecialchars($_SESSION['usuario_nombre'] ?? 'Administrador');
-        $filtro = $_GET['estado'] ?? null;
-        $verificaciones = $this->verificacionModel->listarVerificaciones($filtro);
-
-        include __DIR__ . '/../Views/Admin/verificacion_pagos.php';
-    }
-
-    public function aprobarVerificacionPago() {
-        $this->verificarAdmin();
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $idVerif = (int)($_POST['id_verificacion'] ?? 0);
-            $idUser = (int)$_SESSION['usuario_id'];
-
-            if ($idVerif > 0) {
-                $res = $this->verificacionModel->aprobarPago($idVerif, $idUser);
-                if ($res['ok']) {
-                    if (AjaxHelper::isAjax()) AjaxHelper::jsonResponse(true, $res['mensaje']);
-                    $_SESSION['flash_success'] = $res['mensaje'];
-                } else {
-                    if (AjaxHelper::isAjax()) AjaxHelper::jsonError($res['mensaje'], 422);
-                    $_SESSION['flash_error'] = $res['mensaje'];
-                }
-            }
-        }
-        header('Location: index.php?action=verificacion_pagos');
-        exit();
-    }
-
-    public function rechazarVerificacionPago() {
-        $this->verificarAdmin();
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $idVerif = (int)($_POST['id_verificacion'] ?? 0);
-            $motivo = trim($_POST['motivo_rechazo'] ?? 'Voucher ilegible o no concuerda');
-            $idUser = (int)$_SESSION['usuario_id'];
-
-            if ($idVerif > 0) {
-                $res = $this->verificacionModel->rechazarPago($idVerif, $idUser, $motivo);
-                if ($res['ok']) {
-                    if (AjaxHelper::isAjax()) AjaxHelper::jsonResponse(true, $res['mensaje']);
-                    $_SESSION['flash_success'] = $res['mensaje'];
-                } else {
-                    if (AjaxHelper::isAjax()) AjaxHelper::jsonError($res['mensaje'], 422);
-                    $_SESSION['flash_error'] = $res['mensaje'];
-                }
-            }
-        }
-        header('Location: index.php?action=verificacion_pagos');
         exit();
     }
 

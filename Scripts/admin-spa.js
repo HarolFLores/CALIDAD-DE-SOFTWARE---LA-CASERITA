@@ -7,7 +7,7 @@ window.ensureCameraScanner = function(callback) {
     if (window.scannerRemoteLoading) return;
     window.scannerRemoteLoading = true;
     const scannerScript = document.createElement('script');
-    scannerScript.src = 'Scripts/scanner-camara.js';
+    scannerScript.src = 'Scripts/scanner-camara.js?v=20261019-2';
     scannerScript.onload = function() {
         window.scannerRemoteLoading = false;
         if (callback) callback();
@@ -35,19 +35,30 @@ if (!window.UniversalCameraScanner || !window.UniversalCameraScanner.isReal) {
     };
 }
 
+// Helper para garantizar la paginación unificada en todas las vistas del ERP
+window.ensureTblPagination = function() {
+    if (window.TblPagination) return;
+    if (document.getElementById('tblPaginationScript')) return;
+    var s = document.createElement('script');
+    s.id = 'tblPaginationScript';
+    s.src = 'Scripts/pagination.js?v=20261019';
+    document.head.appendChild(s);
+};
+
 const SPA = {
     moduleTitles: {
         dashboard_ganancias: 'Dashboard financiero',
+        reportes_admin: 'Reportes',
+        configuracion_admin: 'Configuración',
         ventas_admin: 'Ventas',
         compras_admin: 'Compras y reposición',
-        verificacion_pagos: 'Auditoría de pagos',
         delivery_admin: 'Logística y despacho',
         inventario: 'Productos',
         productos_admin: 'Productos',
         categorias_admin: 'Categorías',
         kardex_admin: 'Kardex valorizado',
         proveedores_admin: 'Proveedores',
-        caja_admin: 'Caja',
+            caja_admin: 'Supervisión de caja',
         carrusel_admin: 'Banners y carrusel',
         usuarios_admin: 'Usuarios',
         mi_perfil_admin: 'Mi perfil'
@@ -55,6 +66,7 @@ const SPA = {
 
     init: function() {
         this.setupAjax();
+        window.ensureTblPagination();
         this.createToastContainer();
         this.createLoader();
         this.setupNavigation();
@@ -171,7 +183,7 @@ const SPA = {
                     <div class="toast-title">${title}</div>
                     <div class="toast-message">${message}</div>
                 </div>
-                <button class="toast-close">
+                <button class="toast-close" aria-label="Cerrar">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
                 <div class="toast-progress" style="animation-duration: ${duration}ms"></div>
@@ -254,13 +266,69 @@ const SPA = {
         });
     },
 
+    ensureModuleStyles: function(action) {
+        const actionStylesheets = {
+            caja_admin: ['Styles/Vistas/Admin/caja_admin.css'],
+            carrusel_admin: ['Styles/Vistas/Admin/carrusel_admin.css'],
+            categorias_admin: ['Styles/Vistas/Admin/categorias_admin.css'],
+            compras_admin: ['Styles/Vistas/Admin/compras_admin.css'],
+            dashboard_ganancias: ['Styles/Vistas/Admin/dashboard_ganancias.css'],
+            reportes_admin: ['Styles/Vistas/Admin/reportes_admin.css'],
+            configuracion_admin: ['Styles/Vistas/Admin/configuracion_admin.css'],
+            delivery_admin: ['Styles/Vistas/Admin/delivery_admin.css'],
+            kardex_admin: ['Styles/Vistas/Admin/kardex_admin.css'],
+            proveedores_admin: ['Styles/Vistas/Admin/proveedores_admin.css'],
+            ventas_admin: ['Styles/Vistas/Admin/ventas_admin.css'],
+            mi_perfil_admin: ['Styles/Vistas/Perfil/mi_perfil.css'],
+            inventario: ['Styles/Vistas/Inventario/inventario.css', 'Styles/Vistas/Inventario/inventario_panel.css'],
+            productos_admin: ['Styles/Vistas/Inventario/inventario.css', 'Styles/Vistas/Inventario/inventario_panel.css'],
+            pos: ['Styles/styles-pos.css', 'Styles/styles-users-admin.css', 'Styles/Vistas/Cajero/caja_punto_venta.css']
+        };
+
+        const paths = (actionStylesheets[action] || []).slice();
+        if (action === 'pos') {
+            paths.push('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+        }
+
+        $('link[data-admin-view-style]').each(function() {
+            const base = (this.getAttribute('href') || '').split('?')[0];
+            if (!paths.includes(base)) {
+                $(this).remove();
+            }
+        });
+
+        return Promise.all(paths.map(function(stylesheet) {
+            const alreadyLoaded = $('link[data-admin-view-style]').filter(function() {
+                return (this.getAttribute('href') || '').split('?')[0] === stylesheet;
+            }).length > 0;
+
+            if (alreadyLoaded) {
+                return Promise.resolve();
+            }
+
+            return new Promise(function(resolve) {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.setAttribute('data-admin-view-style', '1');
+                link.href = stylesheet.indexOf('http') === 0
+                    ? stylesheet
+                    : `${stylesheet}?v=20261021-1`;
+                link.onload = resolve;
+                link.onerror = resolve;
+                document.head.appendChild(link);
+            });
+        }));
+    },
+
     loadModule: function(url, pushState = true) {
         if (window.UniversalCameraScanner && window.UniversalCameraScanner.isOpen) {
             window.UniversalCameraScanner.close();
         }
         this.showLoader();
         const $container = $('#admin-container');
-        
+        const requestedAction = new URL(url, window.location.href).searchParams.get('action');
+        const stylesReady = this.ensureModuleStyles(requestedAction);
+
         $container.addClass('admin-main-transition').removeClass('admin-main-visible');
 
         $.ajax({
@@ -278,36 +346,6 @@ const SPA = {
                         $('<style class="spa-dynamic-style">').html(css).appendTo('head');
                     }
                 });
-
-                const actionStylesheets = {
-                    caja_admin: ['Styles/Vistas/Admin/caja_admin.css'],
-                    carrusel_admin: ['Styles/Vistas/Admin/carrusel_admin.css'],
-                    categorias_admin: ['Styles/Vistas/Admin/categorias_admin.css'],
-                    compras_admin: ['Styles/Vistas/Admin/compras_admin.css'],
-                    dashboard_ganancias: ['Styles/Vistas/Admin/dashboard_ganancias.css'],
-                    delivery_admin: ['Styles/Vistas/Admin/delivery_admin.css', 'Styles/Vistas/Admin/bandeja_pedidos.css'],
-                    kardex_admin: ['Styles/Vistas/Admin/kardex_admin.css'],
-                    proveedores_admin: ['Styles/Vistas/Admin/proveedores_admin.css'],
-                    ventas_admin: ['Styles/Vistas/Admin/ventas_admin.css'],
-                    verificacion_pagos: ['Styles/Vistas/Admin/verificacion_pagos.css'],
-                    mi_perfil_admin: ['Styles/styles-cuenta.css'],
-                    inventario: ['Styles/Vistas/Inventario/inventario.css', 'Styles/Vistas/Inventario/inventario_panel.css'],
-                    productos_admin: ['Styles/Vistas/Inventario/inventario.css', 'Styles/Vistas/Inventario/inventario_panel.css'],
-                    pos: ['Styles/styles-pos.css', 'Styles/styles-users-admin.css', 'Styles/Vistas/Cajero/caja_punto_venta.css']
-                };
-                const requestedAction = new URL(url, window.location.href).searchParams.get('action');
-                $('link[data-admin-view-style]').remove();
-                (actionStylesheets[requestedAction] || []).forEach(function(stylesheet) {
-                    $('<link rel="stylesheet" data-admin-view-style>')
-                        .attr('href', `${stylesheet}?v=${Date.now()}`)
-                        .appendTo('head');
-                });
-
-                if (requestedAction === 'pos') {
-                    $('<link rel="stylesheet" data-admin-view-style>')
-                        .attr('href', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css')
-                        .appendTo('head');
-                }
 
                 let $extracted = $doc.find('#admin-container');
                 if (!$extracted.length) {
@@ -348,7 +386,7 @@ const SPA = {
                 // Execute scripts with window.eval to preserve global function definitions
                 $doc.find('script').each(function() {
                     const src = $(this).attr('src');
-                    if (src && src.indexOf('admin-spa.js') === -1 && src.indexOf('jquery') === -1) {
+                    if (src && src.indexOf('admin-spa.js') === -1 && src.indexOf('jquery') === -1 && src.indexOf('pagination.js') === -1) {
                         $.getScript(src);
                     } else if (!src) {
                         const scriptCode = $(this).html();
@@ -362,9 +400,9 @@ const SPA = {
                     }
                 });
 
-                setTimeout(() => {
+                stylesReady.finally(function() {
                     $container.addClass('admin-main-visible').removeClass('admin-main-transition');
-                }, 50);
+                });
 
                 if (pushState) {
                     window.history.pushState({ url: url }, '', url);

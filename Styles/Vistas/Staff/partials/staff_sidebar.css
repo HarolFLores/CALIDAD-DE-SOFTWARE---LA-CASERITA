@@ -10,6 +10,68 @@ body.repartidor-panel {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+/* Paneles de cajero y reparto: misma estructura visual que el admin. */
+body:not(.pos-body) .staff-topbar {
+  display: flex;
+  position: fixed;
+  top: 0;
+  left: 270px;
+  right: 0;
+  height: 68px;
+  z-index: 900;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  box-sizing: border-box;
+  background: #15803d;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+}
+
+body:not(.pos-body) .staff-main { padding-top: 68px; }
+.staff-sidebar .sidebar-link[href*="home_usuario"],
+.staff-topbar .topbar-store-btn { display: none; }
+
+@media (max-width: 850px) {
+  body:not(.pos-body) .staff-topbar { left: 0; height: 60px; padding: 0 14px; }
+  body:not(.pos-body) .staff-main { padding-top: 60px; }
+}
+
+body.pos-body .pos-header .topbar-store-btn { display: none; }
+
+/* X de cierre del módulo Cajero: misma geometría y animación que en el login. */
+html body.cashier-app .btn-close-universal,
+html body.cashier-history-page .btn-close-universal,
+html body.pos-body.role-staff .btn-close-universal {
+  width: clamp(36px, 8vw, 44px);
+  height: clamp(36px, 8vw, 44px);
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: clamp(1.4rem, 4vw, 1.8rem);
+  font-weight: 200;
+  line-height: 1;
+  box-shadow: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .2s ease, color .2s ease, border-color .2s ease, transform .2s ease;
+}
+
+html body.cashier-app .btn-close-universal:hover,
+html body.cashier-history-page .btn-close-universal:hover,
+html body.pos-body.role-staff .btn-close-universal:hover {
+  background: #f0fdf4;
+  color: #15803d;
+  border-color: #15803d;
+  transform: rotate(90deg);
+}
+
 /* Overlay Móvil */
 .staff-sidebar-overlay {
   position: fixed;
@@ -49,8 +111,8 @@ body.repartidor-panel {
   display: none;
   min-height: 72px;
   padding: 16px 20px;
-  background: #15803d;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
   align-items: center;
   justify-content: space-between;
   box-sizing: border-box;
@@ -60,17 +122,16 @@ body.repartidor-panel {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #ffffff;
-  font-size: 1rem;
-  font-weight: 700;
+  color: #15803d;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
 }
 
-.staff-sidebar .sidebar-mobile-heading svg {
-  width: 22px;
-  height: 22px;
-  stroke: #ffffff;
-  fill: none;
-  stroke-width: 2;
+.staff-sidebar .sidebar-mobile-brand-img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
   flex-shrink: 0;
 }
 
@@ -118,7 +179,8 @@ body.repartidor-panel {
   display: block;
 }
 
-.staff-sidebar .sidebar-brand span {
+.staff-sidebar .sidebar-brand span,
+.staff-sidebar .sidebar-brand-text span {
   color: #15803d;
   font-size: 1.25rem;
   font-weight: 800;
@@ -328,6 +390,8 @@ body.repartidor-panel {
 .staff-main {
   min-height: 100vh;
   margin-left: 270px;
+  min-width: 0;
+  width: auto;
   display: flex;
   flex-direction: column;
   background: #f8fafc;
@@ -416,12 +480,14 @@ body.repartidor-panel {
 
 /* Contenido Principal */
 .staff-content {
-  max-width: 1260px;
+  max-width: none;
   width: 100%;
   margin: 0 auto;
   padding: 20px 24px 44px;
   box-sizing: border-box;
 }
+
+.staff-content > * { min-width: 0; }
 
 /* Soporte específico para POS (pantalla completa con drawer deslizante) */
 body.pos-body .staff-sidebar {
@@ -525,6 +591,7 @@ body.pos-body .staff-sidebar .sidebar-brand.hide-on-mobile {
 
   .staff-main {
     margin-left: 0;
+    width: 100%;
   }
 
   .staff-topbar {
@@ -537,6 +604,12 @@ body.pos-body .staff-sidebar .sidebar-brand.hide-on-mobile {
   }
 
   .staff-content {
+    width: 100%;
     padding: 16px 14px 36px;
   }
+}
+
+@media (max-width: 520px) {
+  .staff-content { padding: 12px 10px 30px; }
+  .staff-topbar { padding: 0 10px; }
 }

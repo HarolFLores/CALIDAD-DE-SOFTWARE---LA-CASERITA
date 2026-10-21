@@ -22,6 +22,7 @@ class DeliveryModel {
                         ELSE 'recojo'
                     END AS tipo_entrega_norm,
                     p.fecha AS pedido_fecha,
+                    GREATEST(TIMESTAMPDIFF(MINUTE, p.fecha, NOW()), 0) AS minutos_espera,
                     p.horario_entrega,
                     p.observacion,
                     COALESCE(ed.id_envio, 0) AS id_envio,
@@ -83,85 +84,14 @@ class DeliveryModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * HU33 - Personal de empaque disponible (cajeros y administradores activos).
-     */
-    public function listarPersonalEmpaque() {
-        $sql = "SELECT id_usuario, nombre, apellido, correo
-                FROM usuario
-                WHERE rol IN ('cajero', 'admin') AND activo = 1
-                ORDER BY nombre ASC";
-        $stmt = $this->conn->query($sql);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    /**
-     * HU33 - Repartidores (motorizados) activos para asignación de despacho.
-     */
-    public function listarRepartidoresActivos() {
-        $sql = "SELECT id_usuario, nombre, apellido, telefono, correo
-                FROM usuario
-                WHERE rol = 'repartidor' AND activo = 1
-                ORDER BY nombre ASC";
-        $stmt = $this->conn->query($sql);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    /**
-     * HU33 - Asignación individual o masiva de pedidos a un motorizado.
-     * Crea el registro de envío si el pedido aún no lo tiene y marca el despacho.
-     * Devuelve la cantidad de pedidos asignados.
-     */
-    public function asignarRepartidorPedidos(array $ids, int $idRepartidor): int
-    {
-        $ids = array_values(array_filter(array_map('intval', $ids)));
-        if (empty($ids) || $idRepartidor <= 0) {
-            return 0;
-        }
-
-        $marcadores = implode(',', array_fill(0, count($ids), '?'));
-
-        // Crear registros de envío faltantes para los pedidos seleccionados
-        $stmtEx = $this->conn->prepare("SELECT id_pedido FROM envio_delivery WHERE id_pedido IN ($marcadores)");
-        $stmtEx->execute($ids);
-        $conEnvio = array_map('intval', $stmtEx->fetchAll(PDO::FETCH_COLUMN));
-        $faltantes = array_values(array_diff($ids, $conEnvio));
-
-        if (!empty($faltantes)) {
-            $marcFalt = implode(',', array_fill(0, count($faltantes), '?'));
-            $sqlInsert = "INSERT INTO envio_delivery
-                            (id_pedido, id_repartidor, nombre_destinatario, celular_contacto,
-                             direccion_destino, referencia, costo_delivery, estado_delivery)
-                          SELECT p.id_pedido, NULL,
-                                 COALESCE(NULLIF(TRIM(CONCAT(COALESCE(u.nombre,''), ' ', COALESCE(u.apellido,''))), ''), NULLIF(p.cliente_nombre,''), 'Cliente'),
-                                 COALESCE(NULLIF(u.telefono,''), '—'),
-                                 COALESCE(NULLIF(p.direccion_envio,''), 'Dirección de entrega no especificada'),
-                                 COALESCE(d.referencia, ''),
-                                 COALESCE(p.costo_envio, 0.00),
-                                 'Pendiente'
-                          FROM pedido p
-                          LEFT JOIN usuario u   ON u.id_usuario = p.id_usuario
-                          LEFT JOIN direccion d ON d.id_direccion = p.id_direccion
-                          WHERE p.id_pedido IN ($marcFalt)";
-            $stmtIns = $this->conn->prepare($sqlInsert);
-            $stmtIns->execute($faltantes);
-        }
-
-        $sql = "UPDATE envio_delivery
-                   SET id_repartidor = ?,
-                       estado_delivery = CASE WHEN estado_delivery = 'Pendiente' THEN 'Asignado' ELSE estado_delivery END,
-                       fecha_asignacion = COALESCE(fecha_asignacion, NOW())
-                 WHERE id_pedido IN ($marcadores)
-                   AND estado_delivery <> 'Entregado'";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute(array_merge([$idRepartidor], $ids));
-        return $stmt->rowCount();
-    }
-
     public function asignarRepartidor($idEnvio, $idRepartidor) {
         $sql = "UPDATE envio_delivery SET 
                     id_repartidor = :rep, 
-                    estado_delivery = 'Asignado',
+                    estado_delivery = CASE 
+                        WHEN estado_delivery = 'Asignado' OR estado_delivery = '' OR estado_delivery IS NULL 
+                        THEN 'Pendiente' 
+                        ELSE estado_delivery 
+                    END,
                     fecha_asignacion = NOW() 
                 WHERE id_envio = :id";
         $stmt = $this->conn->prepare($sql);
@@ -172,13 +102,63 @@ class DeliveryModel {
 
     public function tomarEnvioDisponible($idEnvio, $idRepartidor) {
         $sql = "UPDATE envio_delivery
-                SET id_repartidor = :repartidor, estado_delivery = 'Asignado', fecha_asignacion = NOW()
+                SET id_repartidor = :repartidor, fecha_asignacion = NOW()
                 WHERE id_envio = :envio AND id_repartidor IS NULL AND estado_delivery = 'Pendiente'";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':repartidor', (int)$idRepartidor, PDO::PARAM_INT);
         $stmt->bindValue(':envio', (int)$idEnvio, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->rowCount() === 1;
+    }
+
+    public function envioTieneRepartidor($idEnvio) {
+        $stmt = $this->conn->prepare("SELECT id_repartidor FROM envio_delivery WHERE id_envio = :id LIMIT 1");
+        $stmt->bindValue(':id', (int)$idEnvio, PDO::PARAM_INT);
+        $stmt->execute();
+        $idRepartidor = $stmt->fetchColumn();
+        return $idRepartidor !== false && $idRepartidor !== null && (int)$idRepartidor > 0;
+    }
+
+    public function pedidoTieneRepartidor($idPedido) {
+        $stmt = $this->conn->prepare("SELECT id_repartidor FROM envio_delivery WHERE id_pedido = :id LIMIT 1");
+        $stmt->bindValue(':id', (int)$idPedido, PDO::PARAM_INT);
+        $stmt->execute();
+        $idRepartidor = $stmt->fetchColumn();
+        return $idRepartidor !== false && $idRepartidor !== null && (int)$idRepartidor > 0;
+    }
+
+    public function sincronizarEstadoPorPedido($idPedido, $nuevoEstado) {
+        switch ($nuevoEstado) {
+            case 'Pendiente':
+                $estadoEnvio = 'Pendiente';
+                break;
+            case 'En Preparacion':
+                $estadoEnvio = 'En Preparacion';
+                break;
+            case 'En Camino':
+            case 'En Ruta':
+                $estadoEnvio = 'En Ruta';
+                break;
+            case 'Entregado':
+                $estadoEnvio = 'Entregado';
+                break;
+            case 'Cancelado':
+            case 'Fallido':
+                $estadoEnvio = 'Fallido';
+                break;
+            default:
+                return true;
+        }
+
+        $sql = "UPDATE envio_delivery SET estado_delivery = :est";
+        if ($estadoEnvio === 'Entregado') {
+            $sql .= ", fecha_entrega = NOW()";
+        }
+        $sql .= " WHERE id_pedido = :id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':est', $estadoEnvio);
+        $stmt->bindValue(':id', (int)$idPedido, PDO::PARAM_INT);
+        return $stmt->execute();
     }
 
     public function actualizarEstadoDelivery($idEnvio, $nuevoEstado, $cobrado = null, $liquidado = null, $notas = '', $idPedido = 0) {
@@ -188,9 +168,14 @@ class DeliveryModel {
 
         // Si existe registro en envio_delivery, actualizarlo
         if ($idEnvio > 0) {
+            if ($nuevoEstado === 'En Ruta' && !$this->envioTieneRepartidor($idEnvio)) {
+                return false;
+            }
             $sql = "UPDATE envio_delivery SET 
-                        estado_delivery = :est,
-                        notas_entrega = CONCAT(COALESCE(notas_entrega, ''), '\n', :notas)";
+                        estado_delivery = :est";
+            if ($notas !== '') {
+                $sql .= ", notas_entrega = CONCAT(COALESCE(notas_entrega, ''), '\n', :notas)";
+            }
             if ($nuevoEstado === 'Entregado') {
                 $sql .= ", fecha_entrega = NOW()";
             }
@@ -204,7 +189,7 @@ class DeliveryModel {
 
             $stmt = $this->conn->prepare($sql);
             $stmt->bindParam(':est', $nuevoEstado);
-            $stmt->bindParam(':notas', $notas);
+            if ($notas !== '') $stmt->bindParam(':notas', $notas);
             $stmt->bindParam(':id', $idEnvio, PDO::PARAM_INT);
             if ($cobrado !== null) $stmt->bindParam(':cobrado', $cobrado, PDO::PARAM_INT);
             if ($liquidado !== null) $stmt->bindParam(':liquidado', $liquidado, PDO::PARAM_INT);
@@ -214,7 +199,7 @@ class DeliveryModel {
         // Actualizar tabla pedido
         if ($idPedido > 0) {
             $estadoPedido = $nuevoEstado;
-            if ($nuevoEstado === 'En Ruta' || $nuevoEstado === 'Asignado') {
+            if ($nuevoEstado === 'En Ruta') {
                 $estadoPedido = 'En Camino';
             } elseif ($nuevoEstado === 'Fallido') {
                 $estadoPedido = 'Cancelado';
@@ -244,5 +229,70 @@ class DeliveryModel {
         }
 
         return $res;
+    }
+
+    public function actualizarIncidenciaEntrega($idEnvio, $notas) {
+        $idEnvio = (int)$idEnvio;
+        $notas = trim((string)$notas);
+        if ($idEnvio <= 0 || $notas === '') {
+            return false;
+        }
+
+        $stmt = $this->conn->prepare("SELECT ed.notas_entrega, p.observacion
+            FROM envio_delivery ed
+            JOIN pedido p ON p.id_pedido = ed.id_pedido
+            WHERE ed.id_envio = :id AND ed.estado_delivery = 'Fallido'
+            LIMIT 1");
+        $stmt->bindValue(':id', $idEnvio, PDO::PARAM_INT);
+        $stmt->execute();
+        $envio = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$envio) {
+            return false;
+        }
+
+        $anteriores = (string)($envio['notas_entrega'] ?? '');
+        $observacion = (string)($envio['observacion'] ?? '');
+        $lineas = preg_split('/\r?\n/', $anteriores) ?: [];
+        $conservar = [];
+        $ultimaMeta = -1;
+        foreach ($lineas as $indice => $linea) {
+            $linea = trim($linea);
+            if ($linea === '') {
+                continue;
+            }
+            if (preg_match('/^(Horario|Programado)\s*:/iu', $linea)) {
+                if (!in_array($linea, $conservar, true)) {
+                    $conservar[] = $linea;
+                }
+                $ultimaMeta = $indice;
+            }
+        }
+        $anteriorMotivo = trim(implode("\n", array_slice($lineas, $ultimaMeta + 1)));
+        $nuevasNotas = implode("\n", array_merge($conservar, [$notas]));
+
+        try {
+            $this->conn->beginTransaction();
+            $actualizar = $this->conn->prepare("UPDATE envio_delivery SET notas_entrega = :notas WHERE id_envio = :id AND estado_delivery = 'Fallido'");
+            $actualizar->bindValue(':notas', $nuevasNotas);
+            $actualizar->bindValue(':id', $idEnvio, PDO::PARAM_INT);
+            $actualizar->execute();
+
+            if ($anteriorMotivo !== '' && $observacion !== '') {
+                $observacionNueva = str_replace($anteriorMotivo, $notas, $observacion, $reemplazos);
+                if ($reemplazos > 0) {
+                    $actualizarPedido = $this->conn->prepare("UPDATE pedido p JOIN envio_delivery ed ON p.id_pedido = ed.id_pedido SET p.observacion = :observacion WHERE ed.id_envio = :id");
+                    $actualizarPedido->bindValue(':observacion', $observacionNueva);
+                    $actualizarPedido->bindValue(':id', $idEnvio, PDO::PARAM_INT);
+                    $actualizarPedido->execute();
+                }
+            }
+            $this->conn->commit();
+            return true;
+        } catch (Throwable $e) {
+            if ($this->conn->inTransaction()) {
+                $this->conn->rollBack();
+            }
+            return false;
+        }
     }
 }

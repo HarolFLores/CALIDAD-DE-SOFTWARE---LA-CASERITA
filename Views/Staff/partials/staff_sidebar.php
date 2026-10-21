@@ -5,7 +5,10 @@ if (session_status() === PHP_SESSION_NONE) {
 $rolPanelStaff = $_SESSION['usuario_rol'] ?? '';
 $nombrePanelStaff = htmlspecialchars($_SESSION['usuario_nombre'] ?? 'Personal');
 $paginaPanelStaff = $paginaPanelStaff ?? '';
-$activeTab = $_GET['tab'] ?? ($paginaPanelStaff === 'entregas' ? 'dashboard' : '');
+$activeTab = $_GET['tab'] ?? ($paginaPanelStaff === 'entregas' ? 'assigned' : '');
+$rutaPerfilPanelStaff = $rolPanelStaff === 'admin'
+    ? 'index.php?action=mi_perfil_admin'
+    : 'index.php?action=mi_perfil_staff';
 
 if (!isset($cantAsignados) || !isset($cantDisponibles) || !isset($cantHistorial)) {
     $cantAsignados = 0;
@@ -31,9 +34,9 @@ if (!isset($cantAsignados) || !isset($cantDisponibles) || !isset($cantHistorial)
     }
 }
 
-$tituloMobile = ($rolPanelStaff === 'cajero') ? 'Panel de caja (Cajero)' : 'Panel de reparto (Repartidor)';
 $rolLabel = ($rolPanelStaff === 'cajero') ? 'Cajero' : 'Repartidor';
 ?>
+<script src="Scripts/pagination.js?v=<?= time(); ?>"></script>
 <script src="Scripts/normalizador-modales.js?v=<?= time(); ?>" defer></script>
 <link rel="stylesheet" href="Styles/Vistas/Staff/partials/staff_sidebar.css?v=<?= time(); ?>">
 
@@ -43,13 +46,10 @@ $rolLabel = ($rolPanelStaff === 'cajero') ? 'Cajero' : 'Repartidor';
     <!-- Header Móvil (Imagen 5) -->
     <div class="sidebar-header-mobile">
         <div class="sidebar-mobile-heading">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-            <span><?= $tituloMobile ?></span>
+            <img src="Images/logo_backup.png" alt="" class="sidebar-mobile-brand-img">
+            <span>La Caserita</span>
         </div>
-        <button type="button" class="sidebar-close-btn" id="staffSidebarClose" aria-label="Cerrar Menú">
+        <button type="button" class="sidebar-close-btn btn-close-universal" id="staffSidebarClose" aria-label="Cerrar Menú">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -57,15 +57,16 @@ $rolLabel = ($rolPanelStaff === 'cajero') ? 'Cajero' : 'Repartidor';
         </button>
     </div>
 
-    <!-- Brand Desktop (Imagen 2) -->
-    <a href="index.php?action=home_usuario" class="sidebar-brand hide-on-mobile">
-        <img src="Images/logo.png" alt="Logo" class="sidebar-brand-img">
-        <span>La Caserita</span>
+    <!-- Brand Desktop -->
+    <a href="index.php?action=<?= ($rolPanelStaff === 'repartidor') ? 'panel_repartidor' : 'panel_cajero'; ?>" class="sidebar-brand hide-on-mobile">
+        <img src="Images/logo_backup.png" alt="La Caserita" class="sidebar-brand-img">
+        <div class="sidebar-brand-text">
+            <span>La Caserita</span>
+        </div>
     </a>
 
     <!-- Menú de Navegación -->
     <nav class="sidebar-nav">
-        <div class="sidebar-nav-title sidebar-mobile-menu-title">MENÚ PRINCIPAL</div>
         <div class="sidebar-nav-title">OPERACIONES</div>
         <ul class="sidebar-menu">
             <?php if ($rolPanelStaff === 'cajero'): ?>
@@ -99,6 +100,17 @@ $rolLabel = ($rolPanelStaff === 'cajero') ? 'Cajero' : 'Repartidor';
                         Productos
                       </a>
                     </li>
+                    <li>
+                      <a href="index.php?action=logistica_cajero" class="sidebar-link <?= ($paginaPanelStaff === 'logistica') ? 'active' : ''; ?>">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <rect x="1" y="3" width="15" height="13"></rect>
+                          <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                          <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                          <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                        </svg>
+                        Logística y Despacho
+                      </a>
+                    </li>
                 <li>
                     <a href="index.php?action=arqueo_caja" class="sidebar-link <?= ($paginaPanelStaff === 'arqueo') ? 'active' : ''; ?>">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -122,18 +134,7 @@ $rolLabel = ($rolPanelStaff === 'cajero') ? 'Cajero' : 'Repartidor';
                 </li>
             <?php elseif ($rolPanelStaff === 'repartidor'): ?>
                 <li>
-                    <a href="index.php?action=panel_repartidor&tab=dashboard" class="sidebar-link <?= ($paginaPanelStaff === 'entregas' && $activeTab === 'dashboard') ? 'active' : ''; ?>">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="3" width="7" height="7"></rect>
-                            <rect x="14" y="3" width="7" height="7"></rect>
-                            <rect x="14" y="14" width="7" height="7"></rect>
-                            <rect x="3" y="14" width="7" height="7"></rect>
-                        </svg>
-                        Dashboard
-                    </a>
-                </li>
-                <li>
-                    <a href="index.php?action=panel_repartidor&tab=assigned" class="sidebar-link <?= ($paginaPanelStaff === 'entregas' && $activeTab === 'assigned') ? 'active' : ''; ?>">
+                    <a href="index.php?action=panel_repartidor&tab=assigned" class="sidebar-link <?= ($paginaPanelStaff === 'entregas' && ($activeTab === 'assigned' || ($activeTab === 'detail' && ($_GET['origen'] ?? 'assigned') === 'assigned'))) ? 'active' : ''; ?>">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="1" y="3" width="15" height="13"></rect>
                             <polygon points="16 8 20 8 23 11 23 16 16 16 8"></polygon>
@@ -145,7 +146,7 @@ $rolLabel = ($rolPanelStaff === 'cajero') ? 'Cajero' : 'Repartidor';
                     </a>
                 </li>
                 <li>
-                    <a href="index.php?action=panel_repartidor&tab=available" class="sidebar-link <?= ($paginaPanelStaff === 'entregas' && $activeTab === 'available') ? 'active' : ''; ?>">
+                    <a href="index.php?action=panel_repartidor&tab=available" class="sidebar-link <?= ($paginaPanelStaff === 'entregas' && ($activeTab === 'available' || ($activeTab === 'detail' && ($_GET['origen'] ?? '') === 'available'))) ? 'active' : ''; ?>">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -155,7 +156,7 @@ $rolLabel = ($rolPanelStaff === 'cajero') ? 'Cajero' : 'Repartidor';
                     </a>
                 </li>
                 <li>
-                    <a href="index.php?action=panel_repartidor&tab=history" class="sidebar-link <?= ($paginaPanelStaff === 'entregas' && $activeTab === 'history') ? 'active' : ''; ?>">
+                    <a href="index.php?action=panel_repartidor&tab=history" class="sidebar-link <?= ($paginaPanelStaff === 'entregas' && ($activeTab === 'history' || ($activeTab === 'detail' && ($_GET['origen'] ?? '') === 'history'))) ? 'active' : ''; ?>">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10"></circle>
                             <polyline points="12 6 12 12 16 14"></polyline>
@@ -165,18 +166,12 @@ $rolLabel = ($rolPanelStaff === 'cajero') ? 'Cajero' : 'Repartidor';
                     </a>
                 </li>
             <?php endif; ?>
-            <li>
-                <a href="index.php?action=home_usuario" class="sidebar-link">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                    Volver a Tienda
-                </a>
-            </li>
         </ul>
     </nav>
 
     <!-- Footer Sidebar (Estilo Referencia: Avatar, Nombre, Rol, Salir) -->
     <div class="sidebar-footer-user">
-        <a href="index.php?action=mi_cuenta" class="sidebar-user-info" title="Mi Cuenta">
+        <a href="<?= htmlspecialchars($rutaPerfilPanelStaff) ?>" class="sidebar-user-info" aria-label="Ir a mi perfil" title="Mi perfil">
             <div class="sidebar-user-avatar">
                 <?= strtoupper(substr($nombrePanelStaff, 0, 1)); ?>
             </div>
@@ -198,3 +193,20 @@ $rolLabel = ($rolPanelStaff === 'cajero') ? 'Cajero' : 'Repartidor';
 
 <script src="Scripts/Vistas/Staff/partials/staff_sidebar.js?v=<?= time(); ?>"></script>
 <script src="Scripts/table-kebab-menu.js?v=<?= time(); ?>" defer></script>
+<script>
+// Cierre automático por inactividad para proteger las operaciones del personal.
+(function () {
+    const LIMITE_INACTIVIDAD = 30 * 60 * 1000;
+    let temporizador;
+    const reiniciar = function () {
+        clearTimeout(temporizador);
+        temporizador = setTimeout(function () {
+            window.location.href = 'index.php?action=logout&motivo=inactividad';
+        }, LIMITE_INACTIVIDAD);
+    };
+    ['pointerdown', 'keydown', 'touchstart'].forEach(function (evento) {
+        document.addEventListener(evento, reiniciar, { passive: true });
+    });
+    reiniciar();
+})();
+</script>

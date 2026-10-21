@@ -383,6 +383,157 @@
             `;
             document.head.appendChild(style);
 
+            // Tema limpio compartido por todos los botones de escáner
+            if (!document.getElementById('universalCameraScannerPosTheme')) {
+                const themeStyle = document.createElement('style');
+                themeStyle.id = 'universalCameraScannerPosTheme';
+                themeStyle.textContent = `
+                    html body .ucs-theme-pos .ucs-card {
+                        max-width: 440px;
+                        border: 0;
+                        border-radius: 24px;
+                        background: #fff;
+                        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+                    }
+                    html body .ucs-theme-pos .ucs-header {
+                        align-items: flex-start;
+                        padding: 22px 24px 0;
+                        background: #fff;
+                        color: #0f172a;
+                    }
+                    html body .ucs-theme-pos .ucs-header-icon {
+                        display: none;
+                    }
+                    html body .ucs-theme-pos .ucs-header-title {
+                        flex: 1;
+                        justify-content: center;
+                    }
+                    html body .ucs-theme-pos .ucs-header-title h3 {
+                        color: #0d5f6e;
+                        text-align: center;
+                    }
+                    html body .ucs-theme-pos #ucsModalSubtitle {
+                        display: none;
+                    }
+                    html body .ucs-theme-pos .ucs-btn-close {
+                        width: 34px;
+                        height: 34px;
+                        border: 2px solid #0d5f6e;
+                        border-radius: 50%;
+                        background: #fff;
+                        color: #0d5f6e;
+                        font-size: 1.3rem;
+                        line-height: 1;
+                    }
+                    html body .ucs-theme-pos .ucs-btn-close:hover {
+                        background: #ecfdf5;
+                    }
+                    html body .ucs-theme-pos .ucs-body {
+                        gap: 12px;
+                        padding: 10px 24px 20px;
+                    }
+                    html body .ucs-theme-pos .ucs-pairing-card {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: stretch;
+                        gap: 8px;
+                        padding: 0;
+                        border: 0;
+                        border-radius: 0;
+                        background: transparent;
+                        text-align: center;
+                    }
+                    html body .ucs-theme-pos .ucs-pairing-card > strong {
+                        order: 1;
+                        color: #475569;
+                        font-size: 0.88rem;
+                        font-weight: 400;
+                        line-height: 1.35;
+                    }
+                    html body .ucs-theme-pos .ucs-pairing-status {
+                        order: 2;
+                        padding: 6px 9px;
+                        border-radius: 8px;
+                        background: #fff7ed;
+                        color: #9a3412;
+                        font-size: 0.75rem;
+                        font-weight: 600;
+                    }
+                    html body .ucs-theme-pos .ucs-pairing-status.connected {
+                        background: #f0fdf4;
+                        color: #166534;
+                    }
+                    html body .ucs-theme-pos .ucs-transport-switch {
+                        order: 3;
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 7px;
+                        width: 100%;
+                    }
+                    html body .ucs-theme-pos .ucs-transport-switch button {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 7px;
+                        min-height: 38px;
+                        padding: 6px 9px;
+                        border: 1px solid #cbd5e1;
+                        border-radius: 9px;
+                        background: #f8fafc;
+                        color: #334155;
+                        font-size: 0.82rem;
+                        font-weight: 700;
+                    }
+                    html body .ucs-theme-pos .ucs-transport-switch button.active {
+                        border-color: #0d5f6e;
+                        background: #ecfdf5;
+                        color: #166534;
+                    }
+                    html body .ucs-theme-pos .ucs-qr-box {
+                        order: 4;
+                        align-self: center;
+                        width: 184px;
+                        min-height: 184px;
+                        padding: 0;
+                        border: 0;
+                        border-radius: 12px;
+                        background: #fff;
+                    }
+                    html body .ucs-theme-pos #ucsPairingToken {
+                        order: 5;
+                        color: #475569;
+                        font-size: 0.82rem;
+                    }
+                    html body .ucs-theme-pos .ucs-open-usb {
+                        order: 6;
+                    }
+                    html body .ucs-theme-pos .ucs-pairing-link {
+                        order: 7;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        min-height: 38px;
+                        padding: 8px 10px;
+                        border: 1px solid #cbd5e1;
+                        border-radius: 9px;
+                        background: #f8fafc;
+                        color: #0d5f6e;
+                        font-size: 0.79rem;
+                        font-weight: 700;
+                        text-decoration: none;
+                    }
+                    html body .ucs-theme-pos .ucs-pairing-error {
+                        order: 8;
+                    }
+                    html body .ucs-theme-pos .ucs-connected-message {
+                        border-radius: 12px;
+                        background: #f0fdf4;
+                        color: #15803d;
+                    }
+                `;
+                document.head.appendChild(themeStyle);
+            }
+
             // Inyectar HTML del modal
             const modal = document.createElement('div');
             modal.id = 'universalCameraScannerModal';
@@ -401,17 +552,17 @@
                                 <small id="ucsModalSubtitle" style="opacity:0.85; font-size:0.75rem;">Celular vinculado por cable o Bluetooth</small>
                             </div>
                         </div>
-                        <button type="button" class="ucs-btn-close" id="ucsBtnClose" title="Cerrar (Esc)">&times;</button>
+                        <button type="button" class="ucs-btn-close btn-close-universal" id="ucsBtnClose" title="Cerrar (Esc)" aria-label="Cerrar escáner">&times;</button>
                     </div>
 
                     <div class="ucs-body">
                         <div class="ucs-pairing-card" id="ucsPairingCard">
                             <strong>Vincula el celular escaneando este QR</strong>
                             <div class="ucs-transport-switch" role="group" aria-label="Tipo de conexión">
-                                <button type="button" id="ucsTransportBluetooth" class="active" aria-pressed="true">Bluetooth</button>
-                                <button type="button" id="ucsTransportUsb" aria-pressed="false">Cable USB</button>
+                                <button type="button" id="ucsTransportBluetooth" class="active" aria-pressed="true"><i class="fa-brands fa-bluetooth-b"></i> Bluetooth</button>
+                                <button type="button" id="ucsTransportUsb" aria-pressed="false"><i class="fa-solid fa-plug"></i> Cable USB</button>
                             </div>
-                            <div class="ucs-pairing-status" id="ucsPairingStatus" role="status">Esperando cámara del celular</div>
+                            <div class="ucs-pairing-status" id="ucsPairingStatus" role="status">Esperando lector m\u00f3vil \u00b7 Bluetooth/Cable USB</div>
                             <div class="ucs-qr-box" id="ucsQrCode" aria-label="Código QR para conectar el celular"></div>
                             <span id="ucsPairingToken"></span>
                             <button type="button" class="ucs-open-usb" id="ucsOpenUsb">Abrir automáticamente en celular (Cable USB)</button>
@@ -419,8 +570,8 @@
                             <span class="ucs-pairing-error" id="ucsPairingError" role="alert" hidden></span>
                         </div>
                         <div class="ucs-connected-message" id="ucsConnectedMessage" hidden>
-                            <span><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Cámara conectada</span>
-                            <button type="button" id="ucsBtnToggleScanner">Desconectar cámara</button>
+                            <span><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Lector conectado</span>
+                            <button type="button" id="ucsBtnToggleScanner">Desconectar lector</button>
                         </div>
 
                         <!-- Feedback de lectura -->
@@ -602,11 +753,12 @@
                     if (pairingCard) pairingCard.hidden = conectado;
                     if (connectedMessage) connectedMessage.hidden = !conectado;
                     if (pairingStatus) {
+                                                const modoConexion = UniversalCameraScanner.remoteTransport === 'usb' ? 'Cable USB' : 'Bluetooth';
                         pairingStatus.textContent = conectado
-                            ? 'Cámara conectada'
+                            ? 'Lector conectado'
                             : data.scanner_activo
-                                ? 'Esperando cámara del celular'
-                                : 'Cámara desconectada';
+                                ? `Esperando lector m\u00f3vil \u00b7 ${modoConexion}`
+                                : 'Lector desconectado';
                         pairingStatus.classList.toggle('connected', conectado);
                     }
                     UniversalCameraScanner.remoteScannerEnabled = data.scanner_activo === true;
@@ -772,6 +924,7 @@
             const sub = document.getElementById('ucsModalSubtitle');
             const fb = document.getElementById('ucsFeedbackBox');
 
+            if (modal) modal.classList.toggle('ucs-theme-pos', options.theme !== 'classic');
             UniversalCameraScanner.selectRemoteTransport(UniversalCameraScanner.remoteTransport);
             if (title && options.title) title.textContent = options.title;
             if (sub && options.subtitle) sub.textContent = options.subtitle;

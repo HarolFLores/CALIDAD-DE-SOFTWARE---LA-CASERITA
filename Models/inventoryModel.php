@@ -31,7 +31,7 @@ class InventarioModel {
                   LEFT JOIN categoria c ON p.id_categoria = c.id_categoria
                   LEFT JOIN grupo_momento gm ON p.id_grupo = gm.id_grupo
                   LEFT JOIN momento_consumo mc ON gm.id_momento = mc.id_momento
-                  ORDER BY p.titulo ASC";
+                  ORDER BY (COALESCE(i.stock_actual, p.stock, 0) <= COALESCE(i.stock_minimo, 5)) DESC, p.titulo ASC";
 
         $stmt = $this->conn->prepare($query);
         $stmt->execute();

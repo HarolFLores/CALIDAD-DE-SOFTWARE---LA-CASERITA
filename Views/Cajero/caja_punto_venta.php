@@ -10,7 +10,7 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Punto de Venta POS  La Caserita</title>
+    <title>Punto de Venta POS - La Caserita</title>
     
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
     
@@ -23,8 +23,9 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
     <link rel="stylesheet" href="Styles/global.css?v=<?= filemtime(__DIR__ . '/../../Styles/global.css') ?>">
     <link rel="stylesheet" href="Styles/styles-home.css?v=<?= filemtime(__DIR__ . '/../../Styles/styles-home.css') ?>">
     <?php endif; ?>
+    <link rel="stylesheet" href="Styles/Vistas/Cajero/caja_punto_venta.css?v=<?= filemtime(__DIR__ . '/../../Styles/Vistas/Cajero/caja_punto_venta.css') ?>">
     <?php if ($isAdminPOS): ?>
-    <link rel="stylesheet" href="Styles/styles-users-admin.css">
+    <link rel="stylesheet" href="Styles/styles-users-admin.css?v=<?= filemtime(__DIR__ . '/../../Styles/styles-users-admin.css') ?>">
     <link rel="stylesheet" href="Styles/admin-spa.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="Scripts/admin-spa.js" defer></script>
@@ -53,12 +54,6 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
 <?php if (!$isAjax && $isCashierPOS): ?>
     <?php $paginaPanelStaff = 'pos'; include __DIR__ . '/../Staff/partials/staff_sidebar.php'; ?>
 <?php endif; ?>
-<?php else: ?>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="Styles/styles-pos.css?v=<?= filemtime(__DIR__ . '/../../Styles/styles-pos.css') ?>">
-<link rel="stylesheet" href="Styles/Vistas/Cajero/caja_punto_venta.css?v=<?= filemtime(__DIR__ . '/../../Styles/Vistas/Cajero/caja_punto_venta.css') ?>">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <?php endif; ?>
 
 <?php if (!$isAjax && !$isAdminPOS): ?>
@@ -71,19 +66,6 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
         <div class="pos-brand">
             <i class="fa-solid fa-cash-register"></i>
             <span>La Caserita POS <small style="font-size:0.75rem; opacity:0.8;">[Caja 01]</small></span>
-        </div>
-        <div class="pos-user-info" style="display:flex; align-items:center; gap:12px;">
-            <span style="font-size:0.88rem; font-weight:600;">
-                <i class="fa-solid fa-user-gear" style="color:var(--pos-accent-light); margin-right:4px;"></i>
-                <?= htmlspecialchars($_SESSION['usuario_nombre'] ?? 'Cajero') ?>
-            </span>
-            <a href="index.php?action=home_usuario" class="topbar-store-btn" style="text-decoration:none;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                Volver a Tienda
-            </a>
-            <a href="index.php?action=logout" class="btn-pos-logout">
-                <i class="fa-solid fa-right-from-bracket"></i> Salir
-            </a>
         </div>
     </header>
 <?php endif; ?>
@@ -132,7 +114,7 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
 
         
         <section class="pos-right-panel">
-            <h3 style="margin: 0 0 1rem; color:var(--pos-primary); font-size:1.1rem; font-weight:800;">
+            <h3 class="pos-summary-title">
                 <i class="fa-solid fa-receipt"></i> Resumen de la Venta
             </h3>
 
@@ -153,65 +135,71 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
 
             
             <!-- CLIENTE / IDENTIFICACIÓN (DNI) -->
-            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:1rem; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <label style="font-size:0.82rem; font-weight:800; color:var(--pos-text-secondary); text-transform:uppercase; margin:0;">
-                        <i class="fa-solid fa-id-card" style="color:var(--pos-primary);"></i> Documento del cliente:
+            <div class="pos-side-client">
+                <div class="pos-side-client-head">
+                    <label class="pos-side-client-label">
+                        <i class="fa-solid fa-id-card"></i> Documento del cliente:
                     </label>
-                    <button type="button" onclick="setClienteGenerico()" style="background:#e6f4f6; color:var(--pos-primary); border:none; padding:4px 9px; border-radius:6px; font-size:0.75rem; font-weight:700; cursor:pointer;" title="Asignar Público General">
+                    <button type="button" class="pos-side-client-generic" onclick="setClienteGenerico()" title="Asignar Público General">
                         <i class="fa-solid fa-user"></i> Público General
                     </button>
                 </div>
-                <div style="display:flex; gap:6px; margin-bottom:6px;">
-                    <div style="position:relative; flex:1;">
-                        <input type="text" id="inputClienteDni" class="pos-input-field" maxlength="11" inputmode="numeric" placeholder="DNI (8) o RUC (11)" value="00000000" style="padding-right:32px; font-weight:700;" onkeypress="if(event.key==='Enter'){event.preventDefault(); consultarDniCajero();}">
-                        <button type="button" onclick="consultarDniCajero()" style="position:absolute; right:6px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--pos-primary); font-size:14px; cursor:pointer;" title="Consultar RENIEC o SUNAT">
+                <div class="pos-side-client-dni-row">
+                    <div class="pos-side-client-dni-wrap">
+                        <input type="text" id="inputClienteDni" class="pos-input-field" maxlength="8" inputmode="numeric" placeholder="DNI (8 dígitos)" value="00000000" style="padding-right:32px; font-weight:700;" onkeypress="if(event.key==='Enter'){event.preventDefault(); consultarDniCajero();}">
+                        <button type="button" class="pos-side-client-search" onclick="consultarDniCajero()" title="Consultar RENIEC">
                             <i class="fa-solid fa-magnifying-glass" id="iconBuscarDni"></i>
                         </button>
                     </div>
                 </div>
-                <div style="display:flex; align-items:center; gap:6px; font-size:0.82rem;">
-                    <span style="color:#64748b; font-size:0.78rem;">Nombre:</span>
-                    <strong id="lblClienteNombre" style="color:#0f172a; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Público General</strong>
-                    <button type="button" onclick="editarNombreClienteManual()" style="background:none; border:none; color:#15803D; cursor:pointer; font-size:11px;" title="Editar nombre manualmente">
+                <div class="pos-side-client-name-row">
+                    <span class="pos-side-client-name-label">Nombre:</span>
+                    <strong id="lblClienteNombre" class="pos-side-client-name">Público General</strong>
+                    <button type="button" class="pos-side-client-edit" onclick="editarNombreClienteManual()" title="Editar nombre manualmente">
                         <i class="fa-solid fa-pen-to-square"></i>
                     </button>
                 </div>
             </div>
 
-            <label style="display:block; margin-bottom:8px; font-size:0.85rem; font-weight:700; color:var(--pos-text-secondary);">
-                MÉTODO DE PAGO:
+            <label class="pos-pay-heading">
+                MÉTODO DE PAGO <span>(puedes combinar varios)</span>:
             </label>
-            <div class="payment-methods-grid">
-                <button type="button" class="payment-btn active" data-method="efectivo" onclick="seleccionarMetodoPago('efectivo')">
-                    <i class="fa-solid fa-money-bill-wave" style="font-size:1.2rem;"></i>
-                    <span>Efectivo</span>
-                </button>
-                <button type="button" class="payment-btn" data-method="tarjeta" onclick="seleccionarMetodoPago('tarjeta')">
-                    <i class="fa-solid fa-credit-card" style="font-size:1.2rem;"></i>
-                    <span>Tarjeta</span>
-                </button>
-                <button type="button" class="payment-btn" data-method="yape" onclick="seleccionarMetodoPago('yape')">
-                    <i class="fa-solid fa-mobile-screen-button" style="font-size:1.2rem;"></i>
-                    <span>Yape</span>
-                </button>
-                <button type="button" class="payment-btn" data-method="plin" onclick="seleccionarMetodoPago('plin')">
-                    <i class="fa-solid fa-mobile-screen-button" style="font-size:1.2rem;"></i>
-                    <span>Plin</span>
-                </button>
+            <div class="pos-pay-rows" id="posPayRows">
+                <div class="pos-pay-row">
+                    <span class="pos-pay-label"><i class="fa-solid fa-money-bill-wave"></i> Efectivo</span>
+                    <input type="number" min="0" step="0.10" class="pos-input-field pos-pay-input" id="payMontoEfectivo" data-method="efectivo" placeholder="0.00" oninput="onPagoInput('efectivo')" onfocus="onPagoFocus('efectivo')">
+                    <div class="pos-pay-actions">
+                        <button type="button" class="pos-pay-fill" onclick="autocompletarPago('efectivo')" title="Completar con el saldo pendiente">AUTO</button>
+                        <button type="button" class="pos-pay-clear" data-method="efectivo" onclick="limpiarPago('efectivo')" title="Limpiar monto de efectivo" aria-label="Limpiar monto de efectivo" hidden><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+                <div class="pos-pay-row">
+                    <span class="pos-pay-label"><i class="fa-solid fa-credit-card"></i> Tarjeta</span>
+                    <input type="number" min="0" step="0.10" class="pos-input-field pos-pay-input" id="payMontoTarjeta" data-method="tarjeta" placeholder="0.00" oninput="onPagoInput('tarjeta')" onfocus="onPagoFocus('tarjeta')">
+                    <div class="pos-pay-actions">
+                        <button type="button" class="pos-pay-fill" onclick="autocompletarPago('tarjeta')" title="Completar con el saldo pendiente">AUTO</button>
+                        <button type="button" class="pos-pay-clear" data-method="tarjeta" onclick="limpiarPago('tarjeta')" title="Limpiar monto de tarjeta" aria-label="Limpiar monto de tarjeta" hidden><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+                <div class="pos-pay-row">
+                    <span class="pos-pay-label"><i class="fa-solid fa-mobile-screen-button"></i> Yape</span>
+                    <input type="number" min="0" step="0.10" class="pos-input-field pos-pay-input" id="payMontoYape" data-method="yape" placeholder="0.00" oninput="onPagoInput('yape')" onfocus="onPagoFocus('yape')">
+                    <div class="pos-pay-actions">
+                        <button type="button" class="pos-pay-fill" onclick="autocompletarPago('yape')" title="Completar con el saldo pendiente">AUTO</button>
+                        <button type="button" class="pos-pay-clear" data-method="yape" onclick="limpiarPago('yape')" title="Limpiar monto de Yape" aria-label="Limpiar monto de Yape" hidden><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
             </div>
 
-            
-            <div id="boxMontoRecibido" style="margin-bottom: 1.25rem;">
-                <div style="display:flex; gap:12px; align-items:center;">
-                    <div style="flex:1;">
-                        <label style="display:block; margin-bottom:6px; font-size:0.8rem; font-weight:700; color:var(--pos-text-secondary);">Monto Recibido (S/):</label>
-                        <input type="number" step="0.50" id="inputMontoRecibido" class="pos-input-field" placeholder="0.00" oninput="calcularVueltas()">
-                    </div>
-                    <div style="flex:1;">
-                        <label style="display:block; margin-bottom:6px; font-size:0.8rem; font-weight:700; color:var(--pos-text-secondary);">Vueltas / Cambio (S/):</label>
-                        <input type="text" id="inputVueltas" class="pos-input-field" readonly value="S/ 0.00">
-                    </div>
+            <div class="pos-pay-summary" id="posPaySummary">
+                <div class="pos-pay-summary-stats">
+                    <span>Total <strong id="payTotal">S/ 0.00</strong></span>
+                    <span>Asignado <strong id="payAsignado">S/ 0.00</strong></span>
+                    <span id="payResultadoWrap"><span id="lblResultadoPago">Falta</span> <strong id="payResultado">S/ 0.00</strong></span>
+                </div>
+                <div id="boxMontoRecibido" class="pos-pay-cash is-off">
+                    <label class="pos-pay-cash-label">Efectivo recibido (S/):</label>
+                    <input type="number" step="0.50" id="inputMontoRecibido" class="pos-input-field" placeholder="0.00" oninput="calcularVueltas()">
                 </div>
             </div>
 
@@ -219,7 +207,7 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
             <button type="button" class="btn-cobrar-pos" id="btnCobrarVenta" onclick="procesarVentaCaja()">
                 <i class="fa-solid fa-circle-check"></i> COBRAR VENTA (F9)
             </button>
-            <button type="button" id="btnImprimirVentaAnterior" onclick="imprimirVentaAnterior()" disabled style="width:100%; margin-top:8px; padding:10px; border:1px solid #cbd5e1; border-radius:8px; background:#fff; color:#334155; font-weight:700; cursor:pointer; opacity:.55;">
+            <button type="button" id="btnImprimirVentaAnterior" class="pos-print-btn" onclick="imprimirVentaAnterior()" disabled>
                 <i class="fa-solid fa-print"></i> Imprimir venta anterior
             </button>
         </section>
@@ -227,11 +215,58 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
 
     <div id="posValidationModal" class="pos-validation-overlay" aria-hidden="true">
         <section class="pos-validation-card" role="alertdialog" aria-modal="true" aria-labelledby="posValidationTitle" aria-describedby="posValidationMessage">
-            <button type="button" class="btn-close-universal pos-validation-close" onclick="cerrarAvisoValidacionCaja()" aria-label="Cerrar aviso"><span class="modal-close-glyph" aria-hidden="true">&times;</span></button>
+            <button type="button" class="btn-close-universal pos-validation-close is-danger" onclick="cerrarAvisoValidacionCaja()" aria-label="Cerrar aviso"><span class="modal-close-glyph" aria-hidden="true">&times;</span></button>
             <div class="pos-validation-icon"><i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i></div>
-            <h2 id="posValidationTitle">Monto recibido insuficiente</h2>
+            <h2 id="posValidationTitle">Revisa el pago</h2>
             <p id="posValidationMessage"></p>
-            <button type="button" class="pos-validation-accept" onclick="cerrarAvisoValidacionCaja(); document.getElementById('inputMontoRecibido').focus();">Corregir monto</button>
+        </section>
+    </div>
+
+    <div id="posClientModal" class="pos-validation-overlay" aria-hidden="true">
+        <section class="pos-validation-card pos-client-card" role="dialog" aria-modal="true" aria-labelledby="posClientTitle">
+            <button type="button" class="btn-close-universal pos-validation-close" onclick="cerrarModalCliente()" aria-label="Cerrar modal"><span class="modal-close-glyph" aria-hidden="true">&times;</span></button>
+            <div class="pos-client-heading">
+                <span class="pos-client-icon"><i class="fa-solid fa-user-pen"></i></span>
+                <div>
+                    <h2 id="posClientTitle">Datos del cliente</h2>
+                    <p>Busca por DNI o escribe el nombre manualmente.</p>
+                </div>
+            </div>
+            <div class="pos-client-field">
+                <label for="inputModalClienteDni">DNI</label>
+                <div class="pos-client-search">
+                    <input type="text" id="inputModalClienteDni" class="pos-input-field" maxlength="8" inputmode="numeric" placeholder="8 dígitos">
+                    <button type="button" class="pos-client-search-btn" onclick="consultarDniModal()"><i class="fa-solid fa-magnifying-glass"></i> Buscar</button>
+                </div>
+            </div>
+            <p id="lblModalClienteEstado" class="pos-client-status" aria-live="polite"></p>
+            <div class="pos-client-field">
+                <label for="inputModalClienteNombre">Nombre completo</label>
+                <input type="text" id="inputModalClienteNombre" class="pos-input-field" maxlength="120" placeholder="Nombre y apellidos">
+            </div>
+            <div class="pos-client-actions">
+                <button type="button" class="btn-confirm-cancel" onclick="cerrarModalCliente()">Cancelar</button>
+                <button type="button" class="btn-confirm-accept" onclick="guardarClienteModal()">Guardar cliente</button>
+            </div>
+        </section>
+    </div>
+
+    <div id="posConfirmModal" class="pos-confirm-overlay" aria-hidden="true">
+        <section class="pos-confirm-card" role="dialog" aria-modal="true" aria-labelledby="posConfirmTitle">
+            <button type="button" class="btn-close-universal pos-confirm-close is-danger" onclick="cerrarConfirmacionCobro()" aria-label="Cerrar">&times;</button>
+            <div class="pos-confirm-heading">
+                <span class="pos-confirm-icon"><i class="fa-solid fa-cash-register"></i></span>
+                <div><small>CONFIRMACIÓN DE VENTA</small><h2 id="posConfirmTitle">Revisa antes de cobrar</h2></div>
+            </div>
+            <div class="pos-confirm-client"><span>Cliente</span><strong id="confirmCliente"></strong><small id="confirmDocumento"></small></div>
+            <div class="pos-confirm-products" id="confirmProductos"></div>
+            <div class="pos-confirm-summary">
+                <div><span>Métodos de pago</span><strong id="confirmPagos"></strong></div>
+                <div class="pos-confirm-total"><span>Total</span><strong id="confirmTotal"></strong></div>
+            </div>
+            <div class="pos-confirm-actions">
+                <button type="button" id="btnConfirmarCobro" class="btn-confirm-accept pos-confirm-submit" onclick="confirmarCobroVenta()">Confirmar</button>
+            </div>
         </section>
     </div>
 
@@ -285,12 +320,12 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
         </section>
     </div>
 
-    <!-- MODAL QR YAPE / PLIN EN MOSTRADOR -->
+    <!-- MODAL QR YAPE EN MOSTRADOR -->
     <div id="modalYapePlinPOS" class="pos-lock-overlay" style="display:none;">
         <div class="pos-qr-modal" style="max-width:380px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                 <h3 style="margin:0; color:#7c3aed; font-size:1.2rem; font-weight:800;">
-                    <i class="fa-solid fa-mobile-screen-button"></i> Cobro con Yape / Plin
+                    <i class="fa-solid fa-mobile-screen-button"></i> Cobro con Yape
                 </h3>
                 <button type="button" onclick="cerrarModalYapePlin()" class="btn-close-universal">&times;</button>
             </div>
@@ -305,7 +340,6 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
                 <p style="margin:0 0 10px; font-size:0.78rem; color:#64748b;">Imagen ilustrativa; no es un código QR escaneable.</p>
                 <div style="display:flex; justify-content:center; gap:8px;">
                     <span style="background:#7c3aed; color:#fff; padding:3px 10px; border-radius:10px; font-size:0.75rem; font-weight:800;">YAPE</span>
-                    <span style="background:#0284c7; color:#fff; padding:3px 10px; border-radius:10px; font-size:0.75rem; font-weight:800;">PLIN</span>
                 </div>
             </div>
             <button type="button" class="btn-cobrar-pos" onclick="cerrarModalYapePlin(); procesarVentaCaja()" style="margin:0; font-size:0.95rem;">
@@ -341,7 +375,7 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
                         <div><strong>Cajero:</strong> <span id="lblTicketCajero">--</span></div>
                         <div><strong>Caja:</strong> CAJA-01 (Mostrador)</div>
                         <div><strong>Cliente:</strong> <span id="lblTicketCliente">CLIENTE GENERAL</span></div>
-                        <div><strong>DNI / Doc:</strong> <span id="lblTicketDni">00000000</span></div>
+                        <div><strong>DNI:</strong> <span id="lblTicketDni">00000000</span></div>
                     </div>
 
                     <div style="border-bottom:1px dashed #000; margin:6px 0;"></div>
@@ -402,8 +436,6 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
     </div>
 
     <!-- Estilos de Impresión Térmica Directa -->
-    <link rel="stylesheet" href="Styles/Vistas/Cajero/caja_punto_venta.css?v=<?= filemtime(__DIR__ . '/../../Styles/Vistas/Cajero/caja_punto_venta.css') ?>">
- 
     <script>
         var TOKEN_SESION = "<?= htmlspecialchars($sesionCaja['token_emparejamiento'] ?? '') ?>";
         var CAJA_ID = "<?= htmlspecialchars($sesionCaja['caja_id'] ?? 'CAJA-01') ?>";
@@ -577,6 +609,34 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
 
             document.getElementById('btnEntrarCaja')?.addEventListener('click', omitirLockQR);
             document.getElementById('btnCerrarConexionEscaner')?.addEventListener('click', cerrarModalConexionEscaner);
+            const clienteDniInput = document.getElementById('inputClienteDni');
+            if (clienteDniInput) {
+                clienteDniInput.addEventListener('focus', function () {
+                    if (this.value === '00000000' || this.value === '99999999') this.select();
+                });
+                clienteDniInput.addEventListener('input', function () {
+                    this.value = this.value.replace(/\D/g, '').slice(0, 8);
+                });
+            }
+            const modalDniInput = document.getElementById('inputModalClienteDni');
+            if (modalDniInput) {
+                modalDniInput.addEventListener('focus', function () { this.select(); });
+                modalDniInput.addEventListener('input', function () {
+                    this.value = this.value.replace(/\D/g, '').slice(0, 8);
+                });
+                modalDniInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        consultarDniModal();
+                    }
+                });
+            }
+            document.getElementById('inputModalClienteNombre')?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    guardarClienteModal();
+                }
+            });
 
             verificarEstadoLock();
             consultarEstadoEscaner();
@@ -601,6 +661,15 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
                     procesarVentaCaja();
                 }
             });
+
+            document.addEventListener('wheel', (e) => {
+                const target = e.target;
+                const input = target && target.closest ? target.closest('input[type="number"]') : null;
+                if (input && document.activeElement === input) {
+                    e.preventDefault();
+                    input.blur();
+                }
+            }, { passive: false });
 
             // Buffer inteligente global para pistolas lectoras de código de barras USB
             let barcodeGunBuffer = '';
@@ -659,6 +728,8 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
 
         var previoItemsCount = -1;
         var previoTotal = -1;
+        var previaFirmaItems = '';
+        var itemsVentaActual = [];
         var audioPosCtx = null;
 
         function playDingSound() {
@@ -810,13 +881,16 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
                                 playDingSound();
                                 const ultimo = items[items.length - 1];
                                 if (ultimo) {
-                                    mostrarNotificacionCaja(`📱 Agregado desde Celular: ${ultimo.nombre} (x${ultimo.cantidad})`);
+                                    mostrarNotificacionCaja(`📱 Agregado desde Celular: ${ultimo.nombre || ultimo.titulo || ('Producto #' + ultimo.id_producto)} (x${ultimo.cantidad})`);
                                 }
                             }
                             previoItemsCount = items.length;
                             previoTotal = total;
 
-                            renderizarTablaItems(items, total);
+                            const firmaItems = JSON.stringify(items) + '|' + total;
+                            if (firmaItems !== previaFirmaItems) {
+                                renderizarTablaItems(items, total);
+                            }
                         }
                     })
                     .catch(err => console.error('Error polling POS:', err));
@@ -890,6 +964,8 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
 
         function renderizarTablaItems(items, total) {
             totalGeneralVenta = parseFloat(total || 0);
+            itemsVentaActual = Array.isArray(items) ? items : [];
+            previaFirmaItems = JSON.stringify(itemsVentaActual) + '|' + totalGeneralVenta;
             const tbody = document.getElementById('posTableBody');
             if (!tbody) return;
 
@@ -902,16 +978,38 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
                         </td>
                     </tr>`;
                 actualizarTotalesUI(0);
+                reiniciarPagos();
                 return;
             }
 
             let html = '';
             items.forEach(item => {
+                const codigoItem = item.codigo || item.codigo_barras || ('ID: ' + item.id_producto);
+                const nombreItem = item.nombre || item.titulo || ('Producto #' + item.id_producto);
+                const imagenItem = String(item.imagen || item.imagen_url || '').trim();
+                const imagenSrc = imagenItem ? escapeHtml(imagenItem) : 'Images/logo.png';
+                const precioUnit = parseFloat(item.precio) || 0;
+                const precioAnterior = parseFloat(item.precio_anterior) || 0;
+                const tieneDescuento = precioAnterior > precioUnit && precioUnit > 0;
+                const pctDescuento = tieneDescuento ? Math.round(((precioAnterior - precioUnit) / precioAnterior) * 100) : 0;
                 html += `
                     <tr>
-                        <td><code style="color:var(--pos-primary); font-weight:700;">${item.codigo}</code></td>
-                        <td><strong>${item.nombre}</strong></td>
-                        <td>S/ ${parseFloat(item.precio).toFixed(2)}</td>
+                        <td><code style="color:var(--pos-primary); font-weight:700;">${escapeHtml(String(codigoItem))}</code></td>
+                        <td>
+                            <div class="pos-product-item-cell">
+                                <div class="pos-product-img-box">
+                                    <img src="${imagenSrc}" alt="${escapeHtml(nombreItem)}"${imagenItem ? '' : ' class="pos-img-fallback"'}>
+                                </div>
+                                <div class="pos-product-meta">
+                                    <strong class="pos-product-name">${escapeHtml(nombreItem)}</strong>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="pos-price-cell">
+                            ${tieneDescuento ? `<span class="pos-price-old">S/ ${precioAnterior.toFixed(2)}</span>` : ''}
+                            <span class="pos-price-current">S/ ${precioUnit.toFixed(2)}</span>
+                            ${tieneDescuento ? `<span class="pos-discount-badge">-${pctDescuento}%</span>` : ''}
+                        </td>
                         <td>
                             <div class="pos-qty-control">
                                 <button type="button" class="btn-qty" onclick="cambiarCantidad(${item.id_producto}, ${item.cantidad - 1})">-</button>
@@ -940,7 +1038,7 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
             document.getElementById('lblIgv').textContent = `S/ ${igv.toFixed(2)}`;
             document.getElementById('lblTotal').textContent = `S/ ${total.toFixed(2)}`;
 
-            calcularVueltas();
+            actualizarResumenPagos();
         }
 
         function cambiarCantidad(idProducto, nuevaCant) {
@@ -964,25 +1062,135 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
             .catch(() => mostrarAvisoProductoPOS('Error de conexión al actualizar la cantidad.'));
         }
 
-        function seleccionarMetodoPago(metodo) {
-            metodoPagoSeleccionado = metodo;
-            document.querySelectorAll('.payment-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.method === metodo);
+        function getPagoInput(metodo) {
+            if (metodo === 'efectivo') return document.getElementById('payMontoEfectivo');
+            if (metodo === 'tarjeta') return document.getElementById('payMontoTarjeta');
+            if (metodo === 'yape') return document.getElementById('payMontoYape');
+            return null;
+        }
+
+        function leerPagos() {
+            const metodos = ['efectivo', 'tarjeta', 'yape'];
+            const pagos = [];
+            metodos.forEach(function (m) {
+                const input = getPagoInput(m);
+                const val = parseFloat(input ? input.value : 0) || 0;
+                if (val > 0) {
+                    pagos.push({ metodo: m, monto: Math.round(val * 100) / 100 });
+                }
+            });
+            return pagos;
+        }
+
+        function sumaPagos(pagos) {
+            const list = pagos || leerPagos();
+            const sum = list.reduce(function (acc, p) { return acc + (parseFloat(p.monto) || 0); }, 0);
+            return Math.round(sum * 100) / 100;
+        }
+
+        function actualizarResumenPagos() {
+            const total = Math.round(totalGeneralVenta * 100) / 100;
+            const asignado = sumaPagos();
+
+            const elTotal = document.getElementById('payTotal');
+            const elAsignado = document.getElementById('payAsignado');
+            const wrap = document.getElementById('posPaySummary');
+
+            if (elTotal) elTotal.textContent = `S/ ${total.toFixed(2)}`;
+            if (elAsignado) elAsignado.textContent = `S/ ${asignado.toFixed(2)}`;
+
+            if (wrap) {
+                if (total > 0 && Math.abs(asignado - total) < 0.01) {
+                    wrap.classList.add('is-ok');
+                    wrap.classList.remove('is-warn');
+                } else if (asignado > total) {
+                    wrap.classList.add('is-warn');
+                    wrap.classList.remove('is-ok');
+                } else {
+                    wrap.classList.remove('is-ok', 'is-warn');
+                }
+            }
+
+            const ef = getPagoInput('efectivo');
+            const efVal = parseFloat(ef ? ef.value : 0) || 0;
+            const boxEfectivo = document.getElementById('boxMontoRecibido');
+            if (boxEfectivo) {
+                if (efVal > 0) {
+                    boxEfectivo.classList.remove('is-off');
+                } else {
+                    boxEfectivo.classList.add('is-off');
+                }
+            }
+            calcularVueltas();
+            actualizarBotonesLimpiarPago();
+        }
+
+        function actualizarBotonesLimpiarPago() {
+            document.querySelectorAll('.pos-pay-clear').forEach(function (btn) {
+                const input = getPagoInput(btn.getAttribute('data-method'));
+                const valor = parseFloat(input && input.value ? input.value : 0) || 0;
+                btn.hidden = valor <= 0;
+            });
+        }
+
+        function sincronizarEfectivoRecibido() {
+            const ef = getPagoInput('efectivo');
+            const aplicado = Math.round((parseFloat(ef && ef.value ? ef.value : 0) || 0) * 100) / 100;
+            const rec = document.getElementById('inputMontoRecibido');
+            if (!rec) return;
+
+            if (aplicado <= 0) {
+                rec.value = '';
+                return;
+            }
+
+            const recibido = parseFloat(rec.value || 0) || 0;
+            if (!rec.value || recibido < aplicado) {
+                rec.value = aplicado.toFixed(2);
+            }
+        }
+
+        function onPagoInput(metodo) {
+            if (metodo === 'efectivo') {
+                sincronizarEfectivoRecibido();
+            }
+            actualizarResumenPagos();
+        }
+
+        function onPagoFocus(metodo) {
+            // Callback opcional de foco
+        }
+
+        function autocompletarPago(metodo) {
+            const total = Math.round(totalGeneralVenta * 100) / 100;
+            const input = getPagoInput(metodo);
+            if (!input) return;
+
+            const otros = ['efectivo', 'tarjeta', 'yape'].filter(function (m) { return m !== metodo; });
+            let sumaOtros = 0;
+            otros.forEach(function (m) {
+                const inp = getPagoInput(m);
+                sumaOtros += parseFloat(inp ? inp.value : 0) || 0;
             });
 
-            const boxEfectivo = document.getElementById('boxMontoRecibido');
-            boxEfectivo.style.display = (metodo === 'efectivo') ? 'block' : 'none';
-
-            if (metodo === 'yape' || metodo === 'plin') {
-                const titulo = document.querySelector('#modalYapePlinPOS h3');
-                const imagenBilletera = document.getElementById('qrPOSBilletera');
-                if (titulo) titulo.innerHTML = `<i class="fa-solid fa-mobile-screen-button"></i> Cobro con ${metodo.toUpperCase()}`;
-                if (imagenBilletera) {
-                    imagenBilletera.src = `uploads/qr/qr_${metodo}.svg`;
-                    imagenBilletera.alt = `Imagen ilustrativa de ${metodo.toUpperCase()}; no es un código QR de pago`;
-                }
-                abrirModalYapePlin();
+            const saldo = Math.max(0, Math.round((total - sumaOtros) * 100) / 100);
+            input.value = saldo > 0 ? saldo.toFixed(2) : '';
+            if (metodo === 'efectivo') {
+                sincronizarEfectivoRecibido();
             }
+            actualizarResumenPagos();
+        }
+
+        function limpiarPago(metodo) {
+            const input = getPagoInput(metodo);
+            if (!input) return;
+            input.value = '';
+            if (metodo === 'efectivo') {
+                const rec = document.getElementById('inputMontoRecibido');
+                if (rec) rec.value = '';
+            }
+            onPagoInput(metodo);
+            input.focus();
         }
 
         function abrirModalYapePlin() {
@@ -994,10 +1202,54 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
         }
 
         function calcularVueltas() {
-            if (metodoPagoSeleccionado !== 'efectivo') return;
-            const recibido = parseFloat(document.getElementById('inputMontoRecibido').value || 0);
-            const cambio = recibido - totalGeneralVenta;
-            document.getElementById('inputVueltas').value = `S/ ${Math.max(0, cambio).toFixed(2)}`;
+            const total = Math.round(totalGeneralVenta * 100) / 100;
+            const asignado = sumaPagos();
+            const falta = Math.max(0, Math.round((total - asignado) * 100) / 100);
+            const exceso = Math.max(0, Math.round((asignado - total) * 100) / 100);
+
+            const ef = getPagoInput('efectivo');
+            const aplicado = Math.round((parseFloat(ef && ef.value ? ef.value : 0) || 0) * 100) / 100;
+            const rec = document.getElementById('inputMontoRecibido');
+            const recibido = parseFloat(rec && rec.value ? rec.value : 0) || 0;
+            const cambio = Math.max(0, Math.round((recibido - aplicado) * 100) / 100);
+            const faltaEfectivo = Math.max(0, Math.round((aplicado - recibido) * 100) / 100);
+
+            const elResultado = document.getElementById('payResultado');
+            const lblResultado = document.getElementById('lblResultadoPago');
+            const wrapResultado = document.getElementById('payResultadoWrap');
+            if (!elResultado || !wrapResultado) return;
+
+            wrapResultado.classList.remove('is-falta', 'is-vuelto', 'is-exceso');
+
+            if (falta > 0.009) {
+                if (lblResultado) lblResultado.textContent = 'Falta';
+                elResultado.textContent = `S/ ${falta.toFixed(2)}`;
+                wrapResultado.classList.add('is-falta');
+            } else if (exceso > 0.009) {
+                if (lblResultado) lblResultado.textContent = 'Exceso';
+                elResultado.textContent = `S/ ${exceso.toFixed(2)}`;
+                wrapResultado.classList.add('is-exceso');
+            } else if (faltaEfectivo > 0.009) {
+                if (lblResultado) lblResultado.textContent = 'Falta';
+                elResultado.textContent = `S/ ${faltaEfectivo.toFixed(2)}`;
+                wrapResultado.classList.add('is-falta');
+            } else {
+                if (lblResultado) lblResultado.textContent = 'Vuelto';
+                elResultado.textContent = `S/ ${cambio.toFixed(2)}`;
+                wrapResultado.classList.add('is-vuelto');
+            }
+        }
+
+        function reiniciarPagos() {
+            ['efectivo', 'tarjeta', 'yape'].forEach(function (m) {
+                const el = getPagoInput(m);
+                if (el) el.value = '';
+            });
+            const rec = document.getElementById('inputMontoRecibido');
+            if (rec) rec.value = '';
+            const box = document.getElementById('boxMontoRecibido');
+            if (box) box.classList.add('is-off');
+            actualizarResumenPagos();
         }
 
         function setClienteGenerico() {
@@ -1019,15 +1271,15 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
                 return;
             }
 
-            if (!/^\d{8}(\d{3})?$/.test(dni)) {
-                alert('Ingresa un DNI de 8 dígitos o un RUC de 11 dígitos.');
+            if (!/^\d{8}$/.test(dni)) {
+                mostrarAvisoValidacionCaja('Ingresa un DNI de 8 dígitos.');
                 return;
             }
 
             icon.className = 'fa-solid fa-spinner fa-spin';
             clienteDniActual = dni;
             clienteNombreActual = '';
-            lbl.textContent = dni.length === 11 ? 'Consultando SUNAT...' : 'Consultando RENIEC...';
+            lbl.textContent = 'Consultando RENIEC...';
             lbl.style.color = 'var(--pos-primary)';
 
             fetch(`index.php?action=pos_consultar_dni&documento=${encodeURIComponent(dni)}`)
@@ -1047,7 +1299,7 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
                             setTimeout(() => { editarNombreClienteManual(); }, 300);
                         }
                     } else {
-                        lbl.textContent = data.mensaje || (dni.length === 11 ? 'No se encontró información en SUNAT.' : 'No se encontró información en RENIEC.');
+                        lbl.textContent = data.mensaje || 'No se encontró información en RENIEC.';
                         lbl.style.color = '#dc2626';
                         setTimeout(() => { editarNombreClienteManual(); }, 300);
                     }
@@ -1062,13 +1314,103 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
         }
 
         function editarNombreClienteManual() {
-            const actual = clienteNombreActual === 'Público General' ? '' : clienteNombreActual;
-            const nuevo = prompt('Ingresa el Nombre Completo o Razón Social del Cliente:', actual);
-            if (nuevo !== null && nuevo.trim().length > 0) {
-                clienteNombreActual = nuevo.trim();
-                document.getElementById('lblClienteNombre').textContent = clienteNombreActual;
-                document.getElementById('lblClienteNombre').style.color = '#0f172a';
+            abrirModalCliente();
+        }
+
+        function abrirModalCliente() {
+            const modal = document.getElementById('posClientModal');
+            const dniInput = document.getElementById('inputModalClienteDni');
+            const nombreInput = document.getElementById('inputModalClienteNombre');
+            const estado = document.getElementById('lblModalClienteEstado');
+            if (!modal || !dniInput || !nombreInput || !estado) return;
+
+            dniInput.value = ['00000000', '99999999'].includes(clienteDniActual) ? '' : clienteDniActual;
+            nombreInput.value = clienteNombreActual === 'Público General' ? '' : clienteNombreActual;
+            estado.textContent = '';
+            estado.className = 'pos-client-status';
+
+            modal.classList.add('active');
+            modal.setAttribute('aria-hidden', 'false');
+            setTimeout(function () { dniInput.focus(); }, 60);
+        }
+
+        function cerrarModalCliente() {
+            const modal = document.getElementById('posClientModal');
+            if (!modal) return;
+            modal.classList.remove('active');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+
+        function setEstadoModalCliente(mensaje, tipo) {
+            const estado = document.getElementById('lblModalClienteEstado');
+            if (!estado) return;
+            estado.textContent = mensaje || '';
+            estado.className = 'pos-client-status' + (tipo ? ' is-' + tipo : '');
+        }
+
+        function consultarDniModal() {
+            const dniInput = document.getElementById('inputModalClienteDni');
+            const nombreInput = document.getElementById('inputModalClienteNombre');
+            const dni = dniInput.value.trim();
+            const icon = document.querySelector('.pos-client-search-btn i');
+            if (!/^\d{8}$/.test(dni) || dni === '00000000' || dni === '99999999') {
+                setEstadoModalCliente('Ingresa un DNI de 8 dígitos.', 'error');
+                dniInput.focus();
+                return;
             }
+
+            if (icon) icon.className = 'fa-solid fa-spinner fa-spin';
+            setEstadoModalCliente('Consultando RENIEC...', '');
+
+            fetch(`index.php?action=pos_consultar_dni&documento=${encodeURIComponent(dni)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (icon) icon.className = 'fa-solid fa-magnifying-glass';
+                    if (data && data.ok) {
+                        const nombreEncontrado = String(data.nombre_completo || data.nombre || '').trim();
+                        if (nombreEncontrado !== '') {
+                            nombreInput.value = nombreEncontrado;
+                            setEstadoModalCliente('DNI encontrado en RENIEC.', 'ok');
+                        } else {
+                            setEstadoModalCliente(data.mensaje || 'No se encontró el nombre. Escríbelo manualmente.', 'error');
+                            nombreInput.focus();
+                        }
+                    } else {
+                        setEstadoModalCliente(data.mensaje || 'No se encontró información en RENIEC.', 'error');
+                        nombreInput.focus();
+                    }
+                })
+                .catch(err => {
+                    console.error('Error al consultar DNI:', err);
+                    if (icon) icon.className = 'fa-solid fa-magnifying-glass';
+                    setEstadoModalCliente('Error de conexión. Escribe el nombre manualmente.', 'error');
+                    nombreInput.focus();
+                });
+        }
+
+        function guardarClienteModal() {
+            const dniInput = document.getElementById('inputModalClienteDni');
+            const nombreInput = document.getElementById('inputModalClienteNombre');
+            const dni = dniInput.value.trim();
+            const nombre = nombreInput.value.trim();
+
+            if (dni !== '' && !/^\d{8}$/.test(dni)) {
+                setEstadoModalCliente('El DNI debe tener 8 dígitos.', 'error');
+                dniInput.focus();
+                return;
+            }
+            if (nombre === '') {
+                setEstadoModalCliente('Ingresa o consulta el nombre del cliente.', 'error');
+                nombreInput.focus();
+                return;
+            }
+
+            clienteDniActual = dni || '00000000';
+            clienteNombreActual = nombre;
+            document.getElementById('inputClienteDni').value = clienteDniActual;
+            document.getElementById('lblClienteNombre').textContent = clienteNombreActual;
+            document.getElementById('lblClienteNombre').style.color = '#0f172a';
+            cerrarModalCliente();
         }
 
         var productosEnDropdown = [];
@@ -1177,25 +1519,36 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
             let html = '';
 
             productos.forEach((prod, idx) => {
-                const cod = prod.codigo_barras || prod.codigo || ('ID: ' + prod.id_producto);
-                const nombreProducto = prod.nombre || prod.titulo || 'Producto';
+                const nombreProducto = prod.nombre || prod.titulo || ('Producto #' + prod.id_producto);
                 const sku = prod.codigo || '';
                 const codigoBarras = prod.codigo_barras || '';
                 const codigos = [sku ? `SKU: ${sku}` : '', codigoBarras ? `Barras: ${codigoBarras}` : '']
                     .filter(Boolean).join(' · ') || `ID: ${prod.id_producto}`;
                 const stock = prod.stock !== undefined ? parseInt(prod.stock) : 0;
-                const stockBadge = stock > 0 
-                    ? `<span class="pos-stock-badge in-stock" style="background:#dcfce7; color:#15803d; font-size:0.75rem; padding:2px 8px; border-radius:12px; font-weight:700;">${stock} disponibles</span>` 
-                    : `<span class="pos-stock-badge out-stock" style="background:#fee2e2; color:#dc2626; font-size:0.75rem; padding:2px 8px; border-radius:12px; font-weight:700;">Agotado</span>`;
+                const imagenProducto = String(prod.imagen || prod.imagen_url || '').trim();
+                const precio = parseFloat(prod.precio) || 0;
+                const precioAnterior = parseFloat(prod.precio_anterior) || 0;
+                const tieneDescuento = precioAnterior > precio && precio > 0;
+                const pctDescuento = tieneDescuento ? Math.round(((precioAnterior - precio) / precioAnterior) * 100) : 0;
+                const stockBadge = stock > 0
+                    ? `<span class="pos-stock-badge in-stock">${stock} disponibles</span>`
+                    : `<span class="pos-stock-badge out-stock">Agotado</span>`;
 
                 html += `
-                    <div class="pos-search-item" data-index="${idx}" onclick="seleccionarProductoPorIndice(${idx})" style="padding:10px 14px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; border-bottom:1px solid #f1f5f9; transition:background 0.15s ease;">
-                        <div class="pos-search-item-info" style="display:flex; flex-direction:column; gap:2px;">
-                            <strong class="pos-search-item-name" style="font-size:0.9rem; color:#0f172a;">${escapeHtml(nombreProducto)}</strong>
-                            <small class="pos-search-item-code" style="font-size:0.75rem; color:#64748b;">${escapeHtml(codigos)}</small>
+                    <div class="pos-search-item" data-index="${idx}" onclick="seleccionarProductoPorIndice(${idx})">
+                        <div class="pos-search-item-left">
+                            ${imagenProducto
+                                ? `<img class="pos-search-item-thumb" src="${escapeHtml(imagenProducto)}" alt="${escapeHtml(nombreProducto)}">`
+                                : `<span class="pos-search-item-icon-fallback"><i class="fa-solid fa-box"></i></span>`}
+                            <div class="pos-search-item-info">
+                                <strong class="pos-search-item-name">${escapeHtml(nombreProducto)}</strong>
+                                <div class="pos-search-item-meta"><span>${escapeHtml(codigos)}</span></div>
+                            </div>
                         </div>
-                        <div class="pos-search-item-price-stock" style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
-                            <span class="pos-search-item-price" style="font-size:0.95rem; font-weight:800; color:#15803d;">S/ ${parseFloat(prod.precio).toFixed(2)}</span>
+                        <div class="pos-search-item-price-stock">
+                            ${tieneDescuento ? `<span class="pos-search-item-old-price">S/ ${precioAnterior.toFixed(2)}</span>` : ''}
+                            <span class="pos-search-item-price">S/ ${precio.toFixed(2)}</span>
+                            ${tieneDescuento ? `<span class="pos-search-discount-badge">-${pctDescuento}%</span>` : ''}
                             ${stockBadge}
                         </div>
                     </div>`;
@@ -1306,35 +1659,93 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
             modal.setAttribute('aria-hidden', 'true');
         }
 
+        var cobroPendiente = null;
+
+        function cerrarConfirmacionCobro() {
+            const modal = document.getElementById('posConfirmModal');
+            if (!modal) return;
+            modal.classList.remove('active');
+            modal.setAttribute('aria-hidden', 'true');
+            cobroPendiente = null;
+        }
+
+        function cerrarModalActivoPOS() {
+            if (document.getElementById('posClientModal')?.classList.contains('active')) return cerrarModalCliente();
+            if (document.getElementById('posConfirmModal')?.classList.contains('active')) return cerrarConfirmacionCobro();
+            if (document.getElementById('posValidationModal')?.classList.contains('active')) return cerrarAvisoValidacionCaja();
+            if (document.getElementById('modalTicketVenta')?.style.display === 'flex') return cerrarTicketVenta();
+            if (document.getElementById('modalYapePlinPOS')?.style.display === 'flex') return cerrarModalYapePlin();
+            cerrarModalConexionEscaner();
+        }
+
         function procesarVentaCaja() {
             if (totalGeneralVenta <= 0) {
-                alert('No hay productos en la orden de cobro.');
+                mostrarAvisoValidacionCaja('No hay productos en la orden de cobro.');
                 return;
             }
 
             if (!['00000000', '99999999'].includes(clienteDniActual) && !clienteNombreActual.trim()) {
-                alert('Consulta el DNI/RUC o ingresa manualmente el nombre del cliente antes de cobrar.');
+                mostrarAvisoValidacionCaja('Consulta el DNI o ingresa manualmente el nombre del cliente antes de cobrar.');
                 editarNombreClienteManual();
                 if (!clienteNombreActual.trim()) return;
             }
 
-            const recibido = parseFloat(document.getElementById('inputMontoRecibido').value || 0);
-            if (metodoPagoSeleccionado === 'efectivo' && recibido < totalGeneralVenta) {
-                mostrarAvisoValidacionCaja(`Recibiste S/ ${recibido.toFixed(2)} y el total de la venta es S/ ${totalGeneralVenta.toFixed(2)}. Ingresa un monto igual o mayor para continuar.`);
+            const pagos = leerPagos();
+            const total = Math.round(totalGeneralVenta * 100) / 100;
+            const asignado = sumaPagos(pagos);
+
+            if (pagos.length === 0) {
+                mostrarAvisoValidacionCaja('Asigna el pago indicando el monto en al menos un método (Efectivo, Tarjeta o Yape).');
                 return;
             }
 
-            if (!confirm(`¿Confirmar venta por un total de S/ ${totalGeneralVenta.toFixed(2)} con pago en ${metodoPagoSeleccionado.toUpperCase()}?`)) {
+            if (Math.abs(asignado - total) > 0.05) {
+                mostrarAvisoValidacionCaja(`El pago asignado es S/ ${asignado.toFixed(2)} y el total de la venta es S/ ${total.toFixed(2)}. Ajusta los montos para que coincidan.`);
                 return;
             }
 
+            const pagoEfectivo = pagos.find(function (p) { return p.metodo === 'efectivo'; });
+            let recibido = parseFloat(document.getElementById('inputMontoRecibido').value || 0) || 0;
+            if (pagoEfectivo) {
+                if (recibido < pagoEfectivo.monto) {
+                    mostrarAvisoValidacionCaja(`La parte en efectivo es S/ ${pagoEfectivo.monto.toFixed(2)} y recibiste S/ ${recibido.toFixed(2)}. Ingresa un monto igual o mayor para continuar.`);
+                    document.getElementById('inputMontoRecibido').focus();
+                    return;
+                }
+            } else {
+                recibido = total;
+            }
+
+            cobroPendiente = { pagos, total, recibido };
+            document.getElementById('confirmCliente').textContent = clienteNombreActual;
+            document.getElementById('confirmDocumento').textContent = `Documento: ${clienteDniActual}`;
+            document.getElementById('confirmProductos').innerHTML = itemsVentaActual.map(function (item) {
+                return `<div><span><strong>${Number(item.cantidad)} ×</strong> ${escapeHtml(item.nombre || item.titulo || ('Producto #' + item.id_producto))}</span><strong>S/ ${parseFloat(item.subtotal).toFixed(2)}</strong></div>`;
+            }).join('');
+            document.getElementById('confirmPagos').textContent = pagos.map(function (p) {
+                return `${p.metodo.toUpperCase()} S/ ${p.monto.toFixed(2)}`;
+            }).join(' + ');
+            document.getElementById('confirmTotal').textContent = `S/ ${total.toFixed(2)}`;
+            const modal = document.getElementById('posConfirmModal');
+            modal.classList.add('active');
+            modal.setAttribute('aria-hidden', 'false');
+            document.getElementById('btnConfirmarCobro').focus();
+        }
+
+        function confirmarCobroVenta() {
+            if (!cobroPendiente) return;
+            const { pagos, recibido } = cobroPendiente;
+            const metodoPrincipal = pagos.length === 1 ? pagos[0].metodo : 'mixto';
             const formData = new FormData();
             formData.append('token', TOKEN_SESION);
-            formData.append('metodo_pago', metodoPagoSeleccionado);
+            formData.append('metodo_pago', metodoPrincipal);
             formData.append('monto_recibido', recibido);
+            formData.append('pagos', JSON.stringify(pagos));
             formData.append('cliente_dni', clienteDniActual);
             formData.append('cliente_nombre', clienteNombreActual);
 
+            const boton = document.getElementById('btnConfirmarCobro');
+            boton.disabled = true;
             fetch('index.php?action=pos_procesar_venta', {
                 method: 'POST',
                 body: formData
@@ -1342,24 +1753,30 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
             .then(res => res.json())
             .then(data => {
                 if (data.status === 'success') {
+                    cerrarConfirmacionCobro();
                     ultimoTicketData = data;
                     try { sessionStorage.setItem('caserita_pos_ultimo_ticket', JSON.stringify(data)); } catch (error) {}
                     document.getElementById('btnImprimirVentaAnterior').disabled = false;
                     document.getElementById('btnImprimirVentaAnterior').style.opacity = '1';
                     mostrarTicketTermico(data);
-                    document.getElementById('inputMontoRecibido').value = '';
-                    document.getElementById('inputVueltas').value = 'S/ 0.00';
+                    reiniciarPagos();
                     cargarItemsPOS();
                 } else {
-                    alert(data.message);
+                    mostrarAvisoValidacionCaja(data.message || 'No se pudo completar la venta.');
                 }
+            })
+            .catch(() => {
+                mostrarAvisoValidacionCaja('Error de conexión al procesar la venta.');
+            })
+            .finally(() => {
+                boton.disabled = false;
             });
         }
 
         function mostrarTicketTermico(data) {
             const numeroDocumento = data.cliente_dni || clienteDniActual;
-            const metodoTicket = (data.metodo_pago || metodoPagoSeleccionado).toLowerCase();
-            document.getElementById('lblTicketTipoDoc').textContent = numeroDocumento.length === 11 ? 'FACTURA DE VENTA' : 'BOLETA DE VENTA';
+            const metodoTicket = String(data.metodo_pago || '').toUpperCase();
+            document.getElementById('lblTicketTipoDoc').textContent = 'BOLETA DE VENTA ELECTRÓNICA';
             document.getElementById('lblTicketCodigo').textContent = data.codigo_pedido || `POS-${data.id_pedido}`;
             document.getElementById('lblTicketFecha').textContent = data.fecha || new Date().toLocaleString();
             document.getElementById('lblTicketCajero').textContent = data.cajero || 'Cajero de Turno';
@@ -1368,15 +1785,19 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
             document.getElementById('lblTicketTotal').textContent = `S/ ${parseFloat(data.total).toFixed(2)}`;
             document.getElementById('lblTicketSubtotal').textContent = `S/ ${parseFloat(data.subtotal || data.total / 1.18).toFixed(2)}`;
             document.getElementById('lblTicketIgv').textContent = `S/ ${parseFloat(data.igv || (data.total - (data.total / 1.18))).toFixed(2)}`;
-            document.getElementById('lblTicketMetodo').textContent = metodoTicket.toUpperCase();
+            document.getElementById('lblTicketMetodo').textContent = metodoTicket || 'EFECTIVO';
 
+            const pagosTicket = Array.isArray(data.pagos) ? data.pagos : [];
+            const tieneEfectivo = pagosTicket.some(function (p) { return p.metodo === 'efectivo'; });
             const rowEfectivo = document.getElementById('rowTicketEfectivo');
-            if (metodoTicket === 'efectivo') {
-                rowEfectivo.style.display = 'block';
-                document.getElementById('lblTicketRecibido').textContent = `S/ ${parseFloat(data.monto_recibido || 0).toFixed(2)}`;
-                document.getElementById('lblTicketVuelto').textContent = `S/ ${parseFloat(data.vueltas || 0).toFixed(2)}`;
-            } else {
-                rowEfectivo.style.display = 'none';
+            if (rowEfectivo) {
+                if (tieneEfectivo || metodoTicket === 'EFECTIVO') {
+                    rowEfectivo.style.display = 'block';
+                    document.getElementById('lblTicketRecibido').textContent = `S/ ${parseFloat(data.monto_recibido || 0).toFixed(2)}`;
+                    document.getElementById('lblTicketVuelto').textContent = `S/ ${parseFloat(data.vueltas || 0).toFixed(2)}`;
+                } else {
+                    rowEfectivo.style.display = 'none';
+                }
             }
 
             const tbody = document.getElementById('ticketTbodyItems');
@@ -1386,7 +1807,7 @@ $isCashierPOS = ($_SESSION['usuario_rol'] ?? '') === 'cajero';
                     rows += `
                         <tr>
                             <td style="padding:3px 0;">${it.cantidad}</td>
-                            <td style="padding:3px 0;">${escapeHtml(it.nombre)}</td>
+                            <td style="padding:3px 0;">${escapeHtml(it.nombre || it.titulo || ('Producto #' + it.id_producto))}</td>
                             <td style="padding:3px 0; text-align:right;">${parseFloat(it.precio).toFixed(2)}</td>
                             <td style="padding:3px 0; text-align:right; font-weight:bold;">${parseFloat(it.subtotal).toFixed(2)}</td>
                         </tr>`;

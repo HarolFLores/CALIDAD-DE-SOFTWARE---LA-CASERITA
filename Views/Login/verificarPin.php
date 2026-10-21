@@ -18,7 +18,7 @@ $pin_dev_helper = $_SESSION['pin_dev_helper'] ?? null;
     <link rel="icon" type="image/png" href="Images/logo_backup.png">
 </head>
 <body>
-    <div class="container">
+    <div class="container auth-pin-container">
         <div class="left-panel">
             <div class="logo">
                 <img src="Images/icono_tienda_blanco.png" alt="logo-tienda">
@@ -67,7 +67,7 @@ $pin_dev_helper = $_SESSION['pin_dev_helper'] ?? null;
                 <form id="pinForm" action="index.php?action=verificar_pin" method="POST">
                     <input type="hidden" name="pin" id="fullPin" value="">
 
-                    <div class="pin-inputs-container" style="display: flex; gap: 8px; justify-content: center; margin: 15px 0 25px;">
+                    <div class="pin-inputs-container">
                         <input type="text" class="pin-digit-input" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="one-time-code" autofocus>
                         <input type="text" class="pin-digit-input" maxlength="1" pattern="[0-9]" inputmode="numeric">
                         <input type="text" class="pin-digit-input" maxlength="1" pattern="[0-9]" inputmode="numeric">

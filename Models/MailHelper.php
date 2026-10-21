@@ -6,16 +6,18 @@ use PHPMailer\PHPMailer\SMTP;
 require_once __DIR__ . '/PHPMailer/src/Exception.php';
 require_once __DIR__ . '/PHPMailer/src/PHPMailer.php';
 require_once __DIR__ . '/PHPMailer/src/SMTP.php';
+require_once __DIR__ . '/../Core/Env.php';
+Env::load();
 
 class MailHelper {
     public static function sendEmail($to, $subject, $body, $isHTML = true) {
-        $host = getenv('SMTP_HOST') ?: 'smtp.gmail.com';
-        $port = (int)(getenv('SMTP_PORT') ?: 587);
-        $smtpUsername = getenv('SMTP_USERNAME') ?: 'erikcarrasco455@gmail.com';
-        $smtpPassword = getenv('SMTP_PASSWORD') ?: 'dkgkbxgmenizalsi';
-        $encryption = getenv('SMTP_ENCRYPTION') ?: 'tls';
-        $fromEmail = getenv('SMTP_FROM_EMAIL') ?: 'erikcarrasco455@gmail.com';
-        $fromName = 'Tienda La Caserita';
+        $host = Env::get('SMTP_HOST', 'smtp.gmail.com');
+        $port = Env::int('SMTP_PORT', 587);
+        $smtpUsername = Env::get('SMTP_USERNAME', '');
+        $smtpPassword = Env::get('SMTP_PASSWORD', '');
+        $encryption = Env::get('SMTP_ENCRYPTION', 'tls');
+        $fromEmail = Env::get('SMTP_FROM_EMAIL', '');
+        $fromName = Env::get('SMTP_FROM_NAME', 'Tienda La Caserita');
 
         // 1. Verificar si existe archivo Config/mail.php
         $configFile = __DIR__ . '/../Config/mail.php';
@@ -53,13 +55,21 @@ class MailHelper {
             }
         }
 
-        // Guardar copia de respaldo en disco para visualización inmediata en entorno local
-        $backupDir = __DIR__ . '/../scratch/emails_enviados';
-        if (!is_dir($backupDir)) {
-            @mkdir($backupDir, 0777, true);
+        // Copia local opcional para desarrollo, fuera del document root.
+        if (Env::bool('MAIL_BACKUP_ENABLED', false)) {
+            $backupDir = trim((string)Env::get('MAIL_BACKUP_DIR', ''));
+            if ($backupDir === '') {
+                $backupDir = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR)
+                    . DIRECTORY_SEPARATOR . 'caserita_mail_outbox';
+            }
+            if (!is_dir($backupDir)) {
+                @mkdir($backupDir, 0700, true);
+            }
+            $backupFile = $backupDir . DIRECTORY_SEPARATOR . 'email_'
+                . date('Ymd_His') . '_' . bin2hex(random_bytes(3))
+                . ($isHTML ? '.html' : '.txt');
+            @file_put_contents($backupFile, "<!-- Para: $to | Asunto: $subject -->\n" . $body);
         }
-        $backupFile = $backupDir . '/email_' . time() . '_' . bin2hex(random_bytes(3)) . ($isHTML ? '.html' : '.txt');
-        @file_put_contents($backupFile, "<!-- Para: $to | Asunto: $subject -->\n" . $body);
 
         // Si tenemos credenciales SMTP, enviar por PHPMailer
         if (!empty($smtpUsername) && !empty($smtpPassword)) {

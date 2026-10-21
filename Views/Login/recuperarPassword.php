@@ -10,7 +10,7 @@
     <link rel="icon" type="image/png" href="Images/logo_backup.png">
 </head>
 <body>
-    <div class="container">
+    <div class="container auth-recovery-container">
         <div class="left-panel">
             <div class="logo">
                 <img src="Images/icono_tienda_blanco.png" alt="logo-tienda">

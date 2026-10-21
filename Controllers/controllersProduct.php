@@ -31,7 +31,10 @@ class controllerProducto{
         $stock = filter_input(INPUT_POST, 'stock', FILTER_VALIDATE_FLOAT);
         $unidad_medida = $_POST['unidad_medida'] ?? 'UND';
         $stock_minimo = filter_input(INPUT_POST, 'stock_minimo', FILTER_VALIDATE_FLOAT);
-        $ubicacion = trim(filter_input(INPUT_POST, 'ubicacion', FILTER_SANITIZE_SPECIAL_CHARS));
+        $ubicacion = trim((string)filter_input(INPUT_POST, 'ubicacion', FILTER_SANITIZE_SPECIAL_CHARS));
+        if ($ubicacion === '') {
+            $ubicacion = 'Almacén principal';
+        }
 
         if (!in_array($unidad_medida, ['UND', 'KG'])) {
             $unidad_medida = 'UND';

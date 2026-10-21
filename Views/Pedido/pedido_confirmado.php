@@ -125,6 +125,8 @@ $totalMonto = (float)($pedido['total'] ?? ($subtotalMonto + $costoEnvioMonto));
                     <?php 
                         $notasLimpia = preg_replace('/\[Pago[^\]]+\]/i', '', $pedido['observacion'] ?? '');
                         $notasLimpia = preg_replace('/\[Tarjeta[^\]]+\]/i', '', $notasLimpia);
+                        $notasLimpia = preg_replace('/\[Cancelación[^\]]*\]/iu', '', $notasLimpia);
+                        $notasLimpia = preg_replace('/\[Rechazo comprobante[^\]]*\]/iu', '', $notasLimpia);
                         $notasLimpia = trim(preg_replace('/^\s*\|\s*|\s*\|\s*$/', '', trim($notasLimpia)));
                         $notasLimpia = trim(preg_replace('/\s*\|\s*\|\s*/', ' | ', $notasLimpia));
                     ?>

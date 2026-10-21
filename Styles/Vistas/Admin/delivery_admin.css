@@ -105,9 +105,11 @@
             border: 2px solid #16a34a;
             background: #ffffff;
         }
-        .deliv-stat-card.active-card .deliv-stat-title,
-        .deliv-stat-card.active-card .deliv-stat-number {
+        .deliv-stat-card.active-card .deliv-stat-title {
             color: #15803d;
+        }
+        .deliv-stat-card.active-card .deliv-stat-number {
+            color: #0f172a;
         }
         .deliv-stat-title {
             font-size: 0.64rem;
@@ -129,7 +131,8 @@
             background: #ffffff;
             border: 1px solid #e2e8f0;
             border-radius: 16px;
-            padding: 22px 26px;
+            padding: 0;
+            overflow: hidden;
             box-shadow: 0 4px 16px rgba(0,0,0,0.02);
         }
         .deliv-card-header {
@@ -138,7 +141,9 @@
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 14px;
-            margin-bottom: 20px;
+            padding: 16px 22px;
+            margin-bottom: 0;
+            border-bottom: 1px solid #f1f5f9;
         }
         .deliv-card-title {
             font-size: 1.05rem;
@@ -162,41 +167,62 @@
         .deliv-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.86rem;
+            font-size: 0.81rem;
             text-align: left;
             table-layout: fixed;
         }
         .deliv-table thead tr {
             background: #f8fafc;
-            border-bottom: 1.5px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
         }
         .deliv-table th {
-            padding: 12px 12px;
-            font-size: 0.70rem;
+            padding: 11px 12px;
+            font-size: 0.68rem;
             font-weight: 800;
             color: #475569;
             text-transform: uppercase;
             letter-spacing: 0.04em;
-            white-space: nowrap;
+            white-space: normal;
+            overflow-wrap: anywhere;
         }
         .deliv-table td {
-            padding: 13px 12px;
-            border-bottom: 1px solid #f1f5f9;
+            padding: 12px;
+            border-bottom: 1px solid #edf2f7;
+            color: #334155;
+            font-size: 0.81rem;
             vertical-align: middle;
+            overflow-wrap: anywhere;
         }
-        .deliv-table td:nth-child(3) > div {
-            line-height: 1.35;
-        }
-        .deliv-table th:nth-child(1), .deliv-table td:nth-child(1) { width: 12%; }
+        .deliv-table th:nth-child(1), .deliv-table td:nth-child(1) { width: 10%; }
         .deliv-table th:nth-child(2), .deliv-table td:nth-child(2) { width: 15%; }
-        .deliv-table th:nth-child(3), .deliv-table td:nth-child(3) { width: 29%; }
-        .deliv-table th:nth-child(4), .deliv-table td:nth-child(4) { width: 12%; }
-        .deliv-table th:nth-child(5), .deliv-table td:nth-child(5) { width: 15%; }
-        .deliv-table th:nth-child(6), .deliv-table td:nth-child(6) { width: 12%; }
-        .deliv-table th:nth-child(7), .deliv-table td:nth-child(7) { width: 5%; min-width: 52px; text-align: right; }
+        .deliv-table th:nth-child(3), .deliv-table td:nth-child(3) { width: 23%; }
+        .deliv-table th:nth-child(4), .deliv-table td:nth-child(4) { width: 11%; }
+        .deliv-table th:nth-child(5), .deliv-table td:nth-child(5) { width: 14%; }
+        .deliv-table th:nth-child(6), .deliv-table td:nth-child(6) { width: 8%; }
+        .deliv-table th:nth-child(7), .deliv-table td:nth-child(7) { width: 12%; }
+        .deliv-table th:nth-child(8), .deliv-table td:nth-child(8) { width: 7%; text-align: right; }
+        .deliv-table-scroll {
+            overflow: visible;
+        }
         .deliv-table tbody tr:hover {
             background: #fcfcfc;
         }
+        .deliv-table tbody tr.deliv-row-alert {
+            background: #fff7f7;
+            box-shadow: inset 3px 0 #ef4444;
+        }
+        .deliv-table tbody tr.deliv-row-alert:hover { background: #fff1f2; }
+        .deliv-time {
+            display: inline-flex;
+            padding: 4px 9px;
+            border-radius: 999px;
+            color: #64748b;
+            background: #f1f5f9;
+            font-size: .76rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+        .deliv-time.is-alert { color: #dc2626; background: #fee2e2; }
 
         /* BADGES */
         .badge-deliv {
@@ -349,6 +375,10 @@
             white-space: nowrap;
             box-shadow: none;
         }
+        .deliv-table .status-pill {
+            white-space: normal;
+            text-align: left;
+        }
         .status-pill::before {
             content: "";
             width: 7px;
@@ -375,6 +405,47 @@
         .status-pill.fallido::before { background: #ef4444; }
 
 /* ===== Impresión de la Boleta (Ver detalle) ===== */
+    @media (max-width: 900px) {
+        .container-admin { max-width: none; padding: 0 14px; }
+        .deliv-card-panel { padding: 16px; }
+        .deliv-card-header { align-items: stretch; flex-direction: column; }
+        .deliv-card-header > div:last-child { width: 100%; }
+    .deliv-search-input { flex: 1; min-width: 180px; }
+    .deliv-table { min-width: 0; table-layout: fixed; font-size: 0.78rem; }
+    .deliv-table th {
+        padding: 9px 7px;
+        font-size: 0.62rem;
+        white-space: normal;
+    }
+    .deliv-table td {
+        padding: 10px 7px;
+    }
+    .deliv-table .status-pill {
+        white-space: normal;
+        text-align: left;
+        line-height: 1.25;
+    }
+    .deliv-table th:nth-child(1), .deliv-table td:nth-child(1) { width: 11%; }
+    .deliv-table th:nth-child(2), .deliv-table td:nth-child(2) { width: 15%; }
+    .deliv-table th:nth-child(3), .deliv-table td:nth-child(3) { width: 24%; }
+    .deliv-table th:nth-child(4), .deliv-table td:nth-child(4) { width: 11%; }
+    .deliv-table th:nth-child(5), .deliv-table td:nth-child(5) { width: 14%; }
+    .deliv-table th:nth-child(6), .deliv-table td:nth-child(6) { width: 8%; }
+    .deliv-table th:nth-child(7), .deliv-table td:nth-child(7) { width: 11%; }
+    .deliv-table th:nth-child(8), .deliv-table td:nth-child(8) { width: 6%; }
+    }
+
+    @media (max-width: 560px) {
+        .container-admin { padding: 0 10px; }
+        .deliv-stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .deliv-card-panel { padding: 12px 10px; border-radius: 12px; }
+        html body .deliv-card-header > div:last-child { align-items: stretch; flex-direction: column; }
+        .deliv-search-input,
+        #filtroTipoSelect,
+        html body .btn-limpiar-filtros { width: 100%; min-width: 0; }
+        .top-toast { left: 10px; right: 10px; min-width: 0; max-width: none; }
+    }
+
     @media print {
         html body * { visibility: hidden; }
         html body #modalDetalleDeliv {
@@ -414,46 +485,67 @@
         html body .deliv-ticket-no-print { display: none; }
     }
 
-        /* ============================================================
-           SELECTOR DE VISTA: BANDEJA DE PEDIDOS (HU33) / DESPACHOS
-           ============================================================ */
-        .is-hidden { display: none; }
+/* ===== Modal de estado: nota del cliente y cancelación ===== */
+html body .deliv-note-label,
+html body .deliv-cancel-label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+}
 
-        .dlv-view-switch {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 18px;
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 2px;
-        }
+html body .deliv-customer-note {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 0.86rem;
+    line-height: 1.45;
+    color: #334155;
+    white-space: pre-line;
+}
 
-        .dlv-view-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.86rem;
-            font-weight: 600;
-            color: #475569;
-            background: transparent;
-            border: none;
-            border-bottom: 2.5px solid transparent;
-            padding: 9px 14px;
-            margin-bottom: -1px;
-            cursor: pointer;
-            font-family: inherit;
-            transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
-        }
+html body .deliv-customer-note.is-empty {
+    color: #94a3b8;
+    font-style: italic;
+}
 
-        .dlv-view-btn svg { flex-shrink: 0; }
+html body .deliv-cancel-wrap {
+    display: none;
+    margin-bottom: 18px;
+}
 
-        .dlv-view-btn:hover { color: #15803d; background: #f8fafc; }
+html body .deliv-cancel-wrap.is-visible {
+    display: block;
+}
 
-        .dlv-view-btn.active {
-            color: #15803d;
-            border-bottom-color: #15803d;
-        }
+html body .deliv-cancel-label {
+    color: #b91c1c;
+}
 
-        @media (max-width: 560px) {
-            .dlv-view-btn { font-size: 0.8rem; padding: 8px 10px; gap: 6px; }
-        }
+html body .deliv-cancel-textarea {
+    width: 100%;
+    min-height: 76px;
+    padding: 10px 12px;
+    border: 1.5px solid #fca5a5;
+    border-radius: 8px;
+    font-size: 0.90rem;
+    box-sizing: border-box;
+    outline: none;
+    resize: vertical;
+}
+
+html body .deliv-cancel-textarea:focus {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+/* ===== Filtro de estado en la barra de Despachos ===== */
+html body .deliv-filter-select {
+    min-width: 170px;
+    padding: 9px 12px;
+    cursor: pointer;
+    background: #ffffff;
+}

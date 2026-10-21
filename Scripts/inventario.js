@@ -115,7 +115,6 @@ window.verDetallesProducto = function(item) {
     const isBajo = stockActual <= stockMinimo;
     const estadoText = isBajo ? 'Stock Bajo' : 'Disponible';
     const estadoClass = isBajo ? 'status-tag-error' : 'status-tag-success';
-    const ubicacion = item.ubicacion || 'Almacén Principal';
     const imgSrc = item.imagen || 'Images/icono.png';
     const tituloEsc = (item.titulo || '').replace(/"/g, '&quot;');
 
@@ -130,7 +129,6 @@ window.verDetallesProducto = function(item) {
         
         <div class="user-detail-badges">
             <span class="status-tag ${estadoClass}">${estadoText}</span>
-            <span class="status-tag ${isBajo ? 'status-tag-error' : 'status-tag-user'}">📍 ${ubicacion}</span>
         </div>
 
         <div class="user-detail-group">
@@ -141,10 +139,6 @@ window.verDetallesProducto = function(item) {
             <div class="user-detail-row">
                 <span class="detail-label">⚠️ Stock Mínimo:</span>
                 <span class="detail-value">${stockMinimo.toFixed(2)} ${unidad}</span>
-            </div>
-            <div class="user-detail-row">
-                <span class="detail-label">📍 Ubicación:</span>
-                <span class="detail-value">${ubicacion}</span>
             </div>
             <div class="user-detail-row">
                 <span class="detail-label">🗓️ Última Act.:</span>
@@ -187,7 +181,6 @@ window.abrirModalEditarProducto = function(item) {
     setVal('editProdUnidad', item.unidad_medida || 'UND');
     setVal('editProdStock', parseFloat(item.stock_actual !== undefined ? item.stock_actual : (item.stock || 0)));
     setVal('editProdStockMinimo', parseFloat(item.stock_minimo || 5));
-    setVal('editProdUbicacion', item.ubicacion || '');
     setVal('editProdDescripcion', item.descripcion || '');
     if (typeof window.setSubcatCombo === 'function') {
         window.setSubcatCombo('editSubcatInput', 'editSubcatDropdown', 'editSubcatId', 'editSubcatGrupo', item.id_categoria || '');

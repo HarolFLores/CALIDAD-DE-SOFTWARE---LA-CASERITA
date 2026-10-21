@@ -68,6 +68,7 @@ body {
     justify-content: center;
     padding: clamp(1.25rem, 3.5vw, 3rem);
     background-color: #f8fafc;
+    min-width: 0;
 }
 
 .login-card {
@@ -77,6 +78,7 @@ body {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     max-width: min(480px, 100%);
     width: 100%;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -92,6 +94,7 @@ body {
     color: #1a1a1a;
     margin-bottom: clamp(0.3rem, 1vw, 0.5rem);
     text-align: center;
+    overflow-wrap: anywhere;
 }
 
 .subtitulo {
@@ -129,6 +132,7 @@ body {
 input {
     width: 100%;
     padding: clamp(0.75rem, 2vw, 0.9rem) 15px clamp(0.75rem, 2vw, 0.9rem) 45px;
+    min-width: 0;
     font-size: clamp(0.9rem, 1.5vw, 1rem);
     border: 1px solid #e0e0e0;
     border-radius: 10px;
@@ -144,6 +148,10 @@ input:focus {
 
 input::placeholder {
     color: #ccc;
+}
+
+.input-wrapper input[type="password"] {
+    padding-right: 48px;
 }
 
 .password-toggle {
@@ -614,6 +622,10 @@ html body input.success {
     z-index: 50;
     width: clamp(36px, 8vw, 44px);
     height: clamp(36px, 8vw, 44px);
+    min-width: clamp(36px, 8vw, 44px);
+    min-height: clamp(36px, 8vw, 44px);
+    aspect-ratio: 1 / 1;
+    box-sizing: border-box;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -656,17 +668,20 @@ html body input.success {
 
 .pin-inputs-container {
     display: flex;
-    gap: 10px;
+    gap: clamp(4px, 1.8vw, 10px);
     justify-content: center;
-    margin: 20px 0;
+    margin: 15px 0 25px;
     width: 100%;
+    min-width: 0;
 }
 
 .pin-digit-input {
-    width: 48px;
-    height: 56px;
+    width: clamp(32px, 10.5vw, 48px);
+    height: clamp(44px, 14vw, 56px);
+    padding: 0;
+    min-width: 0;
     text-align: center;
-    font-size: 1.6rem;
+    font-size: clamp(1.2rem, 5vw, 1.6rem);
     font-weight: 700;
     color: #15803D;
     background: #f8fafc;
@@ -712,4 +727,55 @@ html body input.success {
     color: #94a3b8;
     pointer-events: none;
     text-decoration: none;
+}
+
+.auth-recovery-container {
+    grid-template-columns: 1fr;
+}
+
+.auth-recovery-container .left-panel {
+    display: none;
+}
+
+.auth-recovery-container .right-panel {
+    min-height: 100vh;
+}
+
+@media (max-width: 768px) {
+    .auth-pin-container {
+        grid-template-columns: 1fr;
+    }
+
+    .auth-pin-container .left-panel {
+        display: none;
+    }
+
+    .auth-pin-container .right-panel,
+    .auth-recovery-container .right-panel {
+        width: 100%;
+        min-width: 0;
+        min-height: 100vh;
+        padding: clamp(12px, 4vw, 24px);
+    }
+
+    .auth-pin-container .login-card,
+    .auth-recovery-container .login-card {
+        width: 100%;
+        max-width: min(480px, 100%);
+        min-width: 0;
+        padding: clamp(20px, 6vw, 32px) clamp(16px, 5vw, 28px);
+    }
+
+    .auth-pin-container .titulo,
+    .auth-recovery-container .titulo {
+        padding-inline: clamp(28px, 8vw, 40px);
+    }
+
+    html body .login-card .btn-close-cart:active,
+    html body .login-card .btn-close-universal:active,
+    html body .auth-modal-close-btn:active {
+        background: #f0fdf4;
+        color: #15803d;
+        border-color: #15803d;
+    }
 }

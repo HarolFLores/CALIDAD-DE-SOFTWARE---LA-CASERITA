@@ -1,0 +1,924 @@
+/* ==========================================================================
+   PERFIL — La Caserita (Admin / Cajero / Repartidor)
+   Diseño compartido de la tarjeta de perfil. Prefijo: mp-
+   Regla del proyecto: sin !important; sin estilos inline nuevos.
+   ========================================================================== */
+
+.mp-page {
+    max-width: 1120px;
+    margin: 0 auto;
+}
+
+/* --------------------------------------------------------------------------
+   Flash (avisos de éxito / error)
+   -------------------------------------------------------------------------- */
+.mp-flash {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 14px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    margin-bottom: 18px;
+    border: 1px solid transparent;
+}
+
+.mp-flash svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+.mp-flash.success {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+    color: #166534;
+}
+
+.mp-flash.error {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #b91c1c;
+}
+
+/* --------------------------------------------------------------------------
+   Hero
+   -------------------------------------------------------------------------- */
+.mp-hero {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 22px;
+    padding: 26px 28px;
+    margin-bottom: 22px;
+    border-radius: 22px;
+    color: #ffffff;
+    background: linear-gradient(135deg, #14532d 0%, #15803d 55%, #16a34a 100%);
+    box-shadow: 0 18px 36px rgba(21, 128, 61, 0.28);
+}
+
+.mp-hero::before {
+    content: '';
+    position: absolute;
+    top: -90px;
+    right: -50px;
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    pointer-events: none;
+}
+
+.mp-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -130px;
+    left: 28%;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    pointer-events: none;
+}
+
+.mp-hero-main {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    min-width: 0;
+}
+
+.mp-avatar {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.mp-avatar-circle {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.9rem;
+    font-weight: 900;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.18);
+    border: 2px solid rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14);
+}
+
+.mp-avatar-status {
+    position: absolute;
+    right: 1px;
+    bottom: 3px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #4ade80;
+    border: 3px solid #ffffff;
+    box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.55);
+}
+
+.mp-hero-id {
+    min-width: 0;
+}
+
+.mp-hero-eyebrow {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.mp-hero-name {
+    margin: 0 0 9px;
+    font-size: 1.55rem;
+    line-height: 1.15;
+    font-weight: 900;
+    color: #ffffff;
+    overflow-wrap: anywhere;
+}
+
+.mp-hero-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.mp-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    padding: 5px 11px;
+    border-radius: 999px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.96);
+    background: rgba(0, 0, 0, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.mp-chip svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.mp-chip-role {
+    background: rgba(255, 255, 255, 0.2);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.72rem;
+}
+
+.mp-chip-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mp-hero-side {
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+}
+
+.mp-edit-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 16px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(8px);
+}
+
+.mp-edit-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: #ffffff;
+    cursor: pointer;
+    user-select: none;
+}
+
+.mp-edit-label svg {
+    width: 14px;
+    height: 14px;
+}
+
+.mp-switch {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 26px;
+    flex-shrink: 0;
+}
+
+.mp-switch input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.mp-switch-track {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.35);
+    cursor: pointer;
+    transition: background 0.25s ease;
+}
+
+.mp-switch-track::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22);
+    transition: transform 0.25s ease;
+}
+
+.mp-switch input:checked + .mp-switch-track {
+    background: #065f46;
+}
+
+.mp-switch input:checked + .mp-switch-track::after {
+    transform: translateX(20px);
+}
+
+.mp-switch input:focus-visible + .mp-switch-track {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Tarjetas de datos (stats)
+   -------------------------------------------------------------------------- */
+.mp-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 14px;
+    margin-bottom: 22px;
+}
+
+.mp-stat {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    padding: 14px 16px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+}
+
+.mp-stat-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.mp-stat-icon svg {
+    width: 21px;
+    height: 21px;
+}
+
+.mp-stat-body {
+    min-width: 0;
+}
+
+.mp-stat-label {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #64748b;
+}
+
+.mp-stat-value {
+    display: block;
+    font-size: 0.98rem;
+    font-weight: 900;
+    color: #0f172a;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Tonos para chips de icono (stats y cabeceras de tarjeta) */
+.tone-green { background: #f0fdf4; color: #15803d; }
+.tone-teal { background: #f0fdfa; color: #0f766e; }
+.tone-blue { background: #eff6ff; color: #2563eb; }
+.tone-amber { background: #fffbeb; color: #b45309; }
+.tone-red { background: #fef2f2; color: #dc2626; }
+.tone-slate { background: #f1f5f9; color: #475569; }
+
+/* --------------------------------------------------------------------------
+   Rejilla de tarjetas
+   -------------------------------------------------------------------------- */
+.mp-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: 20px;
+    align-items: start;
+}
+
+.mp-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.mp-card-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 22px;
+    border-bottom: 1px solid #f1f5f9;
+    background: #ffffff;
+}
+
+.mp-card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.mp-card-icon svg {
+    width: 19px;
+    height: 19px;
+}
+
+.mp-card-eyebrow {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #15803d;
+}
+
+.mp-card-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.mp-card-sub {
+    margin: 3px 0 0;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: #64748b;
+}
+
+.mp-card-body {
+    padding: 20px 22px;
+}
+
+/* --------------------------------------------------------------------------
+   Formularios
+   -------------------------------------------------------------------------- */
+.mp-form {
+    margin: 0;
+}
+
+.mp-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.mp-field {
+    min-width: 0;
+}
+
+.mp-field.span-2 {
+    grid-column: 1 / -1;
+}
+
+.mp-label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #475569;
+}
+
+.mp-input {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 14px;
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: 0.94rem;
+    color: #0f172a;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.mp-input::placeholder {
+    color: #94a3b8;
+}
+
+.mp-input:focus {
+    outline: none;
+    background: #ffffff;
+    border-color: #15803d;
+    box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.14);
+}
+
+.mp-input[readonly] {
+    background: #f8fafc;
+    color: #64748b;
+    border-color: #e2e8f0;
+    cursor: not-allowed;
+}
+
+.mp-input:disabled {
+    background: #f1f5f9;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+.mp-input:not([readonly]):not(:disabled) {
+    background: #ffffff;
+}
+
+.mp-input.mp-error {
+    background: #ffffff;
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+}
+
+.mp-input.mp-match-ok {
+    border-color: #16a34a;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.14);
+}
+
+.mp-input.mp-match-bad {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.14);
+}
+
+.mp-error-text {
+    display: block;
+    min-height: 0;
+    margin-top: 5px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: #dc2626;
+}
+
+.mp-input-wrap {
+    position: relative;
+}
+
+.mp-input.has-eye {
+    padding-right: 50px;
+}
+
+.mp-eye {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 2px;
+    width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    background: transparent;
+    border-radius: 10px;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: color 0.2s ease, background 0.2s ease;
+    z-index: 2;
+}
+
+.mp-eye:hover {
+    color: #15803d;
+    background: rgba(21, 128, 61, 0.08);
+}
+
+.mp-eye svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+.mp-eye .eye-open {
+    display: none;
+}
+
+.mp-eye.is-revealed .eye-closed {
+    display: none;
+}
+
+.mp-eye.is-revealed .eye-open {
+    display: block;
+}
+
+.mp-eye:focus-visible {
+    outline: 2px solid #15803d;
+    outline-offset: 1px;
+    border-radius: 6px;
+}
+
+.mp-verify-row {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.mp-verify-row .mp-input-wrap {
+    flex: 1;
+    min-width: 0;
+}
+
+.mp-btn-verify {
+    flex-shrink: 0;
+    min-height: 44px;
+    padding: 0 18px;
+    border: none;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: #ffffff;
+    background: linear-gradient(135deg, #15803d 0%, #16a34a 100%);
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.mp-btn-verify:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(22, 163, 74, 0.42);
+}
+
+.mp-btn-verify:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.mp-verify-row.is-verified .mp-btn-verify {
+    display: none;
+}
+
+.mp-lock-msg {
+    display: none;
+    margin-top: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #dc2626;
+}
+
+.mp-lock-msg.is-visible {
+    display: block;
+}
+
+.mp-match-hint {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.76rem;
+    color: #64748b;
+}
+
+.mp-match-hint.is-ok {
+    color: #16a34a;
+    font-weight: 700;
+}
+
+.mp-match-hint.is-bad {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+/* Acciones (aparecen al editar / verificar) */
+.mp-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    max-height: 0;
+    margin-top: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease, opacity 0.25s ease, margin-top 0.25s ease;
+}
+
+.mp-actions.is-visible {
+    max-height: 220px;
+    margin-top: 18px;
+    opacity: 1;
+}
+
+.mp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 10px 24px;
+    border: none;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.mp-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.mp-btn-primary {
+    color: #ffffff;
+    background: linear-gradient(135deg, #15803d 0%, #16a34a 100%);
+    box-shadow: 0 6px 16px rgba(22, 163, 74, 0.32);
+}
+
+.mp-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(22, 163, 74, 0.44);
+}
+
+.mp-btn-ghost {
+    color: #475569;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+}
+
+.mp-btn-ghost:hover {
+    background: #e2e8f0;
+}
+
+.mp-hint {
+    font-size: 0.78rem;
+    color: #64748b;
+}
+
+/* --------------------------------------------------------------------------
+   Requisitos de contraseña (mismo estilo que el registro)
+   -------------------------------------------------------------------------- */
+.mp-checklist {
+    display: none;
+    padding: 9px 13px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+}
+
+.mp-checklist.is-visible {
+    display: block;
+    animation: mpChecklistIn 0.2s ease;
+}
+
+.mp-checklist-inline {
+    grid-column: 1 / -1;
+}
+
+@keyframes mpChecklistIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: none; }
+}
+
+.mp-checklist-title {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #334155;
+}
+
+.mp-checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 4px;
+    font-size: 0.76rem;
+    color: #94a3b8;
+    transition: color 0.2s ease;
+}
+
+.mp-checklist-item:last-child {
+    margin-bottom: 0;
+}
+
+.mp-chk-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #cbd5e1;
+    color: #ffffff;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.mp-chk-icon svg {
+    display: none;
+    width: 12px;
+    height: 12px;
+}
+
+.mp-checklist-item.valid {
+    color: #15803d;
+    font-weight: 600;
+}
+
+.mp-checklist-item.valid .mp-chk-icon {
+    background: #15803d;
+    transform: scale(1.05);
+}
+
+.mp-checklist-item.valid .mp-chk-icon svg {
+    display: block;
+    stroke: #ffffff;
+}
+
+/* --------------------------------------------------------------------------
+   Toast propio (cuando no existe SPA.toast)
+   -------------------------------------------------------------------------- */
+.mp-toast-host {
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: min(92vw, 360px);
+    pointer-events: none;
+}
+
+.mp-toast {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: #0f172a;
+    color: #ffffff;
+    border-left: 4px solid #22c55e;
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.35);
+    font-size: 0.86rem;
+    line-height: 1.4;
+    animation: mpToastIn 0.25s ease;
+    pointer-events: auto;
+}
+
+.mp-toast.is-error {
+    border-left-color: #ef4444;
+}
+
+.mp-toast strong {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 0.74rem;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+.mp-toast.is-out {
+    animation: mpToastOut 0.25s ease forwards;
+}
+
+@keyframes mpToastIn {
+    from { opacity: 0; transform: translateX(24px); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes mpToastOut {
+    to { opacity: 0; transform: translateX(24px); }
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+    .mp-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .mp-hero {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 22px 18px;
+        gap: 16px;
+    }
+
+    .mp-hero-side {
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .mp-card-head {
+        padding: 16px;
+    }
+
+    .mp-card-body {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 560px) {
+    .mp-fields {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+    }
+
+    .mp-hero-main {
+        gap: 14px;
+    }
+
+    .mp-avatar-circle {
+        width: 62px;
+        height: 62px;
+        font-size: 1.6rem;
+    }
+
+    .mp-hero-name {
+        font-size: 1.25rem;
+    }
+
+    .mp-verify-row {
+        flex-direction: column;
+    }
+
+    .mp-btn-verify {
+        width: 100%;
+    }
+
+    .mp-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .mp-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .mp-actions .mp-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 380px) {
+    .mp-stats {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

@@ -42,6 +42,7 @@ foreach ($verificaciones as $v) {
     <link rel="stylesheet" href="Styles/admin-spa.css?v=<?= time(); ?>">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="Scripts/admin-spa.js?v=<?= time(); ?>" defer></script>
+    <script src="Scripts/pagination.js?v=<?= time(); ?>"></script>
 <link rel="stylesheet" href="Styles/Vistas/Admin/verificacion_pagos.css?v=<?= filemtime(__DIR__ . '/../../Styles/Vistas/Admin/verificacion_pagos.css'); ?>">
 </head>
 <body>
@@ -159,7 +160,7 @@ foreach ($verificaciones as $v) {
         </div>
 
         <!-- Paginación estilo Imagen 3 (< 1 2 3 ... >) -->
-        <div class="verif-pagination-bar" id="paginacionVerifBar"></div>
+        <div class="pg-footer" id="paginacionVerifBar"></div>
     </div>
 </main>
 
@@ -197,7 +198,7 @@ foreach ($verificaciones as $v) {
     let filtroEstado = '<?= $filtro; ?>';
     let busquedaTexto = '';
     let paginaActual = 1;
-    const ITEMS_PER_PAGE = 5;
+    let verifPageSize = 5;
     let accionVerifConfirmacion = null;
 
     // Modal Confirmación (Imagen 3 / Ventas)
@@ -431,11 +432,11 @@ foreach ($verificaciones as $v) {
         });
 
         const total = filtrados.length;
-        const totalPaginas = Math.ceil(total / ITEMS_PER_PAGE) || 1;
+        const totalPaginas = Math.ceil(total / verifPageSize) || 1;
         if (paginaActual > totalPaginas) paginaActual = totalPaginas;
 
-        const inicio = (paginaActual - 1) * ITEMS_PER_PAGE;
-        const fin = Math.min(inicio + ITEMS_PER_PAGE, total);
+        const inicio = (paginaActual - 1) * verifPageSize;
+        const fin = Math.min(inicio + verifPageSize, total);
         const paginaItems = filtrados.slice(inicio, fin);
 
         if (paginaItems.length === 0) {
@@ -488,40 +489,19 @@ foreach ($verificaciones as $v) {
     }
 
     function renderPaginador(container, totalPaginas, actual) {
-        if (!container) return;
-        if (totalPaginas <= 1) {
-            container.innerHTML = '';
-            return;
-        }
+        if (!container || !window.TblPagination) return;
 
-        let html = '';
-        html += `<button type="button" class="pag-btn" ${actual <= 1 ? 'disabled' : ''} onclick="window.cambiarPagina(${actual - 1})" aria-label="Anterior">&lt;</button>`;
-
-        let pages = [];
-        if (totalPaginas <= 5) {
-            for (let i = 1; i <= totalPaginas; i++) pages.push(i);
-        } else {
-            pages.push(1);
-            if (actual > 3) pages.push('...');
-            let start = Math.max(2, actual - 1);
-            let end = Math.min(totalPaginas - 1, actual + 1);
-            for (let i = start; i <= end; i++) {
-                if (!pages.includes(i)) pages.push(i);
-            }
-            if (actual < totalPaginas - 2) pages.push('...');
-            pages.push(totalPaginas);
-        }
-
-        pages.forEach(p => {
-            if (p === '...') {
-                html += `<span style="padding:0 4px; color:#94a3b8; font-weight:700;">...</span>`;
-            } else {
-                html += `<button type="button" class="pag-btn ${p === actual ? 'active' : ''}" onclick="window.cambiarPagina(${p})">${p}</button>`;
+        window.TblPagination.render(container, {
+            pages: totalPaginas,
+            page: actual,
+            size: verifPageSize,
+            onPage: window.cambiarPagina,
+            onSize: function (size) {
+                verifPageSize = size;
+                paginaActual = 1;
+                renderizarTabla();
             }
         });
-
-        html += `<button type="button" class="pag-btn ${actual >= totalPaginas ? 'disabled' : ''} onclick="window.cambiarPagina(${actual + 1})" aria-label="Siguiente">&gt;</button>`;
-        container.innerHTML = html;
     }
 
     window.cambiarPagina = function(p) {

@@ -196,7 +196,7 @@ $esInicioActivoSidebar = ($actionActualSidebar === 'home_usuario' || $actionActu
         <div class="sidebar-footer">
             <?php if ($estaAutenticadoSidebar): ?>
                 <?php if ($esPersonalSidebar): ?>
-                    <a href="index.php?action=<?= $rolSidebar === 'admin' ? 'mi_perfil_admin' : 'mi_cuenta'; ?>" class="sidebar-leaf-link level-1" onclick="cerrarSidebar();" style="display:flex; align-items:center; gap:10px; padding:8px 14px; margin-bottom:8px; border-radius:8px; color:#475569; font-weight:600; text-decoration:none;">
+                    <a href="index.php?action=<?= $rolSidebar === 'admin' ? 'mi_perfil_admin' : 'mi_perfil_staff'; ?>" class="sidebar-leaf-link level-1" onclick="cerrarSidebar();" style="display:flex; align-items:center; gap:10px; padding:8px 14px; margin-bottom:8px; border-radius:8px; color:#475569; font-weight:600; text-decoration:none;">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                             <circle cx="12" cy="7" r="4"></circle>

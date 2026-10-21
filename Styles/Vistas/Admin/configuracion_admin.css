@@ -1,0 +1,271 @@
+.cfg-wrapper {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 24px 28px 50px;
+}
+.cfg-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+.cfg-head-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.cfg-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 40px;
+    padding: 7px 13px;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    background: #fff;
+    color: #475569;
+    font-size: 0.82rem;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.cfg-toggle:hover {
+    border-color: #94a3b8;
+    color: #0f172a;
+}
+.cfg-toggle-track {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: #e2e8f0;
+    transition: background 0.2s ease;
+}
+.cfg-toggle-thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.2);
+    transition: transform 0.2s ease;
+}
+.cfg-toggle.is-active {
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+    color: #166534;
+}
+.cfg-toggle.is-active .cfg-toggle-track {
+    background: #15803d;
+}
+.cfg-toggle.is-active .cfg-toggle-thumb {
+    transform: translateX(16px);
+}
+.cfg-btn[hidden] {
+    display: none;
+}
+.cfg-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 8px 15px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.cfg-btn-edit,
+.cfg-btn-save {
+    background: #15803d;
+    color: #fff;
+}
+.cfg-btn-edit:hover,
+.cfg-btn-save:hover {
+    background: #166534;
+}
+.cfg-btn-cancel {
+    border-color: #cbd5e1;
+    background: #fff;
+    color: #475569;
+}
+.cfg-btn-cancel:hover {
+    border-color: #94a3b8;
+    color: #0f172a;
+}
+.cfg-eyebrow {
+    margin: 0 0 6px;
+    color: #15803d;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+.cfg-head h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 1.7rem;
+    font-weight: 900;
+}
+.cfg-head p {
+    margin: 6px 0 0;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+.cfg-flash {
+    margin-bottom: 14px;
+    padding: 11px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+.cfg-flash.is-success {
+    border: 1px solid #bbf7d0;
+    background: #f0fdf4;
+    color: #166534;
+}
+.cfg-flash.is-error {
+    border: 1px solid #fecaca;
+    background: #fef2f2;
+    color: #b91c1c;
+}
+.cfg-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.cfg-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+.cfg-fields:disabled .cfg-card {
+    background: #fcfdfe;
+}
+.cfg-fields:disabled .cfg-field input,
+.cfg-fields:disabled .cfg-field select,
+.cfg-fields:disabled .cfg-check {
+    border-color: #e2e8f0;
+    background: #f8fafc;
+    color: #334155;
+    cursor: default;
+}
+.cfg-fields:disabled .cfg-field > span {
+    color: #64748b;
+}
+.cfg-card {
+    padding: 18px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #fff;
+}
+.cfg-card-head {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f1f5f9;
+}
+.cfg-card-head h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 1rem;
+    font-weight: 800;
+}
+.cfg-card-head p {
+    margin: 4px 0 0;
+    color: #64748b;
+    font-size: 0.78rem;
+}
+.cfg-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+.cfg-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.cfg-field-wide {
+    grid-column: 1 / -1;
+}
+.cfg-field > span {
+    color: #475569;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.cfg-field input,
+.cfg-field select {
+    min-height: 42px;
+    padding: 8px 11px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #fff;
+    color: #0f172a;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+.cfg-field input[type="color"] {
+    padding: 4px;
+    cursor: pointer;
+}
+.cfg-field input:focus,
+.cfg-field select:focus {
+    outline: 2px solid #bbf7d0;
+    border-color: #15803d;
+}
+.cfg-check {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 42px;
+    padding: 8px 11px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #f8fafc;
+    color: #334155;
+    font-size: 0.84rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+.cfg-check input {
+    width: 17px;
+    height: 17px;
+    accent-color: #15803d;
+}
+.cfg-hint {
+    color: #94a3b8;
+    font-size: 0.7rem;
+    font-weight: 500;
+    line-height: 1.35;
+}
+@media (max-width: 760px) {
+    .cfg-wrapper {
+        padding: 18px 16px 40px;
+    }
+    .cfg-grid {
+        grid-template-columns: 1fr;
+    }
+    .cfg-field-wide {
+        grid-column: auto;
+    }
+    .cfg-head-actions {
+        width: 100%;
+    }
+    .cfg-btn {
+        flex: 1 1 auto;
+    }
+}

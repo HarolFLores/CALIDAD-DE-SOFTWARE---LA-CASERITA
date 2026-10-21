@@ -37,38 +37,28 @@ class ControladorPuntoVenta {
             && hash_equals((string)$sesion['token_emparejamiento'], (string)$token);
     }
 
-    private function obtenerTokenSesionAbiertaActual() {
-        require_once 'Core/dataBase.php';
-        $db = (new DataBase())->getConnection();
-        $stmt = $db->query("SELECT token_emparejamiento FROM sesion_caja WHERE estado = 'abierta' ORDER BY id_sesion DESC LIMIT 1");
-        $sesion = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $sesion['token_emparejamiento'] ?? '';
+    private function directorioEstadoEscaner() {
+        $dir = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR
+            . 'caserita_scanner_' . hash('sha256', __DIR__);
+        if (!is_dir($dir)) @mkdir($dir, 0700, true);
+        return $dir;
     }
 
-    private function rutaTokenEscanerActivo() {
-        return rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR
-            . 'caserita_scanner_' . hash('sha256', __DIR__) . '.token';
+    private function rutaPingEscaner($token) {
+        return $this->directorioEstadoEscaner() . DIRECTORY_SEPARATOR
+            . 'celular_' . hash('sha256', (string)$token) . '.timestamp';
+    }
+
+    private function rutaPingEscanerCompartido() {
+        return $this->directorioEstadoEscaner() . DIRECTORY_SEPARATOR . 'celular_activo.timestamp';
     }
 
     private function guardarEscanerActivo($token, $compartido = true) {
         if ($token === '' || $token === 'general_tienda_pos') return;
-        $stampDir = __DIR__ . '/../scratch';
-        if (!is_dir($stampDir)) @mkdir($stampDir, 0777, true);
-        @file_put_contents($stampDir . '/celular_' . hash('sha256', $token) . '.timestamp', time());
+        @file_put_contents($this->rutaPingEscaner($token), time());
         if ($compartido) {
-            @file_put_contents($stampDir . '/celular_activo.timestamp', time());
-            @file_put_contents($this->rutaTokenEscanerActivo(), $token);
+            @file_put_contents($this->rutaPingEscanerCompartido(), time());
         }
-    }
-
-    private function obtenerTokenEscanerActivo() {
-        $stampDir = __DIR__ . '/../scratch';
-        $stampFile = $stampDir . '/celular_activo.timestamp';
-        $tokenFile = $this->rutaTokenEscanerActivo();
-        if (!is_file($stampFile) || !is_file($tokenFile)) return '';
-        $lastPing = (int)@file_get_contents($stampFile);
-        if (time() - $lastPing > 12) return '';
-        return trim((string)@file_get_contents($tokenFile));
     }
 
     public function pos() {
@@ -84,10 +74,11 @@ class ControladorPuntoVenta {
         }
 
         $sesionCaja = $this->model->obtenerSesionPorToken($sesionActiva['token_emparejamiento']);
-        $stampFile = __DIR__ . '/../scratch/celular_' . hash('sha256', $sesionCaja['token_emparejamiento']) . '.timestamp';
+        $stampFile = $this->rutaPingEscaner($sesionCaja['token_emparejamiento']);
+        $sharedStampFile = $this->rutaPingEscanerCompartido();
         $lastMobilePing = is_file($stampFile) ? (int)@file_get_contents($stampFile) : 0;
-        $sharedMobilePing = is_file(__DIR__ . '/../scratch/celular_activo.timestamp')
-            ? (int)@file_get_contents(__DIR__ . '/../scratch/celular_activo.timestamp')
+        $sharedMobilePing = is_file($sharedStampFile)
+            ? (int)@file_get_contents($sharedStampFile)
             : 0;
         $lastMobilePing = max($lastMobilePing, $sharedMobilePing);
         $sesionCaja['estado_conexion'] = time() - $lastMobilePing <= 12 ? 'conectado' : 'esperando';
@@ -128,7 +119,144 @@ class ControladorPuntoVenta {
     public function productosCatalogo() {
         $this->verificarRolCajero();
         $productos = $this->model->listarProductosCatalogo();
+
+        require_once 'Models/productModel.php';
+        $productoModel = new ProductoModel();
+        $productosStockBajo = $productoModel->getProductosStockBajo();
+
+        $idsStockBajo = array_flip(array_map('intval', array_column($productosStockBajo, 'id_producto')));
+        $productosPrioritarios = [];
+        $productosRestantes = [];
+        foreach ($productos as $producto) {
+            if (isset($idsStockBajo[(int)($producto['id_producto'] ?? 0)])) {
+                $productosPrioritarios[] = $producto;
+            } else {
+                $productosRestantes[] = $producto;
+            }
+        }
+        $productos = array_merge($productosPrioritarios, $productosRestantes);
+
         include 'Views/Cajero/productos.php';
+    }
+
+    public function logisticaCajero() {
+        $this->verificarRolCajero();
+        require_once 'Models/pedidoModel.php';
+        $pedidoModel = new PedidoModel();
+
+        // Bandeja unificada de despacho y entregas, incluidos los finalizados.
+        $bandejaPedidos = $pedidoModel->getPedidosBandeja(true);
+
+        $nombre = htmlspecialchars($_SESSION['usuario_nombre'] ?? 'Cajero');
+        $csrfToken = $_SESSION['csrf_token'] ?? '';
+        $flashSuccess = $_SESSION['flash_success'] ?? null;
+        $flashError = $_SESSION['flash_error'] ?? null;
+        unset($_SESSION['flash_success'], $_SESSION['flash_error']);
+
+        include 'Views/Cajero/logistica.php';
+    }
+
+    public function detallePedidoLogisticaCajero() {
+        $this->verificarRolCajero();
+        header('Content-Type: application/json; charset=utf-8');
+
+        $idPedido = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+        if (!$idPedido) {
+            http_response_code(422);
+            echo json_encode(['success' => false, 'message' => 'Pedido inválido.']);
+            exit();
+        }
+
+        require_once 'Models/pedidoModel.php';
+        $pedidoModel = new PedidoModel();
+        $pedido = $pedidoModel->getPedidoByIdAdmin($idPedido);
+        if (!$pedido) {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'message' => 'Pedido no encontrado.']);
+            exit();
+        }
+
+        echo json_encode([
+            'success' => true,
+            'data' => [
+                'pedido' => $pedido,
+                'detalle' => $pedidoModel->getDetallePedidoAdmin($idPedido)
+            ]
+        ]);
+        exit();
+    }
+
+    public function actualizarEstadoLogisticaCajero() {
+        $this->verificarRolCajero();
+        header('Content-Type: application/json; charset=utf-8');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Método no permitido.']);
+            exit();
+        }
+
+        $csrfSesion = $_SESSION['csrf_token'] ?? '';
+        $csrfRecibido = (string)($_POST['csrf_token'] ?? '');
+        if ($csrfSesion === '' || !hash_equals($csrfSesion, $csrfRecibido)) {
+            http_response_code(419);
+            echo json_encode(['success' => false, 'message' => 'La sesión expiró. Recarga la página.']);
+            exit();
+        }
+
+        $idPedido = filter_input(INPUT_POST, 'id_pedido', FILTER_VALIDATE_INT);
+        $estado = trim((string)($_POST['estado'] ?? ''));
+        $permitidos = ['Pendiente', 'En Preparacion', 'En Camino', 'Listo para Recojo', 'Entregado', 'Cancelado'];
+        if (!$idPedido || !in_array($estado, $permitidos, true)) {
+            http_response_code(422);
+            echo json_encode(['success' => false, 'message' => 'Estado o pedido inválido.']);
+            exit();
+        }
+
+        require_once 'Models/pedidoModel.php';
+        require_once 'Models/deliveryModel.php';
+        $pedidoModel = new PedidoModel();
+        $deliveryModel = new DeliveryModel();
+        $pedido = $pedidoModel->getPedidoByIdAdmin($idPedido);
+        if (!$pedido) {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'message' => 'Pedido no encontrado.']);
+            exit();
+        }
+
+        $esDelivery = strtolower((string)($pedido['tipo_entrega'] ?? '')) === 'delivery';
+        if ($esDelivery && $estado === 'Entregado') {
+            http_response_code(422);
+            echo json_encode(['success' => false, 'message' => 'Solo el repartidor puede marcar un delivery como entregado.']);
+            exit();
+        }
+        if ($esDelivery && $estado === 'En Camino' && !$deliveryModel->pedidoTieneRepartidor($idPedido)) {
+            http_response_code(422);
+            echo json_encode(['success' => false, 'message' => 'Asigna un repartidor antes de marcar el pedido En Ruta.']);
+            exit();
+        }
+
+        $estadoAnterior = (string)($pedido['estado'] ?? '');
+
+        if (!$pedidoModel->updateEstadoPedido($idPedido, $estado)) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'No se pudo actualizar el estado.']);
+            exit();
+        }
+
+        if ($esDelivery) {
+            $deliveryModel->sincronizarEstadoPorPedido($idPedido, $estado);
+        }
+
+        try {
+            require_once __DIR__ . '/../Models/notificacionEmailModel.php';
+            (new NotificacionEmailModel())->enviarActualizacionEstado($idPedido, $estado, '', $estadoAnterior);
+        } catch (Throwable $e) {
+            error_log('No se pudo enviar el aviso de estado del pedido ' . $idPedido . ': ' . $e->getMessage());
+        }
+
+        echo json_encode(['success' => true, 'message' => 'Estado actualizado correctamente.']);
+        exit();
     }
 
     public function arqueoCaja() {
@@ -186,10 +314,11 @@ class ControladorPuntoVenta {
         $this->validarCsrfCaja();
         $sesion = $this->cajaModel->obtenerSesionActiva((int)$_SESSION['usuario_id']);
         $montoReal = filter_input(INPUT_POST, 'monto_cierre_real', FILTER_VALIDATE_FLOAT);
-        if (!$sesion || $montoReal === false || $montoReal === null || $montoReal < 0) {
-            $_SESSION['flash_error'] = 'Ingresa el efectivo contado para cerrar tu caja.';
+        $observacion = trim($_POST['observacion_cierre'] ?? '');
+        if (!$sesion || $montoReal === false || $montoReal === null || $montoReal < 0 || $observacion === '') {
+            $_SESSION['flash_error'] = 'Ingresa el efectivo contado y una observación para cerrar tu caja.';
         } else {
-            $resultado = $this->cajaModel->cerrarCaja((int)$sesion['id_sesion'], (float)$montoReal);
+            $resultado = $this->cajaModel->cerrarCaja((int)$sesion['id_sesion'], (float)$montoReal, mb_substr($observacion, 0, 500));
             $_SESSION[$resultado['ok'] ? 'flash_success' : 'flash_error'] = $resultado['mensaje'];
         }
         header('Location: index.php?action=arqueo_caja');
@@ -256,12 +385,6 @@ class ControladorPuntoVenta {
             echo json_encode(['status' => 'error', 'message' => 'No se pudo validar la sesión del escáner.']);
             exit();
         }
-        if (!$esSesionAdministrativa
-            && (stripos($dispositivo, 'celular') !== false || stripos($dispositivo, 'lector') !== false)) {
-            $tokenActual = $this->obtenerTokenSesionAbiertaActual();
-            if ($tokenActual !== '') $token = $tokenActual;
-        }
-
         if ($esSesionAdministrativa) {
             try {
                 if (!$scannerModel->touchAdministrativeScannerToken($token)) {
@@ -289,16 +412,7 @@ class ControladorPuntoVenta {
         }
 
         if (empty($token)) {
-            require_once 'Core/dataBase.php';
-            $db = (new DataBase())->getConnection();
-            $stmt = $db->query("SELECT token_emparejamiento FROM sesion_caja WHERE estado = 'abierta' ORDER BY id_sesion DESC LIMIT 1");
-            $r = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($r && !empty($r['token_emparejamiento'])) {
-                $token = $r['token_emparejamiento'];
-            }
-        }
-
-        if (empty($token)) {
+            http_response_code(403);
             echo json_encode(['status' => 'error', 'message' => 'Token de emparejamiento faltante']);
             exit();
         }
@@ -397,19 +511,7 @@ class ControladorPuntoVenta {
                 exit();
             }
 
-            if ($token === '') {
-                $token = $this->obtenerTokenEscanerActivo();
-            }
             $sesionScanner = $token !== '' ? $this->model->obtenerSesionPorToken($token) : null;
-            if ((!$sesionScanner || ($sesionScanner['estado'] ?? '') !== 'abierta') && isset($_SESSION['usuario_id'])) {
-                $sesionActual = $this->cajaModel->obtenerSesionActiva((int)$_SESSION['usuario_id']);
-                $token = (string)($sesionActual['token_emparejamiento'] ?? '');
-                $sesionScanner = $token !== '' ? $this->model->obtenerSesionPorToken($token) : null;
-            }
-            if (!$sesionScanner || ($sesionScanner['estado'] ?? '') !== 'abierta') {
-                $token = $this->obtenerTokenSesionAbiertaActual();
-                $sesionScanner = $token !== '' ? $this->model->obtenerSesionPorToken($token) : null;
-            }
             if (!$sesionScanner || ($sesionScanner['estado'] ?? '') !== 'abierta'
                 || (!$esAdmin && !$this->tokenPerteneceCajaActivaDelUsuario($token))) {
                 http_response_code(403);
@@ -465,7 +567,7 @@ class ControladorPuntoVenta {
                 echo json_encode(['status' => 'error', 'message' => 'No se pudo consultar el estado del escáner administrativo.']);
                 exit();
             }
-            $stampFile = __DIR__ . '/../scratch/celular_' . hash('sha256', $token) . '.timestamp';
+            $stampFile = $this->rutaPingEscaner($token);
             $lastMobilePing = is_file($stampFile) ? (int)@file_get_contents($stampFile) : 0;
             echo json_encode([
                 'status' => 'success',
@@ -523,11 +625,66 @@ class ControladorPuntoVenta {
             exit();
         }
         $items = json_decode($sesionData['items_json'] ?? '[]', true);
+        if (is_array($items) && !empty($items)) {
+            $idsToFix = [];
+            foreach ($items as $it) {
+                $idItem = (int)($it['id_producto'] ?? 0);
+                if ($idItem <= 0) continue;
+                $needsImg = empty($it['imagen']) && empty($it['imagen_url']);
+                $needsName = trim((string)($it['nombre'] ?? '')) === '';
+                $needsPrevPrice = !array_key_exists('precio_anterior', $it);
+                if ($needsImg || $needsName || $needsPrevPrice) {
+                    $idsToFix[] = $idItem;
+                }
+            }
+            $idsToFix = array_values(array_unique($idsToFix));
+            if (!empty($idsToFix)) {
+                require_once 'Core/dataBase.php';
+                $dbTmp = (new DataBase())->getConnection();
+                $placeholders = implode(',', array_fill(0, count($idsToFix), '?'));
+                $stFix = $dbTmp->prepare("SELECT id_producto,
+                        COALESCE(NULLIF(imagen, ''), NULLIF(imagen_url, '')) AS img,
+                        COALESCE(NULLIF(nombre, ''), titulo) AS nombre,
+                        precio_anterior
+                    FROM producto WHERE id_producto IN ($placeholders)");
+                $stFix->execute($idsToFix);
+                $mapFix = [];
+                foreach ($stFix->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                    $mapFix[(int)$row['id_producto']] = $row;
+                }
+                $updatedAny = false;
+                foreach ($items as &$it) {
+                    $idItem = (int)($it['id_producto'] ?? 0);
+                    if (!isset($mapFix[$idItem])) continue;
+                    if ((empty($it['imagen']) && empty($it['imagen_url'])) && !empty($mapFix[$idItem]['img'])) {
+                        $it['imagen'] = $mapFix[$idItem]['img'];
+                        $it['imagen_url'] = $mapFix[$idItem]['img'];
+                        $updatedAny = true;
+                    }
+                    if (trim((string)($it['nombre'] ?? '')) === '' && trim((string)($mapFix[$idItem]['nombre'] ?? '')) !== '') {
+                        $it['nombre'] = $mapFix[$idItem]['nombre'];
+                        $updatedAny = true;
+                    }
+                    if (!array_key_exists('precio_anterior', $it)) {
+                        $it['precio_anterior'] = $mapFix[$idItem]['precio_anterior'] !== null
+                            ? (float)$mapFix[$idItem]['precio_anterior']
+                            : null;
+                        $updatedAny = true;
+                    }
+                }
+                unset($it);
+                if ($updatedAny) {
+                    $stmtSave = $dbTmp->prepare("UPDATE sesion_caja SET items_json = :items WHERE token_emparejamiento = :token");
+                    $stmtSave->execute([':items' => json_encode($items), ':token' => $token]);
+                }
+            }
+        }
 
-        $stampFile = __DIR__ . '/../scratch/celular_' . hash('sha256', $token) . '.timestamp';
+        $stampFile = $this->rutaPingEscaner($token);
+        $sharedStampFile = $this->rutaPingEscanerCompartido();
         $lastMobilePing = is_file($stampFile) ? (int)@file_get_contents($stampFile) : 0;
-        $sharedMobilePing = is_file(__DIR__ . '/../scratch/celular_activo.timestamp')
-            ? (int)@file_get_contents(__DIR__ . '/../scratch/celular_activo.timestamp')
+        $sharedMobilePing = is_file($sharedStampFile)
+            ? (int)@file_get_contents($sharedStampFile)
             : 0;
         $lastMobilePing = max($lastMobilePing, $sharedMobilePing);
         $connectionState = time() - $lastMobilePing <= 12 ? $sesionData['estado_conexion'] : 'esperando';
@@ -632,6 +789,18 @@ class ControladorPuntoVenta {
         $clienteDni = filter_input(INPUT_POST, 'cliente_dni', FILTER_SANITIZE_SPECIAL_CHARS) ?? '00000000';
         $clienteNombre = filter_input(INPUT_POST, 'cliente_nombre', FILTER_SANITIZE_SPECIAL_CHARS) ?? 'Público General';
 
+        // Pagos divididos (uno o varios métodos por venta)
+        $pagosRaw = $_POST['pagos'] ?? '';
+        $pagos = [];
+        if (is_string($pagosRaw) && $pagosRaw !== '') {
+            $decoded = json_decode($pagosRaw, true);
+            if (is_array($decoded)) {
+                $pagos = $decoded;
+            }
+        } elseif (is_array($pagosRaw)) {
+            $pagos = $pagosRaw;
+        }
+
         if (!$token) {
             echo json_encode(['status' => 'error', 'message' => 'Token de sesión requerido']);
             exit();
@@ -643,7 +812,7 @@ class ControladorPuntoVenta {
             exit();
         }
 
-        $resultado = $this->model->finalizarVenta($token, $metodoPago, $montoRecibido, $clienteDni, $clienteNombre);
+        $resultado = $this->model->finalizarVenta($token, $metodoPago, $montoRecibido, $clienteDni, $clienteNombre, $pagos);
         echo json_encode($resultado);
         exit();
     }
@@ -662,14 +831,8 @@ class ControladorPuntoVenta {
 
     public function vistaEscanerMovil() {
         $token = trim($_GET['token'] ?? ($_GET['amp;token'] ?? ''));
-        if (empty($token)) {
-            require_once 'Core/dataBase.php';
-            $db = (new DataBase())->getConnection();
-            $stmt = $db->query("SELECT token_emparejamiento FROM sesion_caja WHERE estado = 'abierta' ORDER BY id_sesion DESC LIMIT 1");
-            $r = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($r && !empty($r['token_emparejamiento'])) {
-                $token = $r['token_emparejamiento'];
-            }
+        if ($token === '') {
+            http_response_code(403);
         }
         include 'Views/Cajero/escaner_movil.php';
         exit();
@@ -693,10 +856,6 @@ class ControladorPuntoVenta {
             exit();
         }
         $sesionToken = $token !== '' ? $this->model->obtenerSesionPorToken($token) : null;
-        if ($token === '' && !$esSesionAdministrativa) {
-            $token = $this->obtenerTokenSesionAbiertaActual();
-            $sesionToken = $token !== '' ? $this->model->obtenerSesionPorToken($token) : null;
-        }
         if (!$esSesionAdministrativa && (!$sesionToken || ($sesionToken['estado'] ?? '') !== 'abierta')) {
             http_response_code(409);
             echo json_encode(['ok' => false, 'mensaje' => 'La sesión del escáner no es válida o expiró.']);
@@ -725,11 +884,9 @@ class ControladorPuntoVenta {
         header('Content-Type: application/json');
 
         $token = trim($_GET['token'] ?? ($_GET['amp;token'] ?? ''));
-        if (empty($token)) {
-            $token = $this->obtenerTokenEscanerActivo();
-        }
-        if (empty($token)) {
-            $token = $this->obtenerTokenSesionAbiertaActual();
+        if ($token === '') {
+            echo json_encode(['status' => 'success', 'data' => []]);
+            exit();
         }
         require_once 'Models/posScannerModel.php';
         $scannerModel = new PosScannerModel();

@@ -98,10 +98,6 @@ if (!isset($productosParaBuscadorGlobal)) {
 
                 <div class="search-dropdown" id="searchDropdown">
                     <div class="search-dropdown-content">
-                        <div class="search-suggestions">
-                            <h4>Sugerencias</h4>
-                            <ul id="searchSuggestionsList"></ul>
-                        </div>
                         <div class="search-quick-results">
                             <div class="search-quick-header">
                                 <span id="searchQuickLabel">Resultado para</span>
@@ -116,7 +112,7 @@ if (!isset($productosParaBuscadorGlobal)) {
 
             <div class="header-controls-group header-actions">
                 <!-- Botón Usuario (Píldora con Menú Desplegable al pasar el cursor) -->
-                <?php if ($estaAutenticado): ?>
+                <?php if ($estaAutenticado && !$esPersonal): ?>
                     <div class="user-menu-wrapper" id="userMenuWrapper">
                         <button type="button" class="btn-user-pill-img1 btn-user" title="<?= htmlspecialchars($textoPerfil) ?>" id="btnUserPill" onclick="toggleUserDropdownMenu(event)" aria-haspopup="true" aria-expanded="false">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -165,7 +161,7 @@ if (!isset($productosParaBuscadorGlobal)) {
                             </a>
                         </div>
                     </div>
-                <?php else: ?>
+                <?php elseif (!$estaAutenticado): ?>
                     <button type="button" class="btn-user-pill-img1 btn-user" onclick="if(typeof abrirModalAuth==='function') abrirModalAuth('login'); else window.location.href='index.php?action=login';" title="Entrar">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

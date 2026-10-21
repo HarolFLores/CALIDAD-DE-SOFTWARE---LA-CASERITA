@@ -38,7 +38,7 @@
                 <div>Vinculado a: <strong>Pantalla Activa en PC</strong></div>
             </div>
             <div>
-                <span class="info-token" id="lblToken"><?= htmlspecialchars($token ? substr($token, 0, 12).'...' : 'ACTIVO') ?></span>
+                <span class="info-token" id="lblToken"><?= htmlspecialchars($token ? substr($token, 0, 12).'...' : 'SIN VINCULAR') ?></span>
             </div>
         </div>
 

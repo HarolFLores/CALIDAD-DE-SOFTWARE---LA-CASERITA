@@ -47,10 +47,12 @@ class KardexModel {
      */
     public function listarMovimientos($idProducto = null, $limite = 500, $offset = 0, $fechaDesde = null, $fechaHasta = null, $orden = 'DESC') {
         $sql = "SELECT k.*, COALESCE(NULLIF(p.nombre, ''), p.titulo) as producto_nombre, p.codigo, p.codigo_barras, p.unidad_medida, p.imagen,
-                       u.nombre as usuario_nombre, u.apellido as usuario_apellido, u.rol as usuario_rol
+                       u.nombre as usuario_nombre, u.apellido as usuario_apellido, u.rol as usuario_rol,
+                       ped.canal as canal_pedido
                 FROM kardex k
                 JOIN producto p ON k.id_producto = p.id_producto
-                JOIN usuario u ON k.id_usuario = u.id_usuario";
+                JOIN usuario u ON k.id_usuario = u.id_usuario
+                LEFT JOIN pedido ped ON k.referencia_tipo = 'pedido' AND k.referencia_id = ped.id_pedido";
         $conditions = [];
         $params = [];
         if ($idProducto !== null && $idProducto > 0) {

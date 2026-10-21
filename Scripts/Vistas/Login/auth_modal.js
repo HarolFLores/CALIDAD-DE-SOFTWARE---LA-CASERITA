@@ -304,13 +304,19 @@ function cargarScriptGoogleSDK(callback) {
 function iniciarGoogleServices() {
     if (window.google && window.google.accounts) {
         try {
+            const target = document.getElementById('modalGoogleTarget');
+            const clientId = target ? (target.dataset.clientId || '') : '';
+            if (!clientId) {
+                console.error('Google Client ID no configurado.');
+                return;
+            }
+
             google.accounts.id.initialize({
-                client_id: "1026978247159-p7mer3bmdjm52dkji27b02ucbk5cdo6o.apps.googleusercontent.com",
+                client_id: clientId,
                 callback: handleModalGoogleCallback,
                 auto_prompt: false
             });
 
-            const target = document.getElementById('modalGoogleTarget');
             if (target && !target.dataset.rendered) {
                 google.accounts.id.renderButton(target, {
                     type: 'standard',

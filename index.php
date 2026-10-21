@@ -6,7 +6,10 @@ ini_set('display_errors', 0);
 ini_set('log_errors', 1); 
 
 
-require_once 'Core/SessionManager.php';
+require_once __DIR__ . '/Core/Security.php';
+Security::bootstrap();
+
+require_once __DIR__ . '/Core/SessionManager.php';
 session_set_save_handler(new DatabaseSessionHandler(), true);
 
 
@@ -35,6 +38,7 @@ require_once 'Controllers/controllersCheckout.php';
 require_once 'Controllers/controlador_punto_venta.php';
 require_once 'Controllers/controllersAdminERP.php';
 require_once 'Controllers/controllersRepartidor.php';
+require_once 'Controllers/controllersPerfilStaff.php';
 
 $controller = new UserController();
 $catController = new ControllerCategory();
@@ -50,9 +54,23 @@ $checkoutController = new ControllerCheckout();
 $posController = new ControladorPuntoVenta();
 $adminERP = new ControllerAdminERP();
 $repartidorController = new ControllerRepartidor();
+$perfilStaffController = new ControllerPerfilStaff();
 
 
 $action = isset($_GET['action']) ? trim($_GET['action']) : 'home_usuario';
+$rolSesion = $_SESSION['usuario_rol'] ?? '';
+$panelPorRol = [
+    'admin' => 'dashboard_ganancias',
+    'cajero' => 'panel_cajero',
+    'repartidor' => 'panel_repartidor',
+];
+$rutaSeguraSesion = $panelPorRol[$rolSesion] ?? 'home_usuario';
+
+// El personal trabaja exclusivamente desde su panel, nunca desde la tienda.
+if ($action === 'home_usuario' && isset($panelPorRol[$rolSesion])) {
+    header('Location: index.php?action=' . $rutaSeguraSesion);
+    exit();
+}
 
 $rutasPublicas = [
     'home_usuario',
@@ -113,8 +131,13 @@ $rutasAdmin = [
     'ventas_admin',
     'detalle_pedido_admin',
     'actualizar_estado_pedido',
+    'caja_admin',
     // ERP Modules
     'dashboard_ganancias',
+    'reportes_admin',
+    'exportar_reporte_ventas',
+    'configuracion_admin',
+    'guardar_configuracion',
     'kardex_admin',
     'ajustar_kardex',
     'compras_admin',
@@ -128,10 +151,6 @@ $rutasAdmin = [
     'delivery_admin',
     'asignar_repartidor',
     'actualizar_estado_delivery',
-    'bandeja_asignar',
-    'verificacion_pagos',
-    'aprobar_verificacion_pago',
-    'rechazar_verificacion_pago',
     'guardar_carrusel',
     'carrusel_admin',
 ];
@@ -140,6 +159,9 @@ $rutasAdmin = [
 $rutasCajero = [
     'panel_cajero',
     'productos_cajero',
+    'logistica_cajero',
+    'logistica_detalle_cajero',
+    'logistica_estado_cajero',
     'arqueo_caja',
     'cajero_arqueo',
     'abrir_caja_cajero',
@@ -166,6 +188,14 @@ $rutasRepartidor = [
     'panel_repartidor',
     'actualizar_entrega_repartidor',
     'tomar_entrega_repartidor',
+    'editar_incidencia_repartidor',
+];
+
+$rutasStaff = [
+    'mi_perfil_staff',
+    'actualizar_perfil_staff',
+    'cambiar_password_staff',
+    'verificar_password_actual_staff',
 ];
 
 
@@ -207,25 +237,27 @@ if (in_array($_SESSION['usuario_rol'] ?? '', ['admin', 'cajero', 'repartidor'], 
     if (AjaxHelper::isAjax()) {
         AjaxHelper::jsonError('Las cuentas de personal no pueden realizar compras.', 403);
     }
-    header('Location: index.php?action=home_usuario');
+    header('Location: index.php?action=' . $rutaSeguraSesion);
     exit();
 }
 
 if (in_array($action, $rutasPublicas, true)) {
     
 } elseif (in_array($action, ['pos', 'cajero_pos'], true)) {
-    AuthMiddleware::verificarAcceso(['cajero']);
+    AuthMiddleware::verificarAcceso(['cajero', 'admin']);
 } elseif (in_array($action, $rutasAdmin, true)) {
     AuthMiddleware::verificarAcceso(['admin']);
 } elseif (in_array($action, $rutasCajero, true)) {
     AuthMiddleware::verificarAcceso(['cajero', 'admin']);
 } elseif (in_array($action, $rutasRepartidor, true)) {
     AuthMiddleware::verificarAcceso(['repartidor']);
+} elseif (in_array($action, $rutasStaff, true)) {
+    AuthMiddleware::verificarAcceso(['cajero', 'repartidor']);
 } elseif (in_array($action, $rutasAutenticado, true)) {
     AuthMiddleware::verificarAcceso(['cliente', 'admin', 'cajero', 'repartidor']);
 } else {
     // Si la acción solicitada no existe, redirigir siempre al Home público
-    header('Location: index.php?action=home_usuario');
+    header('Location: index.php?action=' . $rutaSeguraSesion);
     exit();
 }
 
@@ -243,6 +275,15 @@ switch($action) {
         break;
     case 'productos_cajero':
         $posController->productosCatalogo();
+        break;
+    case 'logistica_cajero':
+        $posController->logisticaCajero();
+        break;
+    case 'logistica_detalle_cajero':
+        $posController->detallePedidoLogisticaCajero();
+        break;
+    case 'logistica_estado_cajero':
+        $posController->actualizarEstadoLogisticaCajero();
         break;
     case 'arqueo_caja':
     case 'cajero_arqueo':
@@ -268,6 +309,21 @@ switch($action) {
         break;
     case 'tomar_entrega_repartidor':
         $repartidorController->tomarEntrega();
+        break;
+    case 'editar_incidencia_repartidor':
+        $repartidorController->editarIncidencia();
+        break;
+    case 'mi_perfil_staff':
+        $perfilStaffController->miPerfilStaff();
+        break;
+    case 'actualizar_perfil_staff':
+        $perfilStaffController->actualizarPerfilStaff();
+        break;
+    case 'cambiar_password_staff':
+        $perfilStaffController->cambiarPasswordStaff();
+        break;
+    case 'verificar_password_actual_staff':
+        $perfilStaffController->verificarPasswordActualStaff();
         break;
     case 'pos_generar_qr':
         $posController->apiGenerarQR();
@@ -526,6 +582,18 @@ switch($action) {
     case 'dashboard_ganancias':
         $adminERP->dashboardGanancias();
         break;
+    case 'reportes_admin':
+        $adminERP->reportesAdmin();
+        break;
+    case 'exportar_reporte_ventas':
+        $adminERP->exportarReporteVentas();
+        break;
+    case 'configuracion_admin':
+        $adminERP->configuracionAdmin();
+        break;
+    case 'guardar_configuracion':
+        $adminERP->guardarConfiguracion();
+        break;
     case 'kardex_admin':
         $adminERP->kardexAdmin();
         break;
@@ -572,18 +640,6 @@ switch($action) {
         break;
     case 'actualizar_estado_delivery':
         $adminERP->actualizarEstadoDelivery();
-        break;
-    case 'bandeja_asignar':
-        $adminERP->bandejaAsignar();
-        break;
-    case 'verificacion_pagos':
-        $adminERP->verificacionPagos();
-        break;
-    case 'aprobar_verificacion_pago':
-        $adminERP->aprobarVerificacionPago();
-        break;
-    case 'rechazar_verificacion_pago':
-        $adminERP->rechazarVerificacionPago();
         break;
     case 'carrusel_admin':
         $adminERP->carruselAdmin();

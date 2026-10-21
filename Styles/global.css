@@ -144,7 +144,7 @@ header.main-header,
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
 }
 
-button:not(.hero-dot):not(.hero-arrow):not(.qty-btn):not(.carousel-btn):not(.sidebar-close):not(.btn-close-modal):not(.search-clear):not(.toggle-password-btn):not(.password-toggle):not(.btn-user-pill-img1):not(.btn-cart-circle-img1):not(.btn-user):not(.btn-cart):not(.btn-add-cart-pill):not(.btn-qty-minus):not(.btn-qty-plus),
+button:not([class*="close"]):not(.hero-dot):not(.hero-arrow):not(.qty-btn):not(.carousel-btn):not(.sidebar-close):not(.btn-close-modal):not(.search-clear):not(.toggle-password-btn):not(.password-toggle):not(.btn-user-pill-img1):not(.btn-cart-circle-img1):not(.btn-user):not(.btn-cart):not(.btn-add-cart-pill):not(.btn-qty-minus):not(.btn-qty-plus),
 input[type="submit"],
 a.btn,
 a.btn-primary,
@@ -557,6 +557,10 @@ img {
 :is(.auth-modal-close-btn, .sidebar-close, .sidebar-close-btn, .staff-sidebar-close, .modal-close, .co-modal-close, .cuenta-modal-close, .prov-modal-close, .cat-modal-close-btn, .va-modal-close-icon, .modal-close-caja, .comp-modal-close, .btn-close-universal, .product-detail-close, .btn-close-mobile-filtros, .ticket-modal-close, .btn-close-notif, .btn-close-cart) {
     width: clamp(30px, 4vw, 34px);
     height: clamp(30px, 4vw, 34px);
+    min-width: clamp(30px, 4vw, 34px);
+    min-height: clamp(30px, 4vw, 34px);
+    aspect-ratio: 1 / 1;
+    box-sizing: border-box;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -584,6 +588,25 @@ img {
     color: #15803d;
     border-color: #15803d;
     transform: rotate(90deg);
+}
+
+html body button[aria-label*="Cerrar" i]:not([aria-label*="sesión" i]):not([aria-label*="sesion" i]),
+html body a[aria-label*="Cerrar" i]:not([aria-label*="sesión" i]):not([aria-label*="sesion" i]),
+html body button[title*="Cerrar" i]:not([title*="sesión" i]):not([title*="sesion" i]),
+html body a[title*="Cerrar" i]:not([title*="sesión" i]):not([title*="sesion" i]) {
+    width: clamp(36px, 8vw, 44px);
+    height: clamp(36px, 8vw, 44px);
+    min-width: clamp(36px, 8vw, 44px);
+    min-height: clamp(36px, 8vw, 44px);
+    aspect-ratio: 1 / 1;
+    box-sizing: border-box;
+    padding: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    line-height: 1;
 }
 
 .comp-modal-header .btn-close-universal {
@@ -906,3 +929,153 @@ html body .notif-item-row:hover {
   color: #dc2626;
 }
 
+
+/* ==========================================================================
+   Paginación unificada - La Caserita
+   ========================================================================== */
+html body .pg-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 14px 20px;
+    border-top: 0;
+    background: transparent;
+}
+
+html body .pg-size {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+html body .pg-size-select {
+    min-width: 64px;
+    padding: 6px 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #334155;
+    font: inherit;
+    font-size: 0.82rem;
+    cursor: pointer;
+}
+
+html body .pg-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+}
+
+html body .pg-btn {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: #64748b;
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+html body .pg-btn:hover:not(:disabled) {
+    background: #f8fafc;
+    color: #0f172a;
+}
+
+html body .pg-btn.is-active {
+    background: #15803d;
+    border-color: #15803d;
+    color: #ffffff;
+}
+
+html body .pg-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+html body .pg-nav-btn {
+    font-size: 1.15rem;
+    color: #94a3b8;
+}
+
+html body .pg-ellipsis {
+    padding: 0 2px;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+html body .pg-footer-top {
+    display: none;
+}
+
+/* Botón de acciones (tres puntos) unificado en todas las tablas */
+html body .table-kebab-btn,
+html body .cl-kebab-button {
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    color: #64748b;
+}
+
+html body .table-kebab-btn:hover,
+html body .table-kebab-btn.active,
+html body .cl-kebab-button:hover,
+html body .cl-kebab.is-open .cl-kebab-button {
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+    color: #15803d;
+}
+
+html body .table-kebab-btn svg,
+html body .cl-kebab-button svg {
+    width: 18px;
+    height: 18px;
+}
+
+@media (max-width: 640px) {
+    html body .pg-footer {
+        justify-content: center;
+    }
+
+    html body .pg-nav {
+        margin-left: 0;
+    }
+}
+
+html body :is(.auth-modal-close-btn, .modal-close, .co-modal-close, .cuenta-modal-close, .prov-modal-close, .cat-modal-close-btn, .va-modal-close-icon, .modal-close-caja, .comp-modal-close, .btn-close-universal, .product-detail-close, .btn-close-mobile-filtros, .ticket-modal-close, .btn-close-notif, .btn-close-cart, #closeNotifDropdown) {
+    width: clamp(36px, 8vw, 44px);
+    height: clamp(36px, 8vw, 44px);
+    min-width: clamp(36px, 8vw, 44px);
+    min-height: clamp(36px, 8vw, 44px);
+    aspect-ratio: 1 / 1;
+    padding: 0;
+    border: 2px solid #15803d;
+    border-radius: 50%;
+    background: #f0fdf4;
+    color: #15803d;
+    box-shadow: none;
+}
+
+html body :is(.auth-modal-close-btn, .modal-close, .co-modal-close, .cuenta-modal-close, .prov-modal-close, .cat-modal-close-btn, .va-modal-close-icon, .modal-close-caja, .comp-modal-close, .btn-close-universal, .product-detail-close, .btn-close-mobile-filtros, .ticket-modal-close, .btn-close-notif, .btn-close-cart, #closeNotifDropdown):hover,
+html body :is(.auth-modal-close-btn, .modal-close, .co-modal-close, .cuenta-modal-close, .prov-modal-close, .cat-modal-close-btn, .va-modal-close-icon, .modal-close-caja, .comp-modal-close, .btn-close-universal, .product-detail-close, .btn-close-mobile-filtros, .ticket-modal-close, .btn-close-notif, .btn-close-cart, #closeNotifDropdown):active {
+    background: #dcfce7;
+    color: #166534;
+    border-color: #15803d;
+}

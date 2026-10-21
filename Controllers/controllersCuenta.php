@@ -244,13 +244,6 @@ class ControllerCuenta
 
         require_once __DIR__ . '/../Models/MailHelper.php';
         $enviado = MailHelper::sendEmail($correo, $asunto, $mensaje, false);
-        
-        $backupDir = __DIR__ . '/../scratch/emails_enviados';
-        if (!is_dir($backupDir)) {
-            @mkdir($backupDir, 0777, true);
-        }
-        $backupFile = $backupDir . '/pin_' . time() . '.txt';
-        @file_put_contents($backupFile, "Para: $correo\nAsunto: $asunto\n\n$mensaje");
 
         $msg = "Hemos enviado un código PIN de 6 dígitos a tu correo: " . $correo;
 

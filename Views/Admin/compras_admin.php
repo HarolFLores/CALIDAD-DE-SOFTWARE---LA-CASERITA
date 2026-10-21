@@ -44,7 +44,8 @@ $cantProveedoresConCompras = count($proveedoresDistintos);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="Scripts/admin-spa.js?v=<?= time(); ?>" defer></script>
-    <script src="Scripts/scanner-camara.js"></script>
+    <script src="Scripts/pagination.js?v=<?= time(); ?>"></script>
+    <script src="Scripts/scanner-camara.js?v=<?= filemtime(__DIR__ . '/../../Scripts/scanner-camara.js') ?>"></script>
 <link rel="stylesheet" href="Styles/Vistas/Admin/compras_admin.css?v=<?= filemtime(__DIR__ . '/../../Styles/Vistas/Admin/compras_admin.css'); ?>">
 </head>
 <body>
@@ -82,7 +83,7 @@ $cantProveedoresConCompras = count($proveedoresDistintos);
                 <i class="fa-solid <?= $esError ? 'fa-circle-exclamation' : 'fa-circle-check'; ?>" style="font-size:1.2rem;"></i>
                 <span><?= htmlspecialchars($msgFlash); ?></span>
             </div>
-            <button type="button" onclick="document.getElementById('comprasAlertaBanner').remove()" style="background:none; border:none; cursor:pointer; color:inherit; font-size:1.2rem;">&times;</button>
+            <button type="button" onclick="document.getElementById('comprasAlertaBanner').remove()" aria-label="Cerrar" style="background:none; border:none; cursor:pointer; color:inherit; font-size:1.2rem;">&times;</button>
         </div>
     <?php endif; ?>
 
@@ -216,12 +217,7 @@ $cantProveedoresConCompras = count($proveedoresDistintos);
             </table>
         </div>
 
-        <div class="compras-pagination-bar" id="paginacionComprasBar">
-            <div style="font-size:0.82rem; color:#64748b;" id="lblTotalComprasMostradas">
-                Mostrando <?= count($historial) ?> compras registradas
-            </div>
-            <div class="compras-pag-nav" id="paginacionComprasNav"></div>
-        </div>
+        <div class="pg-footer" id="paginacionComprasNav"></div>
     </div>
 </main>
 
@@ -373,7 +369,7 @@ $cantProveedoresConCompras = count($proveedoresDistintos);
                     <!-- Observaciones -->
                     <div class="comp-col-full">
                         <label class="comp-label">Observaciones / Notas</label>
-                        <textarea name="observacion" id="compra_observacion" class="comp-input" rows="2" placeholder="Detalles de entrega, estado del empaque, etc."></textarea>
+                        <textarea name="observacion" id="compra_observacion" class="comp-input" rows="2" placeholder="Detalles y condiciones de entrega, etc."></textarea>
                     </div>
 
                     <!-- Total & Caja Chica -->
@@ -573,49 +569,58 @@ $cantProveedoresConCompras = count($proveedoresDistintos);
 
             const coincideTexto = !q || prod.includes(q) || prov.includes(q) || comp.includes(q);
             const coincideProv = provFiltro === 'todos' || prov.includes(provFiltro);
+            const visible = coincideTexto && coincideProv;
 
-            if (coincideTexto && coincideProv) {
-                f.style.display = '';
-                contador++;
-            } else {
-                f.style.display = 'none';
-            }
+            f.dataset.match = visible ? '1' : '0';
+            if (visible) contador++;
         });
 
         const lbl = document.getElementById('lblTotalComprasMostradas');
         if (lbl) {
             lbl.textContent = `Mostrando ${contador} compras registradas`;
         }
+
+        paginaActualCompras = 1;
+        renderPaginacionCompras();
     }
 
-    // Paginación de compras (15 por página)
+    // Paginación de compras
     let paginaActualCompras = 1;
-    const comprasPorPagina = 15;
+    let comprasPageSize = 5;
 
     function renderPaginacionCompras() {
-        const filas = Array.from(document.querySelectorAll('.fila-compra')).filter(f => f.style.display !== 'none');
+        const todas = Array.from(document.querySelectorAll('.fila-compra'));
+        const filas = todas.filter(f => f.dataset.match !== '0');
         const total = filas.length;
-        const totalPags = Math.ceil(total / comprasPorPagina) || 1;
-        const nav = document.getElementById('paginacionComprasNav');
-        if (!nav) return;
+        const totalPags = Math.ceil(total / comprasPageSize) || 1;
+        if (paginaActualCompras > totalPags) paginaActualCompras = totalPags;
+        if (paginaActualCompras < 1) paginaActualCompras = 1;
 
-        if (totalPags <= 1) {
-            nav.innerHTML = '';
-            filas.forEach(f => f.style.display = '');
-            return;
-        }
+        const inicio = (paginaActualCompras - 1) * comprasPageSize;
+        const fin = inicio + comprasPageSize;
 
+        todas.forEach(f => { f.style.display = 'none'; });
         filas.forEach((f, idx) => {
-            const inicio = (paginaActualCompras - 1) * comprasPorPagina;
-            const fin = inicio + comprasPorPagina;
             f.style.display = (idx >= inicio && idx < fin) ? '' : 'none';
         });
 
-        let btns = '';
-        for (let p = 1; p <= totalPags; p++) {
-            btns += `<button type="button" class="compras-pag-btn ${p === paginaActualCompras ? 'active' : ''}" onclick="irPaginaCompras(${p})">${p}</button>`;
-        }
-        nav.innerHTML = btns;
+        const nav = document.getElementById('paginacionComprasNav');
+        if (!nav || !window.TblPagination) return;
+
+        window.TblPagination.render(nav, {
+            pages: totalPags,
+            page: paginaActualCompras,
+            size: comprasPageSize,
+            onPage: function (p) {
+                paginaActualCompras = p;
+                renderPaginacionCompras();
+            },
+            onSize: function (size) {
+                comprasPageSize = size;
+                paginaActualCompras = 1;
+                renderPaginacionCompras();
+            }
+        });
     }
 
     function irPaginaCompras(p) {
