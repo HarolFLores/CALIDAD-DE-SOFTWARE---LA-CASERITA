@@ -13,13 +13,12 @@ class DataBase {
     private $password = null;
 
     public function __construct() {
-        // Soporte por defecto para MySQL en XAMPP local
         $this->driver = getenv('DB_DRIVER') ?: 'mysql';
-        $this->host = getenv('DB_HOST') ?: 'localhost';
-        $this->port = getenv('DB_PORT') ?: '3306'; 
-        $this->dbname = getenv('DB_NAME') ?: 'lacaserita_db';
-        $this->user = getenv('DB_USER') ?: 'root';
-        $this->password = getenv('DB_PASS') !== false ? getenv('DB_PASS') : '';
+        $this->host = getenv('DB_HOST') ?: 'db.fr-roub1.bengt.wasmernet.com';
+        $this->port = getenv('DB_PORT') ?: '20184'; 
+        $this->dbname = getenv('DB_NAME') ?: 'laCaserita';
+        $this->user = getenv('DB_USER') ?: 'user_38af82ca';
+        $this->password = getenv('DB_PASS') !== false ? getenv('DB_PASS') : 'pw_6EnptySM6AkgDnT6Z1FmRgJqAaOuo2i4';
     }
 
     public function getConnection() {
