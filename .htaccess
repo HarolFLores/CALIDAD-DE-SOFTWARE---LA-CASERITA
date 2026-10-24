@@ -1,55 +1,11 @@
-# La Caserita - protección base para Apache
-Options -Indexes
-DirectoryIndex index.php
-AddDefaultCharset UTF-8
-
-# Nunca servir código interno, respaldos, temporales ni metadatos de Git.
-RedirectMatch 404 (?i)/(?:\.git|\.agents|Config|Core|Controllers|Models|Views|database|scratch|backups)(?:/|$)
-
-# Solo index.php puede ejecutarse directamente.
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteCond %{REQUEST_URI} !/index\.php$
-    RewriteRule \.php$ - [R=404,L]
+    RewriteBase /
+
+    # Si el archivo o carpeta existe fisicamente (imagenes, css, js), cargarlo directo
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Redirigir todo lo demas al enrutador principal index.php
+    RewriteRule ^ index.php [QSA,L]
 </IfModule>
-
-<FilesMatch "(?i)(^\.|\.(env|sql|log|zip|token|timestamp|bak|ini)$|^composer\.(json|lock)$|^AGENTS\.md$)">
-    Require all denied
-</FilesMatch>
-
-<IfModule mod_headers.c>
-    Header always set X-Content-Type-Options "nosniff"
-    Header always set X-Frame-Options "SAMEORIGIN"
-    Header always set Referrer-Policy "strict-origin-when-cross-origin"
-    Header always set Permissions-Policy "camera=(self), microphone=(), geolocation=(self)"
-
-    <FilesMatch "\.(css|js|mjs|jpg|jpeg|png|gif|webp|svg|ico|woff2?|ttf|eot)$">
-        Header set Cache-Control "public, max-age=604800, stale-while-revalidate=86400"
-    </FilesMatch>
-
-    <FilesMatch "\.(php|html?)$">
-        Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
-    </FilesMatch>
-</IfModule>
-
-<IfModule mod_expires.c>
-    ExpiresActive On
-    ExpiresByType text/css "access plus 7 days"
-    ExpiresByType application/javascript "access plus 7 days"
-    ExpiresByType image/svg+xml "access plus 30 days"
-    ExpiresByType image/png "access plus 30 days"
-    ExpiresByType image/jpeg "access plus 30 days"
-    ExpiresByType image/webp "access plus 30 days"
-    ExpiresByType font/woff2 "access plus 30 days"
-</IfModule>
-
-<IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json image/svg+xml
-</IfModule>
-
-<IfModule mod_mime.c>
-    AddType application/javascript .js
-    AddType image/svg+xml .svg
-</IfModule>
-
-FileETag MTime Size
