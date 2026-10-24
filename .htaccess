@@ -2,10 +2,8 @@
     RewriteEngine On
     RewriteBase /
 
-    # Si el archivo o carpeta existe fisicamente (imagenes, css, js), cargarlo directo
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
 
-    # Redirigir todo lo demas al enrutador principal index.php
     RewriteRule ^ index.php [QSA,L]
 </IfModule>
