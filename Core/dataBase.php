@@ -25,7 +25,7 @@ class DataBase {
         if (self::$conexion === null) {
             try {
                 if ($this->driver === 'pgsql') {
-                    $dsn = "pgsql:host={$this->host};port={$this->port};dbname={$this->dbname};sslmode=require";
+                    $dsn = "mysql:host={$this->host};port={$this->port};dbname={$this->dbname};charset=utf8mb4";
                 } else {
                     $dsn = "mysql:host={$this->host};port={$this->port};dbname={$this->dbname};charset=utf8mb4";
                 }
