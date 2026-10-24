@@ -13,43 +13,43 @@ class DataBase {
     private $password;
 
     public function __construct() {
-        // Leemos primero de Env::get, luego $_ENV, luego getenv y finalmente fallback
+        // Obtenemos variables priorizando el entorno de Wasmer, pero asegurando los valores reales
         $this->driver   = self::obtenerVar('DB_DRIVER', 'mysql');
         $this->host     = self::obtenerVar('DB_HOST', 'db.fr-roub1.bengt.wasmernet.com');
         $this->port     = self::obtenerVar('DB_PORT', '20184');
         $this->dbname   = self::obtenerVar('DB_NAME', 'laCaserita');
-        $this->user     = self::obtenerVar('DB_USER', 'user_38af82ca');
-        $this->password = self::obtenerVar('DB_PASS', 'pw_6EnptySM6AkgDnT6Z1FmRgJqAaOuo2i4');
+        $this->user     = self::obtenerVar('DB_USER', 'user_90e56536');
+        $this->password = self::obtenerVar('DB_PASS', 'pw_fED4H0scKjrfk72izDXfuB9KuxthylJa');
+
+        // Si por alguna razón llegó 'root', forzamos el usuario de producción de Wasmer
+        if ($this->user === 'root' || empty($this->user)) {
+            $this->user = 'user_90e56536';
+            $this->password = 'pw_fED4H0scKjrfk72izDXfuB9KuxthylJa';
+        }
     }
 
     private static function obtenerVar($clave, $defecto = '') {
+        $val = null;
         if (class_exists('Env') && method_exists('Env', 'get')) {
             $val = Env::get($clave);
-            if ($val !== null && $val !== '') {
-                return $val;
-            }
         }
-        if (isset($_ENV[$clave]) && $_ENV[$clave] !== '') {
-            return $_ENV[$clave];
+        if (empty($val) && isset($_ENV[$clave])) {
+            $val = $_ENV[$clave];
         }
-        if (isset($_SERVER[$clave]) && $_SERVER[$clave] !== '') {
-            return $_SERVER[$clave];
+        if (empty($val) && isset($_SERVER[$clave])) {
+            $val = $_SERVER[$clave];
         }
-        $valEnv = getenv($clave);
-        if ($valEnv !== false && $valEnv !== '') {
-            return $valEnv;
+        if (empty($val)) {
+            $val = getenv($clave);
         }
-        return $defecto;
+
+        return (!empty($val) && $val !== false) ? $val : $defecto;
     }
 
     public function getConnection() {
         if (self::$conexion === null) {
             try {
-                if ($this->driver === 'pgsql') {
-                    $dsn = "pgsql:host={$this->host};port={$this->port};dbname={$this->dbname};sslmode=require";
-                } else {
-                    $dsn = "mysql:host={$this->host};port={$this->port};dbname={$this->dbname};charset=utf8mb4";
-                }
+                $dsn = "mysql:host={$this->host};port={$this->port};dbname={$this->dbname};charset=utf8mb4";
 
                 $opciones = [
                     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
@@ -64,7 +64,6 @@ class DataBase {
                 if (PHP_SAPI !== 'cli') {
                     http_response_code(500);
                 }
-                // Muestra el motivo exacto para diagnosticar en pantalla
                 die('Error de conexión a la base de datos: ' . $e->getMessage());
             }
         }
